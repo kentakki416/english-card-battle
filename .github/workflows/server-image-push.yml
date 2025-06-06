@@ -76,32 +76,11 @@ jobs:
             --push \
             .
 
-      - name: 🏷️ イメージ情報を出力
+      - name: ✅ プッシュ完了
         run: |
           echo "✅ Docker イメージが正常にプッシュされました"
           echo "🐳 Repository: ${{ env.ECR_REPOSITORY }}"
           echo "🏷️ Tag: ${{ steps.image-tag.outputs.image_tag }}"
+          echo "🏷️ Latest Tag: ${{ steps.image-tag.outputs.latest_tag }}"
           echo "📍 Registry: ${{ steps.login-ecr.outputs.registry }}"
-
-      - name: 📝 プッシュ結果をアーティファクトに保存
-        run: |
-          mkdir -p artifacts
-          cat << EOF > artifacts/image-info.json
-          {
-            "repository": "${{ env.ECR_REPOSITORY }}",
-            "tag": "${{ steps.image-tag.outputs.image_tag }}",
-            "latest_tag": "${{ steps.image-tag.outputs.latest_tag }}",
-            "registry": "${{ steps.login-ecr.outputs.registry }}",
-            "full_image_uri": "${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.image-tag.outputs.image_tag }}",
-            "environment": "${{ steps.image-tag.outputs.environment }}",
-            "git_sha": "${{ github.sha }}",
-            "build_time": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          }
-          EOF
-
-      - name: 📤 イメージ情報をアップロード
-        uses: actions/upload-artifact@v4
-        with:
-          name: docker-image-info-${{ steps.image-tag.outputs.environment }}
-          path: artifacts/image-info.json
-          retention-days: 30 
+          echo "🔗 Full URI: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.image-tag.outputs.image_tag }}" 

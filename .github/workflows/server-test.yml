@@ -2,12 +2,10 @@ name: 🧪 Server Test
 
 on:
   push:
-    branches: [ main, develop ]
     paths:
       - 'server/**'
       - '.github/workflows/server-test.yml'
   pull_request:
-    branches: [ main, develop ]
     paths:
       - 'server/**'
     types: [opened, synchronize, reopened]
@@ -15,14 +13,10 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
-
-env:
-  NODE_ENV: test
 
 jobs:
   test:
-    name: 🧪 Unit & E2E Tests
+    name: 🧪 Unit & Integration Tests
     runs-on: ubuntu-latest
     
     steps:
@@ -40,54 +34,6 @@ jobs:
         working-directory: server
         run: npm ci
 
-      - name: 🔨 プロジェクトをビルド
+      - name: 🧪 テストを実行（カバレッジ付き）
         working-directory: server
-        run: npm run build
-
-      - name: 🧪 テストを実行
-        working-directory: server
-        run: npm test
-
-      - name: 📊 カバレッジレポートを生成
-        working-directory: server
-        run: npm test -- --coverage --coverageReporters=lcov
-
-      - name: 📈 カバレッジレポートをアップロード
-        uses: codecov/codecov-action@v4
-        with:
-          file: server/coverage/lcov.info
-          flags: server
-          name: server-coverage
-          fail_ci_if_error: false
-
-      - name: 💬 テスト結果をコメント
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            let comment = '## 🧪 Server テスト結果\n\n';
-            
-            try {
-              // カバレッジ情報があれば追加
-              if (fs.existsSync('server/coverage/coverage-summary.json')) {
-                const coverage = JSON.parse(fs.readFileSync('server/coverage/coverage-summary.json', 'utf8'));
-                const total = coverage.total;
-                comment += `### 📊 カバレッジ\n`;
-                comment += `- **Statements**: ${total.statements.pct}%\n`;
-                comment += `- **Branches**: ${total.branches.pct}%\n`;
-                comment += `- **Functions**: ${total.functions.pct}%\n`;
-                comment += `- **Lines**: ${total.lines.pct}%\n\n`;
-              }
-              
-              comment += '✅ すべてのテストが正常に完了しました！';
-            } catch (error) {
-              comment += '✅ テストが完了しました！';
-            }
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            }); 
+        run: npm run test:coverage 

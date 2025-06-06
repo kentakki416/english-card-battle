@@ -2,12 +2,10 @@ name: 🧹 Server Lint
 
 on:
   push:
-    branches: [ main, develop ]
     paths:
       - 'server/**'
       - '.github/workflows/server-lint.yml'
   pull_request:
-    branches: [ main, develop ]
     paths:
       - 'server/**'
     types: [opened, synchronize, reopened]
@@ -15,7 +13,6 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
   lint:
@@ -43,16 +40,4 @@ jobs:
 
       - name: 🔍 TypeScript型チェック
         working-directory: server
-        run: npm run build
-
-      - name: ✅ リント結果をコメント
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '✅ Server lint チェックが完了しました！'
-            }) 
+        run: npm run build 
