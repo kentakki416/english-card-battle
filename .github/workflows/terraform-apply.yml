@@ -12,7 +12,7 @@ on:
         - dev
         - prd
       confirm_apply:
-        description: 'Type "APPLY" to confirm deployment'
+        description: 'Type "APPLY" exactly to confirm deployment (case sensitive)'
         required: true
         type: string
       dry_run:
@@ -24,128 +24,13 @@ on:
 env:
   TF_VERSION: "1.7.0"
   TF_IN_AUTOMATION: true
-  TF_CLI_ARGS: "-no-color"
   TF_INPUT: false
   AWS_REGION: ap-northeast-1
 
 jobs:
-  # ========================================
-  # 🔍 Pre-apply Validation
-  # ========================================
-
-  pre-apply-validation:
-    name: 🔍 Pre-apply Validation
-    runs-on: ubuntu-latest
-    outputs:
-      should_proceed: ${{ steps.validation.outputs.should_proceed }}
-    steps:
-      - name: 🔍 Validate Input
-        id: validation
-        run: |
-          echo "🔍 Validating apply inputs..."
-          
-          # Check confirmation
-          if [[ "${{ github.event.inputs.confirm_apply }}" != "APPLY" ]]; then
-            echo "❌ Confirmation failed. You must type 'APPLY' to proceed."
-            echo "should_proceed=false" >> $GITHUB_OUTPUT
-            exit 1
-          fi
-          
-          # Check environment
-          if [[ "${{ github.event.inputs.environment }}" != "dev" && "${{ github.event.inputs.environment }}" != "prd" ]]; then
-            echo "❌ Invalid environment specified."
-            echo "should_proceed=false" >> $GITHUB_OUTPUT
-            exit 1
-          fi
-          
-          echo "✅ Validation passed"
-          echo "should_proceed=true" >> $GITHUB_OUTPUT
-
-      - name: 📊 Apply Summary
-        run: |
-          echo "## 🚀 Terraform Apply Configuration" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 🌍 Environment | \`${{ github.event.inputs.environment }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔄 Dry Run | \`${{ github.event.inputs.dry_run }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| 👤 Triggered by | @${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🕐 Timestamp | $(date -u '+%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
-
-  # ========================================
-  # 📋 Fresh Plan Generation
-  # ========================================
-
-  terraform-plan:
-    name: 📋 Generate Fresh Plan
-    runs-on: ubuntu-latest
-    needs: pre-apply-validation
-    if: needs.pre-apply-validation.outputs.should_proceed == 'true'
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      TF_VAR_environment: ${{ github.event.inputs.environment }}
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: ⚙️ Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TF_VERSION }}
-
-      - name: 🔧 Terraform Init
-        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
-        run: |
-          echo "🚀 Initializing Terraform for ${{ github.event.inputs.environment }} environment..."
-          terraform init
-
-      - name: 📋 Generate Fresh Plan
-        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
-        run: |
-          echo "📋 Creating fresh Terraform plan for apply..."
-          terraform plan -detailed-exitcode -out=tfplan-apply-${{ github.event.inputs.environment }}.out
-
-      - name: 📊 Plan Analysis
-        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
-        run: |
-          echo "📊 Analyzing plan before apply..."
-          terraform show -no-color tfplan-apply-${{ github.event.inputs.environment }}.out
-
-      - name: 🔍 Safety Checks
-        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
-        run: |
-          echo "🔍 Running safety checks..."
-          
-          # Check for destroy operations
-          if terraform show -no-color tfplan-apply-${{ github.event.inputs.environment }}.out | grep -q "destroy"; then
-            echo "⚠️ WARNING: Plan contains resource destruction!"
-            terraform show -no-color tfplan-apply-${{ github.event.inputs.environment }}.out | grep -A 2 -B 2 "destroy"
-          fi
-          
-          # Check for sensitive data
-          if terraform show -no-color tfplan-apply-${{ github.event.inputs.environment }}.out | grep -i "password\|secret\|key" | grep -v "sensitive"; then
-            echo "⚠️ WARNING: Potential sensitive data exposure!"
-          fi
-          
-          echo "✅ Safety checks completed"
-
-      - name: 💾 Save Plan for Apply
-        uses: actions/upload-artifact@v4
-        with:
-          name: terraform-apply-plan-${{ github.event.inputs.environment }}
-          path: infra/aws/env/${{ github.event.inputs.environment }}/tfplan-apply-${{ github.event.inputs.environment }}.out
-          retention-days: 1
-
-  # ========================================
-  # 🚀 Terraform Apply
-  # ========================================
-
   terraform-apply:
-    name: 🚀 Apply Infrastructure
+    name: 🚀 Terraform Apply
     runs-on: ubuntu-latest
-    needs: [pre-apply-validation, terraform-plan]
-    if: needs.pre-apply-validation.outputs.should_proceed == 'true' && github.event.inputs.dry_run != 'true'
     environment: 
       name: ${{ github.event.inputs.environment }}
       url: https://console.aws.amazon.com/
@@ -154,7 +39,29 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       TF_VAR_environment: ${{ github.event.inputs.environment }}
     steps:
-      - name: 📥 Checkout Code
+      - name: 🔍 Validate Inputs
+        run: |
+          echo "🔍 Validating apply inputs..."
+          
+          # Normalize inputs
+          CONFIRM_APPLY=$(echo "${{ github.event.inputs.confirm_apply }}" | tr -d '[:space:]')
+          ENVIRONMENT=$(echo "${{ github.event.inputs.environment }}" | tr -d '[:space:]')
+          
+          # Check confirmation
+          if [[ "${CONFIRM_APPLY}" != "APPLY" ]]; then
+            echo "❌ You must type 'APPLY' exactly to confirm"
+            exit 1
+          fi
+          
+          # Check environment validity
+          if [[ "${ENVIRONMENT}" != "dev" && "${ENVIRONMENT}" != "prd" ]]; then
+            echo "❌ Invalid environment: ${ENVIRONMENT}"
+            exit 1
+          fi
+          
+          echo "✅ Input validation passed"
+
+      - name: 📥 Checkout & Setup
         uses: actions/checkout@v4
 
       - name: ⚙️ Setup Terraform
@@ -162,36 +69,49 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
-      - name: 📥 Download Plan Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: terraform-apply-plan-${{ github.event.inputs.environment }}
-          path: infra/aws/env/${{ github.event.inputs.environment }}
-
-      - name: 🔧 Terraform Init
+      - name: 🔧 Initialize & Plan
         working-directory: infra/aws/env/${{ github.event.inputs.environment }}
         run: |
-          echo "🚀 Initializing Terraform for apply..."
+          echo "🚀 Initializing Terraform for ${{ github.event.inputs.environment }}..."
           terraform init
+          
+          echo "📋 Generating apply plan..."
+          terraform plan -detailed-exitcode -out=apply.tfplan
+          
+          echo "📊 Plan summary:"
+          terraform show -no-color apply.tfplan
 
-      - name: 🔍 Pre-apply State Check
+      - name: 🔍 Safety Checks
         working-directory: infra/aws/env/${{ github.event.inputs.environment }}
         run: |
-          echo "🔍 Checking current state before apply..."
-          terraform state list || echo "No existing state"
-          terraform workspace show
+          echo "🔍 Running safety checks..."
+          
+          # Check for destroy operations
+          if terraform show -no-color apply.tfplan | grep -q "destroy"; then
+            echo "⚠️ WARNING: Plan contains resource destruction!"
+            terraform show -no-color apply.tfplan | grep -A 2 -B 2 "destroy"
+          fi
+          
+          # Check for sensitive data exposure
+          if terraform show -no-color apply.tfplan | grep -i "password\|secret\|key" | grep -v "sensitive"; then
+            echo "⚠️ WARNING: Potential sensitive data exposure!"
+          fi
+          
+          echo "✅ Safety checks completed"
 
-      - name: 🚀 Apply Infrastructure
+      - name: 🚀 Execute Apply
+        if: github.event.inputs.dry_run != 'true'
         working-directory: infra/aws/env/${{ github.event.inputs.environment }}
         run: |
-          echo "🚀 Applying Terraform plan for ${{ github.event.inputs.environment }} environment..."
-          echo "⏰ Apply started at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "🚀 Applying infrastructure for ${{ github.event.inputs.environment }}..."
+          echo "⏰ Started at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
           
-          terraform apply tfplan-apply-${{ github.event.inputs.environment }}.out
+          terraform apply apply.tfplan
           
-          echo "✅ Apply completed at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "✅ Completed at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 
-      - name: 📊 Post-apply Verification
+      - name: 📊 Verify Results
+        if: github.event.inputs.dry_run != 'true'
         working-directory: infra/aws/env/${{ github.event.inputs.environment }}
         run: |
           echo "📊 Post-apply verification..."
@@ -202,45 +122,32 @@ jobs:
           
           # Show final state
           echo "=== Final State ==="
-          terraform state list
-          
-          # Resource count
           RESOURCE_COUNT=$(terraform state list | wc -l)
           echo "📊 Total resources managed: $RESOURCE_COUNT"
+          echo "RESOURCE_COUNT=$RESOURCE_COUNT" >> $GITHUB_ENV
 
-      - name: 🎉 Apply Success Summary
+      - name: 📊 Summary
         run: |
-          echo "## 🎉 Apply Completed Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚀 Terraform Apply Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📊 Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- **Environment**: \`${{ github.event.inputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Applied by**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Completion time**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "| Item | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🌍 Environment | \`${{ github.event.inputs.environment }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔄 Mode | \`${{ github.event.inputs.dry_run == 'true' && 'Dry Run' || 'Execute' }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📊 Resources | \`${{ env.RESOURCE_COUNT || 'N/A' }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 👤 By | @${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🕐 Time | $(date -u '+%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### ✅ Next Steps" >> $GITHUB_STEP_SUMMARY
-          echo "- Check AWS Console for deployed resources" >> $GITHUB_STEP_SUMMARY
-          echo "- Verify application functionality" >> $GITHUB_STEP_SUMMARY
-          echo "- Monitor CloudWatch for any issues" >> $GITHUB_STEP_SUMMARY
-
-  # ========================================
-  # 📋 Dry Run Summary
-  # ========================================
-
-  dry-run-summary:
-    name: 📋 Dry Run Summary
-    runs-on: ubuntu-latest
-    needs: [pre-apply-validation, terraform-plan]
-    if: needs.pre-apply-validation.outputs.should_proceed == 'true' && github.event.inputs.dry_run == 'true'
-    steps:
-      - name: 📋 Dry Run Results
-        run: |
-          echo "## 📋 Dry Run Completed" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### ℹ️ Information" >> $GITHUB_STEP_SUMMARY
-          echo "- **Environment**: \`${{ github.event.inputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Mode**: Dry run (plan only)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Executed by**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### ✅ Plan Generated Successfully" >> $GITHUB_STEP_SUMMARY
-          echo "The Terraform plan has been generated and validated." >> $GITHUB_STEP_SUMMARY
-          echo "To actually apply these changes, run this workflow again with **dry_run** set to \`false\`." >> $GITHUB_STEP_SUMMARY 
+          
+          if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
+            echo "### 📋 Dry run completed - plan generated" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ To execute, run again with dry_run=false" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ✅ Apply completed successfully" >> $GITHUB_STEP_SUMMARY
+            echo "🎉 Infrastructure has been deployed to ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Next Steps:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Check AWS Console for deployed resources" >> $GITHUB_STEP_SUMMARY
+            echo "- Verify application functionality" >> $GITHUB_STEP_SUMMARY
+            echo "- Monitor CloudWatch for any issues" >> $GITHUB_STEP_SUMMARY
+          fi 
