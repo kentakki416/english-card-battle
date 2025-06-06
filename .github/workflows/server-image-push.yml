@@ -52,10 +52,19 @@ jobs:
         run: |
           ENVIRONMENT=${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prd' || 'dev') }}
           TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-          SHORT_SHA=${GITHUB_SHA::7}
+          
+          # ブランチ名をDockerタグ用に正規化（スラッシュをハイフンに変換、小文字化）
+          RAW_BRANCH="${{ github.ref_name }}"
+          BRANCH_NAME=$(echo "$RAW_BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+          
+          # ブランチ名が長すぎる場合は短縮（Dockerタグの制限対応）
+          if [ ${#BRANCH_NAME} -gt 20 ]; then
+            BRANCH_NAME="${BRANCH_NAME:0:20}"
+          fi
           
           echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
-          echo "image_tag=${ENVIRONMENT}-${TIMESTAMP}-${SHORT_SHA}" >> $GITHUB_OUTPUT
+          echo "branch_name=${BRANCH_NAME}" >> $GITHUB_OUTPUT
+          echo "image_tag=${ENVIRONMENT}-${BRANCH_NAME}-${TIMESTAMP}" >> $GITHUB_OUTPUT
           echo "latest_tag=${ENVIRONMENT}-latest" >> $GITHUB_OUTPUT
 
       - name: 🐳 Dockerイメージをビルド・プッシュ
@@ -80,6 +89,7 @@ jobs:
         run: |
           echo "✅ Docker イメージが正常にプッシュされました"
           echo "🐳 Repository: ${{ env.ECR_REPOSITORY }}"
+          echo "🌿 Branch: ${{ steps.image-tag.outputs.branch_name }}"
           echo "🏷️ Tag: ${{ steps.image-tag.outputs.image_tag }}"
           echo "🏷️ Latest Tag: ${{ steps.image-tag.outputs.latest_tag }}"
           echo "📍 Registry: ${{ steps.login-ecr.outputs.registry }}"
