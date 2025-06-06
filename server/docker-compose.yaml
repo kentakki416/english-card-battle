@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo:latest
+    restart: always # コンテナが何らかの理由で終了した場合、自動で再起動する
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - ./container_data/db:/data/db
+      - ./container_data/configdb:/data/configdb

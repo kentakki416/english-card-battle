@@ -1,0 +1,8 @@
+# dist
+**/dist/
+
+# container_data
+**/container_data/
+
+# node_modules
+node_modules/
