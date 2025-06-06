@@ -23,13 +23,13 @@ jobs:
       - name: 📥 リポジトリをチェックアウト
         uses: actions/checkout@v4
 
-      - name: 🐳 Docker Composeでテスト環境を起動
+      - name: 🧪 テスト実行（依存関係自動処理）
         working-directory: server
         run: |
-          # MongoDBとServerコンテナを起動してテストを実行
-          docker compose up --build --abort-on-container-exit --exit-code-from server
+          echo "🧪 Running tests with MongoDB (auto-started by depends_on)..."
+          # depends_onによりmongoコンテナが自動的に起動され、serverイメージも必要に応じてビルドされる
+          docker compose run --build --rm server npm run test:coverage
         env:
-          # CI環境用の設定
           NODE_ENV: test
           MONGO_ROOT_USERNAME: root
           MONGO_ROOT_PASSWORD: password
