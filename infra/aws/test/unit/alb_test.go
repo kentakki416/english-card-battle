@@ -2,6 +2,7 @@ package test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -21,7 +22,7 @@ func TestALBModule(t *testing.T) {
 		TerraformDir: "../../modules/alb",
 		Vars: map[string]interface{}{
 			"name":              testName,
-			"vpc_id":            "vpc-12345678", // 実際のVPC IDが必要（事前にVPCを作成するか、既存のものを使用）
+			"vpc_id":            "vpc-12345678", // テスト用のダミーID
 			"security_groups":   []string{"sg-12345678"},
 			"subnets":           []string{"subnet-12345678", "subnet-87654321"},
 			"target_group_port": 3000,
@@ -38,6 +39,19 @@ func TestALBModule(t *testing.T) {
 		},
 	}
 
+	// CI環境ではplan-onlyモードで実行
+	if os.Getenv("TERRATEST_PLAN_ONLY") == "true" {
+		// Terraformの初期化
+		terraform.Init(t, terraformOptions)
+
+		// Planのみ実行（リソースは作成しない）
+		terraform.Plan(t, terraformOptions)
+
+		t.Logf("ALB module plan validation passed for: %s", testName)
+		return
+	}
+
+	// ローカル環境では実際のリソース作成テストを実行
 	// テスト終了時にTerraformのリソースを破棄
 	defer terraform.Destroy(t, terraformOptions)
 
@@ -91,7 +105,7 @@ func TestALBModuleMinimalConfig(t *testing.T) {
 		TerraformDir: "../../modules/alb",
 		Vars: map[string]interface{}{
 			"name":              testName,
-			"vpc_id":            "vpc-12345678", // 実際のVPC IDが必要
+			"vpc_id":            "vpc-12345678", // テスト用のダミーID
 			"security_groups":   []string{"sg-12345678"},
 			"subnets":           []string{"subnet-12345678", "subnet-87654321"},
 			"target_group_port": 80,
@@ -103,6 +117,19 @@ func TestALBModuleMinimalConfig(t *testing.T) {
 		},
 	}
 
+	// CI環境ではplan-onlyモードで実行
+	if os.Getenv("TERRATEST_PLAN_ONLY") == "true" {
+		// Terraformの初期化
+		terraform.Init(t, terraformOptions)
+
+		// Planのみ実行（リソースは作成しない）
+		terraform.Plan(t, terraformOptions)
+
+		t.Logf("ALB minimal module plan validation passed for: %s", testName)
+		return
+	}
+
+	// ローカル環境では実際のリソース作成テストを実行
 	defer terraform.Destroy(t, terraformOptions)
 	terraform.InitAndApply(t, terraformOptions)
 

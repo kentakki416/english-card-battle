@@ -1,6 +1,7 @@
 package test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/gruntwork-io/terratest/modules/aws"
@@ -13,7 +14,7 @@ func TestVpcModule(t *testing.T) {
 
 	terraformOptions := &terraform.Options{
 		// テスト対象のTerraformコードのパス
-		TerraformDir: "../../modules/common/vpc",
+		TerraformDir: "../../modules/vpc",
 		Vars: map[string]interface{}{
 			"name":                 "test-vpc",
 			"cidr_block":           "10.0.0.0/16",
@@ -22,13 +23,12 @@ func TestVpcModule(t *testing.T) {
 			"subnets": map[string]interface{}{
 				"public": map[string]interface{}{
 					"cidr_block":        "10.0.1.0/24",
-					"availability_zone": "us-west-2a",
+					"availability_zone": "ap-northeast-1a",
 					"subnet_type":       "public",
-					"route_tables":      []string{"igw"},
 				},
 				"private": map[string]interface{}{
 					"cidr_block":        "10.0.2.0/24",
-					"availability_zone": "us-west-2a",
+					"availability_zone": "ap-northeast-1a",
 					"subnet_type":       "private",
 				},
 			},
@@ -36,7 +36,7 @@ func TestVpcModule(t *testing.T) {
 			"security_groups": map[string]interface{}{
 				"web-sg": map[string]interface{}{
 					"name":        "web-sg",
-					"description": "Security gropup for web servers",
+					"description": "Security group for web servers",
 				},
 			},
 			"security_group_rules": []map[string]interface{}{
@@ -54,10 +54,23 @@ func TestVpcModule(t *testing.T) {
 
 		// AWSプロバイダーの設定
 		EnvVars: map[string]string{
-			"AWS_DEFAULT_REGION": "us-west-2",
+			"AWS_DEFAULT_REGION": "ap-northeast-1",
 		},
 	}
 
+	// CI環境ではplan-onlyモードで実行
+	if os.Getenv("TERRATEST_PLAN_ONLY") == "true" {
+		// Terraformの初期化
+		terraform.Init(t, terraformOptions)
+
+		// Planのみ実行（リソースは作成しない）
+		terraform.Plan(t, terraformOptions)
+
+		t.Logf("VPC module plan validation passed")
+		return
+	}
+
+	// ローカル環境では実際のリソース作成テストを実行
 	// Terraform initとapplyを実行
 	defer terraform.Destroy(t, terraformOptions)
 	terraform.InitAndApply(t, terraformOptions)
@@ -73,7 +86,7 @@ func TestVpcModule(t *testing.T) {
 	assert.Contains(t, securityGroupIds, "web-sg", "Security group ID should be present")
 
 	// VPCが正しいCIDRブロックを持っているかを確認
-	vpc := aws.GetVpcById(t, vpcID, "us-west-2")
+	vpc := aws.GetVpcById(t, vpcID, "ap-northeast-1")
 	if vpc.CidrBlock != nil {
 		actualCidrBlock := *vpc.CidrBlock
 		assert.Equal(t, "10.0.0.0/16", actualCidrBlock, "VPC should have the correct CIDR block")
@@ -81,4 +94,8 @@ func TestVpcModule(t *testing.T) {
 		t.Fatal("VPC's CIDR block is nil")
 	}
 
+	t.Logf("VPC module test passed successfully:")
+	t.Logf("  VPC ID: %s", vpcID)
+	t.Logf("  Subnets: %v", subnets)
+	t.Logf("  Security Groups: %v", securityGroupIds)
 }

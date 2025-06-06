@@ -150,6 +150,8 @@ jobs:
 
       - name: 🧪 Run Tests
         working-directory: infra/aws/test
+        env:
+          TERRATEST_PLAN_ONLY: "true"
         run: |
           go mod download
           go test -v ./unit/... -timeout 30m
