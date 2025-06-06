@@ -41,27 +41,12 @@ jobs:
     steps:
       - name: 🔍 Validate Inputs
         run: |
-          echo "🔍 Validating apply inputs..."
-          
-          # Normalize inputs
-          CONFIRM_APPLY=$(echo "${{ github.event.inputs.confirm_apply }}" | tr -d '[:space:]')
-          ENVIRONMENT=$(echo "${{ github.event.inputs.environment }}" | tr -d '[:space:]')
-          
-          # Check confirmation
-          if [[ "${CONFIRM_APPLY}" != "APPLY" ]]; then
+          if [[ "${{ github.event.inputs.confirm_apply }}" != "APPLY" ]]; then
             echo "❌ You must type 'APPLY' exactly to confirm"
             exit 1
           fi
-          
-          # Check environment validity
-          if [[ "${ENVIRONMENT}" != "dev" && "${ENVIRONMENT}" != "prd" ]]; then
-            echo "❌ Invalid environment: ${ENVIRONMENT}"
-            exit 1
-          fi
-          
-          echo "✅ Input validation passed"
 
-      - name: 📥 Checkout & Setup
+      - name: 📥 Checkout
         uses: actions/checkout@v4
 
       - name: ⚙️ Setup Terraform
@@ -71,197 +56,24 @@ jobs:
 
       - name: 🔧 Terraform init
         working-directory: infra/aws/env/${{ github.event.inputs.environment }}
-        run: |
-          echo "🚀 Initializing Terraform for ${{ github.event.inputs.environment }}..."
-          terraform init
+        run: terraform init
 
-      - name: 🔧 Terraform plan
+      - name: 📋 Terraform plan
         working-directory: infra/aws/env/${{ github.event.inputs.environment }}
-        run: |
-          echo "📋 Generating apply plan..."
-          terraform plan -detailed-exitcode -out=apply.tfplan
+        run: terraform plan -detailed-exitcode -out=apply.tfplan
 
-      - name: 🔍 Terraform show
+      - name: 🔍 Show Plan
         working-directory: infra/aws/env/${{ github.event.inputs.environment }}
-        run: |
-          if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
-            echo "📋 Dry run - プレビュー用のプランを表示しています (${{ github.event.inputs.environment }}環境)"
-            echo "💡 実際の変更は行われません。確認後、dry_run=falseで実行してください。"
-          else
-            echo "🚀 実行モード - 適用予定のプランを表示しています (${{ github.event.inputs.environment }}環境)"
-            echo "⚠️ この後、実際にインフラストラクチャの変更が実行されます。"
-          fi
-          echo ""
-          terraform show apply.tfplan
-
-      - name: 🔍 Safety Checks
-        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
-        run: |
-          echo "🔍 Running safety checks..."
-          
-          SAFETY_WARNINGS=0
-          
-          # リソースの削除操作をチェック
-          # ケース例: 既存のEC2インスタンス、RDS、S3バケットなどが削除される場合
-          # 意図的な削除の場合もあるため警告のみ表示
-          PLAN_OUTPUT=$(terraform show apply.tfplan 2>/dev/null || echo "")
-          if echo "$PLAN_OUTPUT" | grep -q "destroy" 2>/dev/null; then
-            echo "⚠️ 警告: プランにリソースの削除操作が含まれています"
-            echo "削除対象リソース:"
-            echo "$PLAN_OUTPUT" | grep -A 2 -B 2 "destroy" || true
-            echo "DESTROY_DETECTED=true" >> $GITHUB_ENV
-            SAFETY_WARNINGS=$((SAFETY_WARNINGS + 1))
-          fi
-          
-          # 機密情報の平文露出をチェック  
-          # ケース例: パスワード、APIキー、秘密鍵などが平文で表示される場合
-          # Terraformの sensitive = true が正しく設定されていない可能性
-          if echo "$PLAN_OUTPUT" | grep -i "password\|secret\|key" | grep -v "sensitive" >/dev/null 2>&1; then
-            echo "⚠️ 警告: 機密情報が平文で露出している可能性があります"
-            echo "対象箇所:"
-            echo "$PLAN_OUTPUT" | grep -i "password\|secret\|key" | grep -v "sensitive" || true
-            echo "SENSITIVE_DETECTED=true" >> $GITHUB_ENV
-            SAFETY_WARNINGS=$((SAFETY_WARNINGS + 1))
-          fi
-          
-          # 警告がある場合はSummaryに表示（エラーにはしない）
-          if [[ $SAFETY_WARNINGS -gt 0 ]]; then
-            echo ""
-            echo "⚠️ 安全性チェックで $SAFETY_WARNINGS 件の警告が検出されました"
-            echo "詳細は下記のSummaryを確認してください"
-            echo "SAFETY_WARNINGS_COUNT=$SAFETY_WARNINGS" >> $GITHUB_ENV
-          else
-            echo "✅ 安全性チェックで問題は検出されませんでした"
-          fi
+        run: terraform show apply.tfplan
 
       - name: 🚀 Execute Apply
         if: github.event.inputs.dry_run != 'true'
         working-directory: infra/aws/env/${{ github.event.inputs.environment }}
         run: |
           echo "🚀 Applying infrastructure for ${{ github.event.inputs.environment }}..."
-          echo "⏰ Started at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-          
           terraform apply apply.tfplan
-          
-          echo "✅ Completed at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "✅ Apply completed"
 
-      - name: 📊 Verify Results
-        if: github.event.inputs.dry_run != 'true'
-        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
-        run: |
-          echo "📊 Post-apply verification..."
-          
-          # Show outputs
-          echo "=== Terraform Outputs ==="
-          terraform output || echo "No outputs defined"
-          
-          # Show final state
-          echo "=== Final State ==="
-          RESOURCE_COUNT=$(terraform state list | wc -l)
-          echo "📊 Total resources managed: $RESOURCE_COUNT"
-          echo "RESOURCE_COUNT=$RESOURCE_COUNT" >> $GITHUB_ENV
 
-      - name: 📊 Plan Summary
-        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
-        run: |
-          echo "📊 Extracting plan changes..."
-          
-          # terraform showの出力をパースして動的にリソース変更を抽出
-          PLAN_OUTPUT=$(terraform show apply.tfplan 2>/dev/null || echo "")
-          
-          # 各操作タイプのリソースを抽出
-          RESOURCES_TO_CREATE=$(echo "$PLAN_OUTPUT" | grep "^  # .* will be created$" | sed 's/^  # \(.*\) will be created$/\1/' || true)
-          RESOURCES_TO_UPDATE=$(echo "$PLAN_OUTPUT" | grep "^  # .* will be updated in-place$" | sed 's/^  # \(.*\) will be updated in-place$/\1/' || true)
-          RESOURCES_TO_DESTROY=$(echo "$PLAN_OUTPUT" | grep "^  # .* will be destroyed$" | sed 's/^  # \(.*\) will be destroyed$/\1/' || true)
-          RESOURCES_TO_REPLACE=$(echo "$PLAN_OUTPUT" | grep "^  # .* must be replaced$" | sed 's/^  # \(.*\) must be replaced$/\1/' || true)
-          
-          # カウント
-          CREATE_COUNT=$(echo "$RESOURCES_TO_CREATE" | grep -c . || echo "0")
-          UPDATE_COUNT=$(echo "$RESOURCES_TO_UPDATE" | grep -c . || echo "0")
-          DESTROY_COUNT=$(echo "$RESOURCES_TO_DESTROY" | grep -c . || echo "0")
-          REPLACE_COUNT=$(echo "$RESOURCES_TO_REPLACE" | grep -c . || echo "0")
-          
-          # 環境変数とファイルに保存
-          echo "CREATE_COUNT=$CREATE_COUNT" >> $GITHUB_ENV
-          echo "UPDATE_COUNT=$UPDATE_COUNT" >> $GITHUB_ENV  
-          echo "DESTROY_COUNT=$DESTROY_COUNT" >> $GITHUB_ENV
-          echo "REPLACE_COUNT=$REPLACE_COUNT" >> $GITHUB_ENV
-          
-          echo "$RESOURCES_TO_CREATE" > /tmp/resources_create.txt
-          echo "$RESOURCES_TO_UPDATE" > /tmp/resources_update.txt
-          echo "$RESOURCES_TO_DESTROY" > /tmp/resources_destroy.txt
-          echo "$RESOURCES_TO_REPLACE" > /tmp/resources_replace.txt
-          
-          echo "📊 Plan analysis completed: +$CREATE_COUNT ~$UPDATE_COUNT -$DESTROY_COUNT ↻$REPLACE_COUNT"
 
-      - name: 📊 Summary
-        run: |
-          echo "## 🚀 Terraform Plan Summary (${{ github.event.inputs.environment }})" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          # プラン変更サマリー
-          echo "### 📋 Plan Changes" >> $GITHUB_STEP_SUMMARY
-          echo "| Operation | Count |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| ➕ Create | ${{ env.CREATE_COUNT }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔄 Update | ${{ env.UPDATE_COUNT }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🗑️ Destroy | ${{ env.DESTROY_COUNT }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔁 Replace | ${{ env.REPLACE_COUNT }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          # 作成されるリソース
-          if [[ "${{ env.CREATE_COUNT }}" != "0" ]]; then
-            echo "### ➕ Resources to Create" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-            cat /tmp/resources_create.txt 2>/dev/null | head -10 >> $GITHUB_STEP_SUMMARY || echo "No resources to create" >> $GITHUB_STEP_SUMMARY
-            if [[ "${{ env.CREATE_COUNT }}" -gt 10 ]]; then
-              echo "... and $(($(echo "${{ env.CREATE_COUNT }}" | sed 's/[^0-9]//g') - 10)) more" >> $GITHUB_STEP_SUMMARY
-            fi
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-          fi
-          
-          # 更新されるリソース
-          if [[ "${{ env.UPDATE_COUNT }}" != "0" ]]; then
-            echo "### 🔄 Resources to Update" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-            cat /tmp/resources_update.txt 2>/dev/null | head -10 >> $GITHUB_STEP_SUMMARY || echo "No resources to update" >> $GITHUB_STEP_SUMMARY
-            if [[ "${{ env.UPDATE_COUNT }}" -gt 10 ]]; then
-              echo "... and $(($(echo "${{ env.UPDATE_COUNT }}" | sed 's/[^0-9]//g') - 10)) more" >> $GITHUB_STEP_SUMMARY
-            fi
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-          fi
-          
-          # 削除されるリソース
-          if [[ "${{ env.DESTROY_COUNT }}" != "0" ]]; then
-            echo "### 🗑️ Resources to Destroy" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-            cat /tmp/resources_destroy.txt 2>/dev/null | head -10 >> $GITHUB_STEP_SUMMARY || echo "No resources to destroy" >> $GITHUB_STEP_SUMMARY
-            if [[ "${{ env.DESTROY_COUNT }}" -gt 10 ]]; then
-              echo "... and $(($(echo "${{ env.DESTROY_COUNT }}" | sed 's/[^0-9]//g') - 10)) more" >> $GITHUB_STEP_SUMMARY
-            fi
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-          fi
-          
-          # 置換されるリソース
-          if [[ "${{ env.REPLACE_COUNT }}" != "0" ]]; then
-            echo "### 🔁 Resources to Replace" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-            cat /tmp/resources_replace.txt 2>/dev/null | head -10 >> $GITHUB_STEP_SUMMARY || echo "No resources to replace" >> $GITHUB_STEP_SUMMARY
-            if [[ "${{ env.REPLACE_COUNT }}" -gt 10 ]]; then
-              echo "... and $(($(echo "${{ env.REPLACE_COUNT }}" | sed 's/[^0-9]//g') - 10)) more" >> $GITHUB_STEP_SUMMARY
-            fi
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-          fi
-          
-          # 実行ステータス
-          if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
-            echo "### 📋 Dry Run Completed" >> $GITHUB_STEP_SUMMARY
-            echo "✅ プランが正常に生成されました。実行するには \`dry_run=false\` で再実行してください。" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "### ✅ Apply Completed Successfully" >> $GITHUB_STEP_SUMMARY
-            echo "🎉 インフラストラクチャが正常にデプロイされました。" >> $GITHUB_STEP_SUMMARY
-          fi 
+ 
