@@ -97,10 +97,11 @@ jobs:
           # リソースの削除操作をチェック
           # ケース例: 既存のEC2インスタンス、RDS、S3バケットなどが削除される場合
           # 意図的な削除の場合もあるため警告のみ表示
-          if terraform show apply.tfplan | grep -q "destroy"; then
+          PLAN_OUTPUT=$(terraform show apply.tfplan 2>/dev/null || echo "")
+          if echo "$PLAN_OUTPUT" | grep -q "destroy" 2>/dev/null; then
             echo "⚠️ 警告: プランにリソースの削除操作が含まれています"
             echo "削除対象リソース:"
-            terraform show apply.tfplan | grep -A 2 -B 2 "destroy"
+            echo "$PLAN_OUTPUT" | grep -A 2 -B 2 "destroy" || true
             echo "DESTROY_DETECTED=true" >> $GITHUB_ENV
             SAFETY_WARNINGS=$((SAFETY_WARNINGS + 1))
           fi
@@ -108,10 +109,10 @@ jobs:
           # 機密情報の平文露出をチェック  
           # ケース例: パスワード、APIキー、秘密鍵などが平文で表示される場合
           # Terraformの sensitive = true が正しく設定されていない可能性
-          if terraform show apply.tfplan | grep -i "password\|secret\|key" | grep -v "sensitive"; then
+          if echo "$PLAN_OUTPUT" | grep -i "password\|secret\|key" | grep -v "sensitive" >/dev/null 2>&1; then
             echo "⚠️ 警告: 機密情報が平文で露出している可能性があります"
             echo "対象箇所:"
-            terraform show apply.tfplan | grep -i "password\|secret\|key" | grep -v "sensitive"
+            echo "$PLAN_OUTPUT" | grep -i "password\|secret\|key" | grep -v "sensitive" || true
             echo "SENSITIVE_DETECTED=true" >> $GITHUB_ENV
             SAFETY_WARNINGS=$((SAFETY_WARNINGS + 1))
           fi

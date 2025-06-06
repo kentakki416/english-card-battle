@@ -114,9 +114,10 @@ jobs:
           # 重要なリソースの削除をチェック
           # ケース例: データベース(RDS)、ストレージ(S3)、ロードバランサーなど
           # これらの削除は通常、データ損失やサービス停止を伴うため要注意
-          if terraform show destroy.tfplan | grep -i "rds\|database\|s3_bucket\|lb\|load_balancer"; then
+          PLAN_OUTPUT=$(terraform show destroy.tfplan 2>/dev/null || echo "")
+          if echo "$PLAN_OUTPUT" | grep -i "rds\|database\|s3_bucket\|lb\|load_balancer" >/dev/null 2>&1; then
             echo "⚠️ 警告: 以下の重要なリソースが削除されます"
-            terraform show destroy.tfplan | grep -i "rds\|database\|s3_bucket\|lb\|load_balancer"
+            echo "$PLAN_OUTPUT" | grep -i "rds\|database\|s3_bucket\|lb\|load_balancer" || true
             echo "CRITICAL_DETECTED=true" >> $GITHUB_ENV
             CRITICAL_WARNINGS=1
           fi
