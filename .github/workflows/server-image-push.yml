@@ -80,10 +80,10 @@ jobs:
         run: |
           # マルチプラットフォームビルドのセットアップ
           docker buildx create --use --name multiarch-builder
-          
+
           # イメージをビルド・プッシュ
           docker buildx build \
-            --platform linux/amd64,linux/arm64 \
+            --platform linux/amd64 \
             --target runtime \
             --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             --tag $ECR_REGISTRY/$ECR_REPOSITORY:$LATEST_TAG \
