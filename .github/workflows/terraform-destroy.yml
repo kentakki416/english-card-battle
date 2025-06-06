@@ -12,11 +12,11 @@ on:
         - dev
         - prd
       confirm_destroy:
-        description: 'Type "DESTROY" to confirm destruction'
+        description: 'Type "DESTROY" exactly to confirm destruction (case sensitive)'
         required: true
         type: string
       additional_confirmation:
-        description: 'Type the environment name again to double-confirm'
+        description: 'Type the exact environment name again to double-confirm (e.g., "dev" or "prd")'
         required: true
         type: string
       dry_run:
@@ -53,29 +53,49 @@ jobs:
         run: |
           echo "🔍 Validating destroy inputs with STRICT checks..."
           
+          # Normalize inputs by removing any whitespace
+          CONFIRM_DESTROY=$(echo "${{ github.event.inputs.confirm_destroy }}" | tr -d '[:space:]')
+          ADDITIONAL_CONFIRMATION=$(echo "${{ github.event.inputs.additional_confirmation }}" | tr -d '[:space:]')
+          ENVIRONMENT=$(echo "${{ github.event.inputs.environment }}" | tr -d '[:space:]')
+          
+          echo "Debug - Inputs received:"
+          echo "confirm_destroy: '${CONFIRM_DESTROY}' (length: ${#CONFIRM_DESTROY})"
+          echo "additional_confirmation: '${ADDITIONAL_CONFIRMATION}' (length: ${#ADDITIONAL_CONFIRMATION})"
+          echo "environment: '${ENVIRONMENT}' (length: ${#ENVIRONMENT})"
+          
+          # Additional debug info
+          echo "Expected confirm_destroy: 'DESTROY' (length: 7)"
+          echo "Expected additional_confirmation: '${ENVIRONMENT}' (length: ${#ENVIRONMENT})"
+          
           # Check primary confirmation
-          if [[ "${{ github.event.inputs.confirm_destroy }}" != "DESTROY" ]]; then
-            echo "❌ Primary confirmation failed. You must type 'DESTROY' to proceed."
+          if [[ "${CONFIRM_DESTROY}" != "DESTROY" ]]; then
+            echo "❌ Primary confirmation failed!"
+            echo "Expected: 'DESTROY' (all uppercase, no extra characters)"
+            echo "Received: '${CONFIRM_DESTROY}'"
+            echo "Please ensure you type exactly 'DESTROY' without quotes or extra spaces."
             echo "should_proceed=false" >> $GITHUB_OUTPUT
             exit 1
           fi
           
           # Check secondary confirmation (environment name)
-          if [[ "${{ github.event.inputs.additional_confirmation }}" != "${{ github.event.inputs.environment }}" ]]; then
-            echo "❌ Environment confirmation failed. You must type the environment name '${{ github.event.inputs.environment }}' exactly."
+          if [[ "${ADDITIONAL_CONFIRMATION}" != "${ENVIRONMENT}" ]]; then
+            echo "❌ Environment confirmation failed!"
+            echo "Expected: '${ENVIRONMENT}' (must match the selected environment exactly)"
+            echo "Received: '${ADDITIONAL_CONFIRMATION}'"
+            echo "Please type the environment name '${ENVIRONMENT}' exactly as shown above."
             echo "should_proceed=false" >> $GITHUB_OUTPUT
             exit 1
           fi
           
           # Check environment validity
-          if [[ "${{ github.event.inputs.environment }}" != "dev" && "${{ github.event.inputs.environment }}" != "prd" ]]; then
-            echo "❌ Invalid environment specified."
+          if [[ "${ENVIRONMENT}" != "dev" && "${ENVIRONMENT}" != "prd" ]]; then
+            echo "❌ Invalid environment specified: '${ENVIRONMENT}'"
             echo "should_proceed=false" >> $GITHUB_OUTPUT
             exit 1
           fi
           
           # Extra safety for production
-          if [[ "${{ github.event.inputs.environment }}" == "prd" ]]; then
+          if [[ "${ENVIRONMENT}" == "prd" ]]; then
             echo "⚠️ PRODUCTION ENVIRONMENT DESTROY DETECTED!"
             echo "🚨 This action will permanently delete all production resources!"
             sleep 5
