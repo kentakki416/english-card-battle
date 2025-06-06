@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestALBModulePlan(t *testing.T) {
+func TestALBModule(t *testing.T) {
 	t.Parallel()
 
 	// ユニークなリソース名を生成（並列実行対応）
@@ -21,7 +21,7 @@ func TestALBModulePlan(t *testing.T) {
 		TerraformDir: "../../modules/alb",
 		Vars: map[string]interface{}{
 			"name":              testName,
-			"vpc_id":            "vpc-12345678", // ダミーVPC ID
+			"vpc_id":            "vpc-12345678", // 実際のVPC IDが必要（事前にVPCを作成するか、既存のものを使用）
 			"security_groups":   []string{"sg-12345678"},
 			"subnets":           []string{"subnet-12345678", "subnet-87654321"},
 			"target_group_port": 3000,
@@ -38,41 +38,52 @@ func TestALBModulePlan(t *testing.T) {
 		},
 	}
 
-	// Terraform initとplanのみ実行（実際のリソース作成は行わない）
-	terraform.Init(t, terraformOptions)
-	planOutput := terraform.Plan(t, terraformOptions)
+	// テスト終了時にTerraformのリソースを破棄
+	defer terraform.Destroy(t, terraformOptions)
 
-	// === Planの内容検証 ===
-	// ALBの設定が含まれているか確認
-	assert.Contains(t, planOutput, "aws_lb.main", "Plan should include ALB resource")
-	assert.Contains(t, planOutput, testName, "Plan should contain the test ALB name")
-	assert.Contains(t, planOutput, "application", "Plan should specify application load balancer")
+	// Terraformの初期化と適用
+	terraform.InitAndApply(t, terraformOptions)
 
-	// ターゲットグループの設定確認
-	assert.Contains(t, planOutput, "aws_lb_target_group.main", "Plan should include target group")
-	assert.Contains(t, planOutput, "3000", "Plan should contain target group port")
-	assert.Contains(t, planOutput, "HTTP", "Plan should use HTTP protocol")
+	// === 出力値の検証 ===
+	// ALB IDの検証
+	albID := terraform.Output(t, terraformOptions, "alb_id")
+	assert.NotEmpty(t, albID, "ALB ID should not be empty")
+	assert.Contains(t, albID, "arn:aws:elasticloadbalancing", "ALB ID should be a valid ARN")
 
-	// リスナーの設定確認
-	assert.Contains(t, planOutput, "aws_lb_listener.main", "Plan should include listener")
-	assert.Contains(t, planOutput, "80", "Plan should contain listener port")
+	// ALB ARNの検証
+	albArn := terraform.Output(t, terraformOptions, "alb_arn")
+	assert.NotEmpty(t, albArn, "ALB ARN should not be empty")
+	assert.Contains(t, albArn, testName, "ALB ARN should contain the test name")
 
-	// セキュリティグループとサブネットの設定確認
-	assert.Contains(t, planOutput, "sg-12345678", "Plan should contain security group")
-	assert.Contains(t, planOutput, "subnet-12345678", "Plan should contain subnet")
+	// ALB DNS名の検証
+	albDnsName := terraform.Output(t, terraformOptions, "alb_dns_name")
+	assert.NotEmpty(t, albDnsName, "ALB DNS name should not be empty")
+	assert.Contains(t, albDnsName, "elb.amazonaws.com", "ALB DNS name should have correct format")
 
-	// タグの設定確認
-	assert.Contains(t, planOutput, "Environment", "Plan should contain Environment tag")
-	assert.Contains(t, planOutput, "LoadBalancer", "Plan should contain Component tag")
+	// ALB Zone IDの検証
+	albZoneId := terraform.Output(t, terraformOptions, "alb_zone_id")
+	assert.NotEmpty(t, albZoneId, "ALB Zone ID should not be empty")
 
-	// リソース数の確認（ALB、ターゲットグループ、リスナー）
-	assert.Contains(t, planOutput, "3 to add", "Plan should create 3 resources")
+	// ターゲットグループARNの検証
+	targetGroupArn := terraform.Output(t, terraformOptions, "target_group_arn")
+	assert.NotEmpty(t, targetGroupArn, "Target Group ARN should not be empty")
+	assert.Contains(t, targetGroupArn, "arn:aws:elasticloadbalancing", "Target Group ARN should be valid")
+
+	// リスナーARNの検証
+	listenerArn := terraform.Output(t, terraformOptions, "listener_arn")
+	assert.NotEmpty(t, listenerArn, "Listener ARN should not be empty")
+	assert.Contains(t, listenerArn, "arn:aws:elasticloadbalancing", "Listener ARN should be valid")
+
+	t.Logf("ALB created successfully:")
+	t.Logf("  ALB ID: %s", albID)
+	t.Logf("  ALB DNS Name: %s", albDnsName)
+	t.Logf("  Target Group ARN: %s", targetGroupArn)
 }
 
-func TestALBModuleValidation(t *testing.T) {
+func TestALBModuleMinimalConfig(t *testing.T) {
 	t.Parallel()
 
-	// 最小構成でのバリデーションテスト
+	// ユニークなリソース名を生成
 	uniqueId := fmt.Sprintf("%d", time.Now().Unix())
 	testName := fmt.Sprintf("test-alb-min-%s", uniqueId)
 
@@ -80,32 +91,27 @@ func TestALBModuleValidation(t *testing.T) {
 		TerraformDir: "../../modules/alb",
 		Vars: map[string]interface{}{
 			"name":              testName,
-			"vpc_id":            "vpc-12345678",
+			"vpc_id":            "vpc-12345678", // 実際のVPC IDが必要
 			"security_groups":   []string{"sg-12345678"},
 			"subnets":           []string{"subnet-12345678", "subnet-87654321"},
 			"target_group_port": 80,
 			"listener_port":     "80",
+			// 最小限の設定でテスト
 		},
 		EnvVars: map[string]string{
 			"AWS_DEFAULT_REGION": "ap-northeast-1",
 		},
 	}
 
-	// Terraform validateを実行（変数なしで実行）
-	terraform.Init(t, terraformOptions)
+	defer terraform.Destroy(t, terraformOptions)
+	terraform.InitAndApply(t, terraformOptions)
 
-	// validateは変数なしで実行される
-	validateOptions := &terraform.Options{
-		TerraformDir: terraformOptions.TerraformDir,
-		EnvVars:      terraformOptions.EnvVars,
-	}
-	terraform.Validate(t, validateOptions)
+	// 基本的な出力値の検証
+	albArn := terraform.Output(t, terraformOptions, "alb_arn")
+	assert.NotEmpty(t, albArn, "ALB ARN should not be empty")
 
-	// validateが成功すれば、設定ファイルは構文的に正しい
-	t.Log("ALB module validation passed")
+	targetGroupArn := terraform.Output(t, terraformOptions, "target_group_arn")
+	assert.NotEmpty(t, targetGroupArn, "Target Group ARN should not be empty")
 
-	// プランの実行で設定の妥当性を確認
-	planOutput := terraform.Plan(t, terraformOptions)
-	assert.NotEmpty(t, planOutput, "Plan should produce output")
-	assert.NotContains(t, planOutput, "Error:", "Plan should not contain errors")
+	t.Logf("Minimal ALB configuration test passed: %s", albArn)
 }
