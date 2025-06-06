@@ -31,18 +31,16 @@ jobs:
         env:
           NODE_ENV: test
           MONGO_ROOT_USERNAME: root
+          MONGO_ROOT_PASSWORD: password
+          TEST_MONGO_URI: mongodb://root:password@mongo:27017/test_db
 
       - name: 🧪 テスト実行
         working-directory: server
         run: |
           echo "🧪 Running tests"
-          docker compose run --build --rm server npm run test:coverage
+          docker compose run --rm server npm run test:coverage
           echo "✅ Test execution completed!"
-        env:
-          NODE_ENV: test
-          MONGO_ROOT_USERNAME: root
-          MONGO_ROOT_PASSWORD: password
-          TEST_MONGO_URI: mongodb://root:password@mongo:27017/test_db
+
 
       - name: 🧹 テスト後クリーンアップ
         working-directory: server
