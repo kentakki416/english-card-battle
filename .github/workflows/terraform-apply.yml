@@ -84,7 +84,14 @@ jobs:
       - name: 🔍 Terraform show
         working-directory: infra/aws/env/${{ github.event.inputs.environment }}
         run: |
-          echo "📋 Showing apply plan..."
+          if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
+            echo "📋 Dry run - プレビュー用のプランを表示しています (${{ github.event.inputs.environment }}環境)"
+            echo "💡 実際の変更は行われません。確認後、dry_run=falseで実行してください。"
+          else
+            echo "🚀 実行モード - 適用予定のプランを表示しています (${{ github.event.inputs.environment }}環境)"
+            echo "⚠️ この後、実際にインフラストラクチャの変更が実行されます。"
+          fi
+          echo ""
           terraform show apply.tfplan
 
       - name: 🔍 Safety Checks

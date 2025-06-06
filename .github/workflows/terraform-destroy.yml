@@ -68,7 +68,7 @@ jobs:
           
           echo "✅ Input validation passed"
 
-      - name: 📥 Checkout & Setup
+      - name: 📥 Checkout
         uses: actions/checkout@v4
 
       - name: ⚙️ Setup Terraform
@@ -76,12 +76,17 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
+      - name: 🔧 Terraform init
+        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
+        run: |
+          echo "🚀 Initializing Terraform for ${{ github.event.inputs.environment }}..."
+          terraform init
+
       - name: 🔍 Check Current State
         id: state-check
         working-directory: infra/aws/env/${{ github.event.inputs.environment }}
         run: |
           echo "🔍 Checking Terraform state..."
-          terraform init
           
           RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l || echo "0")
           echo "RESOURCE_COUNT=$RESOURCE_COUNT" >> $GITHUB_ENV
@@ -101,9 +106,9 @@ jobs:
           terraform plan -destroy -detailed-exitcode -out=destroy.tfplan
           
       - name: 🔍 Terraform show
+        if: env.RESOURCE_COUNT != '0'
         working-directory: infra/aws/env/${{ github.event.inputs.environment }}
         run: |
-          echo "📋 Showing destroy plan..."
           terraform show destroy.tfplan
 
       - name: 🔍 Critical Resource Check
@@ -114,13 +119,11 @@ jobs:
           
           CRITICAL_WARNINGS=0
           
-          # 重要なリソースの削除をチェック
-          # ケース例: データベース(RDS)、ストレージ(S3)、ロードバランサーなど
-          # これらの削除は通常、データ損失やサービス停止を伴うため要注意
-          PLAN_OUTPUT=$(terraform show destroy.tfplan 2>/dev/null || echo "")
-          if echo "$PLAN_OUTPUT" | grep -i "rds\|database\|s3_bucket\|lb\|load_balancer" >/dev/null 2>&1; then
-            echo "⚠️ 警告: 以下の重要なリソースが削除されます"
-            echo "$PLAN_OUTPUT" | grep -i "rds\|database\|s3_bucket\|lb\|load_balancer" || true
+          # 重要リソースの削除チェック
+          # インフラストラクチャの全削除は重大な影響を伴う可能性があるため警告表示
+          if [[ "${{ env.RESOURCE_COUNT }}" != "0" ]]; then
+            echo "⚠️ 警告: ${{ env.RESOURCE_COUNT }}個のリソースが削除されます"
+            echo "💡 削除予定の詳細はTerraformプラン出力で確認してください"
             echo "CRITICAL_DETECTED=true" >> $GITHUB_ENV
             CRITICAL_WARNINGS=1
           fi
@@ -175,11 +178,11 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "**重要なインフラストラクチャコンポーネントが削除されます:**" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "🚨 **以下のリソースが永続的に削除されます:**" >> $GITHUB_STEP_SUMMARY
-            echo "- 📊 データベース (RDS instances)" >> $GITHUB_STEP_SUMMARY
-            echo "- 💾 ストレージバケット (S3)" >> $GITHUB_STEP_SUMMARY
-            echo "- ⚖️ ロードバランサー" >> $GITHUB_STEP_SUMMARY
-            echo "- 🏗️ その他の重要インフラストラクチャ" >> $GITHUB_STEP_SUMMARY
+            echo "🚨 **${{ env.RESOURCE_COUNT }}個のリソースが永続的に削除されます**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "💡 **削除対象の詳細確認:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Terraformプラン出力で具体的なリソースを確認してください" >> $GITHUB_STEP_SUMMARY
+            echo "- データベース、ストレージ、ネットワークリソースが含まれる可能性があります" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "⚠️ **データ損失やサービス停止の可能性があります**" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
