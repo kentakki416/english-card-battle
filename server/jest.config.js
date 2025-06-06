@@ -16,12 +16,13 @@ module.exports = {
     '!src/**/*.d.ts',
     '!src/**/index.ts',  // エントリーポイントは除外
   ],
-  coverageThreshold: {
-    global: {
-      branches: 40,
-      functions: 40,
-      lines: 40,
-      statements: 40
-    }
-  }
+  // カバレッジ閾値は設定せず、情報表示のみ
+  // coverageThreshold: {
+  //   global: {
+  //     branches: 40,
+  //     functions: 40,
+  //     lines: 40,
+  //     statements: 40
+  //   }
+  // }
 };

@@ -2,7 +2,7 @@
 FROM node:20-alpine3.17 as install
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force <-追加
+RUN npm ci --only=production && npm cache clean --force
 
 ## ビルド
 FROM node:20-alpine3.17 as build
