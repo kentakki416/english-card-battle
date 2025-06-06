@@ -1,0 +1,142 @@
+name: 🔍 Dependency Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run dependency check every Monday at 9 AM JST (00:00 UTC)
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  go-security:
+    name: 🔒 Go Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🐹 Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: 📦 Download Go Dependencies
+        working-directory: infra/aws/test
+        run: |
+          go mod download
+          go mod tidy
+
+      - name: 🔍 Run Gosec Security Scanner
+        run: |
+          go install github.com/securecodewarrior/gosec/v2/cmd/gosec@latest
+          gosec -fmt sarif -out gosec-results.sarif ./infra/aws/test/...
+
+      - name: 📊 Upload Gosec Results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: gosec-results.sarif
+
+      - name: 🛡️ Run Nancy (Go vulnerability check)
+        working-directory: infra/aws/test
+        run: |
+          go install github.com/sonatypecommunity/nancy@latest
+          go list -json -deps ./... | nancy sleuth
+
+  terraform-version-check:
+    name: 📋 Terraform Version Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🔍 Check Terraform Version Consistency
+        run: |
+          echo "🔍 Checking Terraform version consistency across the project..."
+          
+          # Extract version from GitHub Actions workflow
+          WORKFLOW_VERSION=$(grep -r "TF_VERSION:" .github/workflows/ | head -1 | cut -d'"' -f2)
+          echo "Workflow version: $WORKFLOW_VERSION"
+          
+          # Check if .terraform-version file exists
+          if [ -f ".terraform-version" ]; then
+            FILE_VERSION=$(cat .terraform-version)
+            echo "File version: $FILE_VERSION"
+            
+            if [ "$WORKFLOW_VERSION" != "$FILE_VERSION" ]; then
+              echo "❌ Terraform version mismatch!"
+              echo "Workflow: $WORKFLOW_VERSION"
+              echo "File: $FILE_VERSION"
+              exit 1
+            else
+              echo "✅ Terraform versions are consistent"
+            fi
+          else
+            echo "⚠️ .terraform-version file not found"
+          fi
+
+  terraform-docs-check:
+    name: 📚 Terraform Docs Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 📚 Generate Terraform Docs
+        uses: terraform-docs/gh-actions@v1.2.0
+        with:
+          working-dir: infra/aws/modules/vpc,infra/aws/modules/alb,infra/aws/modules/ecs
+          output-file: README.md
+          output-method: inject
+          git-push: false
+          fail-on-diff: true
+
+  cost-estimation:
+    name: 💰 Infrastructure Cost Estimation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"
+
+      - name: 🔧 Terraform Init
+        working-directory: infra/aws/env/dev
+        run: terraform init
+
+      - name: 📋 Generate Plan for Cost Estimation
+        working-directory: infra/aws/env/dev
+        run: |
+          terraform plan -out=tfplan.out
+          terraform show -json tfplan.out > tfplan.json
+
+      - name: 💰 Run Infracost
+        uses: infracost/actions/setup@v3
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+      - name: 💰 Generate Cost Estimate
+        working-directory: infra/aws/env/dev
+        run: |
+          infracost breakdown --path=tfplan.json --format=json --out-file=infracost-base.json
+
+      - name: 💬 Comment Cost Estimate on PR
+        uses: infracost/actions/comment@v1
+        if: github.event_name == 'pull_request'
+        with:
+          path: infra/aws/env/dev/infracost-base.json
+          behavior: update 

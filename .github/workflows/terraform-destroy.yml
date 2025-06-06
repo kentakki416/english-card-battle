@@ -1,0 +1,360 @@
+name: 💥 Terraform Destroy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to destroy'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+        - dev
+        - prd
+      confirm_destroy:
+        description: 'Type "DESTROY" to confirm destruction'
+        required: true
+        type: string
+      additional_confirmation:
+        description: 'Type the environment name again to double-confirm'
+        required: true
+        type: string
+      dry_run:
+        description: 'Run destroy plan only (dry run)'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  TF_VERSION: "1.7.0"
+  TF_IN_AUTOMATION: true
+  TF_CLI_ARGS: "-no-color"
+  TF_INPUT: false
+  AWS_REGION: ap-northeast-1
+
+jobs:
+  # ========================================
+  # 🔍 Pre-destroy Validation
+  # ========================================
+
+  pre-destroy-validation:
+    name: 🔍 Pre-destroy Validation
+    runs-on: ubuntu-latest
+    outputs:
+      should_proceed: ${{ steps.validation.outputs.should_proceed }}
+      resource_count: ${{ steps.state-check.outputs.resource_count }}
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      TF_VAR_environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: 🔍 Validate Destroy Inputs
+        id: validation
+        run: |
+          echo "🔍 Validating destroy inputs with STRICT checks..."
+          
+          # Check primary confirmation
+          if [[ "${{ github.event.inputs.confirm_destroy }}" != "DESTROY" ]]; then
+            echo "❌ Primary confirmation failed. You must type 'DESTROY' to proceed."
+            echo "should_proceed=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+          # Check secondary confirmation (environment name)
+          if [[ "${{ github.event.inputs.additional_confirmation }}" != "${{ github.event.inputs.environment }}" ]]; then
+            echo "❌ Environment confirmation failed. You must type the environment name '${{ github.event.inputs.environment }}' exactly."
+            echo "should_proceed=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+          # Check environment validity
+          if [[ "${{ github.event.inputs.environment }}" != "dev" && "${{ github.event.inputs.environment }}" != "prd" ]]; then
+            echo "❌ Invalid environment specified."
+            echo "should_proceed=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+          # Extra safety for production
+          if [[ "${{ github.event.inputs.environment }}" == "prd" ]]; then
+            echo "⚠️ PRODUCTION ENVIRONMENT DESTROY DETECTED!"
+            echo "🚨 This action will permanently delete all production resources!"
+            sleep 5
+          fi
+          
+          echo "✅ All validations passed"
+          echo "should_proceed=true" >> $GITHUB_OUTPUT
+
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: 🔍 Check Current State
+        id: state-check
+        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
+        run: |
+          echo "🔍 Checking current Terraform state..."
+          terraform init
+          
+          # Count resources
+          RESOURCE_COUNT=$(terraform state list 2>/dev/null | wc -l || echo "0")
+          echo "resource_count=$RESOURCE_COUNT" >> $GITHUB_OUTPUT
+          
+          if [[ "$RESOURCE_COUNT" -eq 0 ]]; then
+            echo "ℹ️ No resources found in state. Nothing to destroy."
+          else
+            echo "⚠️ Found $RESOURCE_COUNT resources that will be destroyed:"
+            terraform state list
+          fi
+
+      - name: 📊 Destroy Summary
+        run: |
+          echo "## 💥 Terraform Destroy Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🌍 Environment | \`${{ github.event.inputs.environment }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔄 Dry Run | \`${{ github.event.inputs.dry_run }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📊 Resources to destroy | \`${{ steps.state-check.outputs.resource_count }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 👤 Triggered by | @${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🕐 Timestamp | $(date -u '+%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ github.event.inputs.environment }}" == "prd" ]]; then
+            echo "### 🚨 PRODUCTION ENVIRONMENT WARNING" >> $GITHUB_STEP_SUMMARY
+            echo "You are about to destroy **PRODUCTION** resources!" >> $GITHUB_STEP_SUMMARY
+            echo "This action is **IRREVERSIBLE** and will cause **DOWNTIME**!" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ========================================
+  # 📋 Destroy Plan Generation
+  # ========================================
+
+  terraform-destroy-plan:
+    name: 📋 Generate Destroy Plan
+    runs-on: ubuntu-latest
+    needs: pre-destroy-validation
+    if: needs.pre-destroy-validation.outputs.should_proceed == 'true' && needs.pre-destroy-validation.outputs.resource_count != '0'
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      TF_VAR_environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: 🔧 Terraform Init
+        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
+        run: |
+          echo "🚀 Initializing Terraform for destroy operation..."
+          terraform init
+
+      - name: 📋 Generate Destroy Plan
+        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
+        run: |
+          echo "📋 Creating Terraform destroy plan..."
+          terraform plan -destroy -detailed-exitcode -out=tfplan-destroy-${{ github.event.inputs.environment }}.out
+
+      - name: 📊 Analyze Destroy Plan
+        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
+        run: |
+          echo "📊 Analyzing destroy plan..."
+          terraform show -no-color tfplan-destroy-${{ github.event.inputs.environment }}.out
+          
+          echo ""
+          echo "=== DESTROY PLAN SUMMARY ==="
+          terraform show -no-color tfplan-destroy-${{ github.event.inputs.environment }}.out | grep -E "^  # " | sort | uniq -c
+
+      - name: 🔍 Critical Resource Check
+        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
+        run: |
+          echo "🔍 Checking for critical resources..."
+          
+          # Check for databases
+          if terraform show -no-color tfplan-destroy-${{ github.event.inputs.environment }}.out | grep -i "rds\|database"; then
+            echo "⚠️ WARNING: Database resources will be destroyed!"
+            terraform show -no-color tfplan-destroy-${{ github.event.inputs.environment }}.out | grep -i "rds\|database"
+          fi
+          
+          # Check for S3 buckets
+          if terraform show -no-color tfplan-destroy-${{ github.event.inputs.environment }}.out | grep -i "s3_bucket"; then
+            echo "⚠️ WARNING: S3 bucket resources will be destroyed!"
+            terraform show -no-color tfplan-destroy-${{ github.event.inputs.environment }}.out | grep -i "s3_bucket"
+          fi
+          
+          # Check for load balancers
+          if terraform show -no-color tfplan-destroy-${{ github.event.inputs.environment }}.out | grep -i "lb\|load_balancer\|alb\|nlb"; then
+            echo "⚠️ WARNING: Load balancer resources will be destroyed!"
+            terraform show -no-color tfplan-destroy-${{ github.event.inputs.environment }}.out | grep -i "lb\|load_balancer\|alb\|nlb"
+          fi
+          
+          echo "✅ Critical resource check completed"
+
+      - name: 💾 Save Destroy Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-destroy-plan-${{ github.event.inputs.environment }}
+          path: infra/aws/env/${{ github.event.inputs.environment }}/tfplan-destroy-${{ github.event.inputs.environment }}.out
+          retention-days: 1
+
+  # ========================================
+  # 💥 Terraform Destroy Execution
+  # ========================================
+
+  terraform-destroy:
+    name: 💥 Destroy Infrastructure
+    runs-on: ubuntu-latest
+    needs: [pre-destroy-validation, terraform-destroy-plan]
+    if: needs.pre-destroy-validation.outputs.should_proceed == 'true' && needs.pre-destroy-validation.outputs.resource_count != '0' && github.event.inputs.dry_run != 'true'
+    environment: 
+      name: ${{ github.event.inputs.environment }}-destroy
+      url: https://console.aws.amazon.com/
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      TF_VAR_environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: 📥 Download Destroy Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-destroy-plan-${{ github.event.inputs.environment }}
+          path: infra/aws/env/${{ github.event.inputs.environment }}
+
+      - name: 🔧 Terraform Init
+        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
+        run: |
+          echo "🚀 Initializing Terraform for destroy..."
+          terraform init
+
+      - name: 🔍 Pre-destroy Final Check
+        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
+        run: |
+          echo "🔍 Final check before destruction..."
+          echo "Current state:"
+          terraform state list
+          echo ""
+          echo "Workspace:"
+          terraform workspace show
+          echo ""
+          echo "⚠️ FINAL WARNING: Starting destruction in 10 seconds..."
+          sleep 10
+
+      - name: 💥 Execute Destruction
+        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
+        run: |
+          echo "💥 Executing Terraform destroy for ${{ github.event.inputs.environment }} environment..."
+          echo "⏰ Destroy started at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          
+          terraform apply tfplan-destroy-${{ github.event.inputs.environment }}.out
+          
+          echo "✅ Destroy completed at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+
+      - name: 🔍 Post-destroy Verification
+        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
+        run: |
+          echo "🔍 Post-destroy verification..."
+          
+          # Check if any resources remain
+          REMAINING_RESOURCES=$(terraform state list | wc -l)
+          
+          if [[ "$REMAINING_RESOURCES" -eq 0 ]]; then
+            echo "✅ All resources successfully destroyed"
+          else
+            echo "⚠️ WARNING: $REMAINING_RESOURCES resources still remain:"
+            terraform state list
+          fi
+          
+          echo "REMAINING_RESOURCES=$REMAINING_RESOURCES" >> $GITHUB_ENV
+
+      - name: 🎯 Destroy Success Summary
+        if: env.REMAINING_RESOURCES == '0'
+        run: |
+          echo "## 🎯 Destroy Completed Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: \`${{ github.event.inputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Destroyed by**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Completion time**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "- **Resources destroyed**: ${{ needs.pre-destroy-validation.outputs.resource_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ All resources have been successfully destroyed" >> $GITHUB_STEP_SUMMARY
+          echo "The ${{ github.event.inputs.environment }} environment has been completely removed." >> $GITHUB_STEP_SUMMARY
+
+      - name: ⚠️ Partial Destroy Warning
+        if: env.REMAINING_RESOURCES != '0'
+        run: |
+          echo "## ⚠️ Partial Destroy Detected" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚨 Warning" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: \`${{ github.event.inputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Remaining resources**: ${{ env.REMAINING_RESOURCES }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ❌ Some resources could not be destroyed automatically" >> $GITHUB_STEP_SUMMARY
+          echo "Please check the AWS Console and manually remove any remaining resources." >> $GITHUB_STEP_SUMMARY
+          echo "You may need to run the destroy operation again or manually delete resources with dependencies." >> $GITHUB_STEP_SUMMARY
+
+  # ========================================
+  # 📋 Dry Run Summary
+  # ========================================
+
+  dry-run-summary:
+    name: 📋 Dry Run Summary
+    runs-on: ubuntu-latest
+    needs: [pre-destroy-validation, terraform-destroy-plan]
+    if: needs.pre-destroy-validation.outputs.should_proceed == 'true' && github.event.inputs.dry_run == 'true'
+    steps:
+      - name: 📋 Dry Run Results
+        run: |
+          echo "## 📋 Destroy Dry Run Completed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ℹ️ Information" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: \`${{ github.event.inputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Mode**: Dry run (plan only)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Resources to destroy**: ${{ needs.pre-destroy-validation.outputs.resource_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Executed by**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Destroy Plan Generated Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "The Terraform destroy plan has been generated and validated." >> $GITHUB_STEP_SUMMARY
+          echo "**⚠️ To actually destroy these resources, run this workflow again with dry_run set to \`false\`.**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚨 WARNING" >> $GITHUB_STEP_SUMMARY
+          echo "Destroying infrastructure is irreversible. Please review the plan carefully before proceeding." >> $GITHUB_STEP_SUMMARY
+
+  # ========================================
+  # 📋 No Resources Summary
+  # ========================================
+
+  no-resources-summary:
+    name: 📋 No Resources Found
+    runs-on: ubuntu-latest
+    needs: pre-destroy-validation
+    if: needs.pre-destroy-validation.outputs.should_proceed == 'true' && needs.pre-destroy-validation.outputs.resource_count == '0'
+    steps:
+      - name: 📋 No Resources to Destroy
+        run: |
+          echo "## 📋 No Resources to Destroy" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ℹ️ Information" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: \`${{ github.event.inputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Resources found**: 0" >> $GITHUB_STEP_SUMMARY
+          echo "- **Executed by**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Nothing to Destroy" >> $GITHUB_STEP_SUMMARY
+          echo "No Terraform resources were found in the state file." >> $GITHUB_STEP_SUMMARY
+          echo "The environment appears to be already clean or never initialized." >> $GITHUB_STEP_SUMMARY 
