@@ -30,7 +30,6 @@ permissions:
 env:
   TF_VERSION: "1.7.0"
   TF_IN_AUTOMATION: true
-  TF_CLI_ARGS: "-no-color"
   TF_INPUT: false
   AWS_REGION: ap-northeast-1
 
@@ -45,9 +44,8 @@ jobs:
     outputs:
       terraform: ${{ steps.changes.outputs.terraform }}
       tests: ${{ steps.changes.outputs.tests }}
-      modules: ${{ steps.changes.outputs.modules }}
     steps:
-      - name: 📥 Checkout Code
+      - name: 📥 Checkout
         uses: actions/checkout@v4
 
       - name: 🔍 Detect Changes
@@ -63,27 +61,18 @@ jobs:
               - 'infra/**/*test.go'
               - 'infra/**/go.mod'
               - 'infra/**/go.sum'
-            modules:
-              - 'infra/aws/modules/**'
 
   # ========================================
-  # 🧹 Terraform Lint & Validation
+  # 🧹 Lint & Security
   # ========================================
 
-  terraform-validate:
-    name: 🧹 Lint, Validate & Format Check
+  lint-and-security:
+    name: 🧹 Lint & Security
     runs-on: ubuntu-latest
     needs: changes
     if: needs.changes.outputs.terraform == 'true'
-    strategy:
-      matrix:
-        directory:
-          - infra/aws/env/dev
-          - infra/aws/modules/vpc
-          - infra/aws/modules/alb
-          - infra/aws/modules/ecs
     steps:
-      - name: 📥 Checkout Code
+      - name: 📥 Checkout
         uses: actions/checkout@v4
 
       - name: ⚙️ Setup Terraform
@@ -96,59 +85,26 @@ jobs:
         with:
           tflint_version: latest
 
-      - name: 📝 Terraform Format Check
-        working-directory: ${{ matrix.directory }}
-        run: |
-          echo "🔍 Checking Terraform format in ${{ matrix.directory }}..."
-          terraform fmt -check -recursive -diff
-        continue-on-error: false
+      - name: 📝 Format Check
+        working-directory: infra/aws
+        run: terraform fmt -check -recursive -diff
 
-      - name: 🔧 Terraform Init
-        working-directory: ${{ matrix.directory }}
+      - name: ✅ Validate & Lint
+        working-directory: infra/aws/env/dev
         run: |
-          echo "🚀 Initializing Terraform in ${{ matrix.directory }}..."
           terraform init -backend=false
-
-      - name: ✅ Terraform Validate
-        working-directory: ${{ matrix.directory }}
-        run: |
-          echo "✨ Validating Terraform configuration in ${{ matrix.directory }}..."
           terraform validate
-
-      - name: 🎯 TFLint
-        working-directory: ${{ matrix.directory }}
-        run: |
-          echo "🔍 Running TFLint in ${{ matrix.directory }}..."
+          cd ../../
           tflint --init
           tflint --format compact
 
-      - name: 📊 Terraform Providers
-        working-directory: ${{ matrix.directory }}
-        run: |
-          echo "📊 Showing Terraform providers in ${{ matrix.directory }}..."
-          terraform providers
-        continue-on-error: true
-
-  # ========================================
-  # 🔒 Security Scanning
-  # ========================================
-
-  terraform-security:
-    name: 🔒 Security Scan
-    runs-on: ubuntu-latest
-    needs: changes
-    if: needs.changes.outputs.terraform == 'true'
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 🔒 Run tfsec
+      - name: 🔒 Security Scan
         uses: aquasecurity/tfsec-action@v1.0.3
         with:
           working_directory: infra/aws
           soft_fail: true
 
-      - name: 🛡️ Run Checkov
+      - name: 🛡️ Checkov Scan
         uses: bridgecrewio/checkov-action@v12
         with:
           directory: infra/aws
@@ -157,75 +113,18 @@ jobs:
           output_format: sarif
           output_file_path: checkov-results.sarif
 
-      - name: 📊 Upload Checkov Results
+      - name: 📊 Upload Security Results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: checkov-results.sarif
 
   # ========================================
-  # 📋 State Management Check
+  # 🧪 Go Tests
   # ========================================
 
-  terraform-state-check:
-    name: 📋 State & Workspace Check
-    runs-on: ubuntu-latest
-    needs: changes
-    if: github.event_name != 'pull_request' && needs.changes.outputs.terraform == 'true'
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    strategy:
-      matrix:
-        environment: [dev]
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: ⚙️ Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TF_VERSION }}
-
-      - name: 🔧 Terraform Init
-        working-directory: infra/aws/env/${{ matrix.environment }}
-        run: |
-          echo "🚀 Initializing Terraform for ${{ matrix.environment }}..."
-          terraform init
-
-      - name: 🏢 Terraform Workspace Show
-        working-directory: infra/aws/env/${{ matrix.environment }}
-        run: |
-          echo "🏢 Current Terraform workspace:"
-          terraform workspace show
-        continue-on-error: true
-
-      - name: 📋 Terraform State List
-        working-directory: infra/aws/env/${{ matrix.environment }}
-        run: |
-          echo "📋 Current Terraform state for ${{ matrix.environment }}:"
-          terraform state list || echo "No state found - this is normal for new environments"
-        continue-on-error: true
-
-      - name: 📊 Terraform State Show (Summary)
-        working-directory: infra/aws/env/${{ matrix.environment }}
-        run: |
-          echo "📊 Terraform state summary:"
-          if terraform state list > /dev/null 2>&1; then
-            echo "Resource count: $(terraform state list | wc -l)"
-            echo "Resources by type:"
-            terraform state list | cut -d'.' -f1 | sort | uniq -c
-          else
-            echo "No resources in state"
-          fi
-        continue-on-error: true
-
-  # ========================================
-  # 🧪 Go Testing
-  # ========================================
-
-  terraform-go-tests:
-    name: 🧪 Go Infrastructure Tests
+  go-tests:
+    name: 🧪 Go Tests
     runs-on: ubuntu-latest
     needs: changes
     if: needs.changes.outputs.tests == 'true' || needs.changes.outputs.terraform == 'true'
@@ -234,7 +133,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: ap-northeast-1
     steps:
-      - name: 📥 Checkout Code
+      - name: 📥 Checkout
         uses: actions/checkout@v4
 
       - name: 🐹 Setup Go
@@ -243,52 +142,32 @@ jobs:
           go-version: '1.22'
           cache-dependency-path: infra/aws/test/go.sum
 
-      - name: 📦 Download Dependencies
+      - name: 🧪 Run Tests
         working-directory: infra/aws/test
         run: |
           go mod download
-          go mod tidy
-
-      - name: 🧪 Run Unit Tests
-        working-directory: infra/aws/test
-        run: |
-          echo "🧪 Running Go unit tests..."
           go test -v ./unit/... -timeout 30m
-
-      - name: 🧪 Run Integration Tests
-        working-directory: infra/aws/test
-        run: |
-          echo "🧪 Running Go integration tests..."
-          go test -v ./integration/... -timeout 45m
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
-      - name: 📊 Test Results Summary
-        run: |
-          echo "## 🧪 Go Test Results" >> $GITHUB_STEP_SUMMARY
-          echo "- Unit tests: ✅ Completed" >> $GITHUB_STEP_SUMMARY
+          
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
-            echo "- Integration tests: ✅ Completed" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- Integration tests: ⏭️ Skipped (only on main push)" >> $GITHUB_STEP_SUMMARY
+            go test -v ./integration/... -timeout 45m
           fi
 
   # ========================================
-  # 📋 Terraform Plan & Analysis
+  # 📋 Terraform Plan
   # ========================================
 
-  terraform-plan-test:
-    name: 📋 Terraform Plan & Analysis
+  terraform-plan:
+    name: 📋 Terraform Plan
     runs-on: ubuntu-latest
-    needs: [changes, terraform-validate, terraform-security]
+    needs: [changes, lint-and-security]
     if: needs.changes.outputs.terraform == 'true'
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    strategy:
-      matrix:
-        environment: [dev]
+    outputs:
+      plan_output: ${{ steps.format_plan.outputs.plan_output }}
     steps:
-      - name: 📥 Checkout Code
+      - name: 📥 Checkout
         uses: actions/checkout@v4
 
       - name: ⚙️ Setup Terraform
@@ -297,233 +176,62 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
           terraform_wrapper: false
 
-      - name: 🔧 Terraform Init
-        working-directory: infra/aws/env/${{ matrix.environment }}
+      - name: 📋 Generate Plan
+        working-directory: infra/aws/env/dev
         run: |
-          echo "🚀 Initializing Terraform for ${{ matrix.environment }}..."
           terraform init
-
-      - name: 📋 Terraform Plan
-        id: plan
-        working-directory: infra/aws/env/${{ matrix.environment }}
-        run: |
-          echo "📋 Creating Terraform plan for ${{ matrix.environment }}..."
           terraform plan -detailed-exitcode -no-color -out=tfplan.out | tee plan_output.txt
-          echo "plan_exitcode=$?" >> $GITHUB_OUTPUT
         continue-on-error: true
 
-      - name: 💾 Save Plan Artifact
+      - name: 💾 Save Plan
         uses: actions/upload-artifact@v4
         with:
-          name: terraform-plan-${{ matrix.environment }}
-          path: infra/aws/env/${{ matrix.environment }}/tfplan.out
+          name: terraform-plan-dev
+          path: infra/aws/env/dev/tfplan.out
           retention-days: 5
 
-      - name: 📊 Plan Analysis
-        working-directory: infra/aws/env/${{ matrix.environment }}
-        run: |
-          echo "📊 Analyzing Terraform plan..."
-          if [ -f tfplan.out ]; then
-            echo "=== Plan Summary ==="
-            terraform show -no-color tfplan.out | grep -E "^(Plan:|No changes)" || echo "Plan analysis completed"
-            
-            echo "=== Resource Changes ==="
-            terraform show -no-color tfplan.out | grep -E "^  [+~-]" | head -20 || echo "No resource changes detected"
-          else
-            echo "No plan file generated"
-          fi
-
       - name: 🔍 Safety Checks
-        working-directory: infra/aws/env/${{ matrix.environment }}
+        working-directory: infra/aws/env/dev
         run: |
-          echo "🔍 Running safety checks..."
-          
           if [ -f tfplan.out ]; then
-            # Check for destroy operations
             if terraform show -no-color tfplan.out | grep -q "destroy"; then
               echo "⚠️ WARNING: Plan contains resource destruction!"
-              terraform show -no-color tfplan.out | grep -A 2 -B 2 "destroy"
-            fi
-            
-            # Check for sensitive data
-            if terraform show -no-color tfplan.out | grep -i "password\|secret\|key" | grep -v "sensitive"; then
-              echo "⚠️ WARNING: Potential sensitive data exposure!"
             fi
           fi
-          
-          echo "✅ Safety checks completed"
 
-      - name: 🧪 Plan Validation Tests
-        working-directory: infra/aws/env/${{ matrix.environment }}
-        run: |
-          echo "🧪 Running plan validation tests..."
-          
-          # Check if plan file exists
-          if [ ! -f tfplan.out ]; then
-            echo "❌ Plan file not generated"
-            exit 1
-          fi
-          
-          # Check for dangerous operations
-          if [ -f plan_output.txt ]; then
-            echo "✅ Plan output captured successfully"
-          fi
-          
-          echo "✅ Plan validation completed"
-
-      - name: 📝 Format Plan for PR Comment
+      - name: 📝 Format Plan for PR
         id: format_plan
         if: github.event_name == 'pull_request'
-        working-directory: infra/aws/env/${{ matrix.environment }}
+        working-directory: infra/aws/env/dev
         run: |
           if [ -f plan_output.txt ]; then
-            # Extract the actual plan output
             PLAN_OUTPUT=$(cat plan_output.txt)
             
-            # Truncate if too long (GitHub comment limit)
             if [ ${#PLAN_OUTPUT} -gt 10000 ]; then
               PLAN_OUTPUT="${PLAN_OUTPUT:0:10000}... (truncated)"
             fi
             
-            # Save to GitHub output (properly escaped)
             {
               echo "plan_output<<EOF"
               echo "$PLAN_OUTPUT"
               echo "EOF"
             } >> $GITHUB_OUTPUT
-          else
-            echo "plan_output=No plan output available" >> $GITHUB_OUTPUT
           fi
 
   # ========================================
-  # 📊 Output Validation
-  # ========================================
-
-  terraform-output-test:
-    name: 📊 Output Validation
-    runs-on: ubuntu-latest
-    needs: terraform-plan-test
-    if: github.event_name != 'pull_request' && needs.changes.outputs.terraform == 'true'
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    strategy:
-      matrix:
-        environment: [dev]
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: ⚙️ Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TF_VERSION }}
-
-      - name: 🔧 Terraform Init
-        working-directory: infra/aws/env/${{ matrix.environment }}
-        run: |
-          echo "🚀 Initializing Terraform for output validation..."
-          terraform init
-
-      - name: 📊 Terraform Output
-        working-directory: infra/aws/env/${{ matrix.environment }}
-        run: |
-          echo "📊 Terraform outputs for ${{ matrix.environment }}:"
-          terraform output || echo "No outputs defined or no state exists"
-        continue-on-error: true
-
-      - name: 🔍 Output Validation
-        working-directory: infra/aws/env/${{ matrix.environment }}
-        run: |
-          echo "🔍 Validating output format and values..."
-          
-          # Check if outputs are valid JSON
-          if terraform output -json > /tmp/outputs.json 2>/dev/null; then
-            echo "✅ Outputs are valid JSON format"
-            
-            # Validate specific outputs if they exist
-            if cat /tmp/outputs.json | jq -e '.vpc_id' > /dev/null 2>&1; then
-              echo "✅ VPC ID output exists"
-            fi
-            
-            if cat /tmp/outputs.json | jq -e '.alb_dns_name' > /dev/null 2>&1; then
-              echo "✅ ALB DNS name output exists"
-            fi
-          else
-            echo "ℹ️ No outputs available or invalid format"
-          fi
-
-  # ========================================
-  # 💬 PR Comment with Results
-  # ========================================
-
-  pr-comment:
-    name: 💬 PR Comment with Results
-    runs-on: ubuntu-latest
-    needs: [changes, terraform-validate, terraform-security, terraform-go-tests, terraform-plan-test, cost-estimation]
-    if: github.event_name == 'pull_request' && always()
-    steps:
-      - name: 🔍 Find Previous Comment
-        uses: peter-evans/find-comment@v3
-        id: find-comment
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'github-actions[bot]'
-          body-includes: '## 🏗️ Terraform CI Results'
-
-      - name: 💬 Create or Update PR Comment
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          comment-id: ${{ steps.find-comment.outputs.comment-id }}
-          issue-number: ${{ github.event.pull_request.number }}
-          edit-mode: replace
-          body: |
-            ## 🏗️ Terraform CI Results
-            
-            ### 📊 Pipeline Status
-            | Job | Status |
-            |-----|--------|
-            | 🔍 Change Detection | ${{ needs.changes.result }} |
-            | 🧹 Lint & Validate | ${{ needs.terraform-validate.result }} |
-            | 🔒 Security Scan | ${{ needs.terraform-security.result }} |
-            | 🧪 Go Tests | ${{ needs.terraform-go-tests.result }} |
-            | 📋 Plan & Analysis | ${{ needs.terraform-plan-test.result }} |
-            | 💰 Cost Estimation | ${{ needs.cost-estimation.result }} |
-            
-            ### 🔍 Change Detection
-            - **Terraform files**: `${{ needs.changes.outputs.terraform }}`
-            - **Test files**: `${{ needs.changes.outputs.tests }}`
-            - **Modules**: `${{ needs.changes.outputs.modules }}`
-            
-            ### 📋 Terraform Plan
-            <details>
-            <summary>Show Plan Output</summary>
-            
-            ```hcl
-            ${{ needs.terraform-plan-test.outputs.plan_output || 'Plan output not available' }}
-            ```
-            </details>
-            
-            ### ✅ Next Steps
-            ${{ (needs.terraform-validate.result == 'success' && needs.terraform-security.result == 'success' && needs.terraform-plan-test.result == 'success') && '🎉 All checks passed! Ready for merge.' || '❌ Some checks failed. Please review the errors above.' }}
-            
-            ---
-            *Updated at: ${{ github.event.pull_request.updated_at }}*
-
-  # ========================================
-  # 💰 Infrastructure Cost Estimation
+  # 💰 Cost Estimation (Optional)
   # ========================================
 
   cost-estimation:
-    name: 💰 Infrastructure Cost Estimation
+    name: 💰 Cost Estimation
     runs-on: ubuntu-latest
-    needs: [changes, terraform-plan-test]
-    if: github.event_name == 'pull_request' && needs.changes.outputs.terraform == 'true'
+    needs: terraform-plan
+    if: github.event_name == 'pull_request' && needs.changes.outputs.terraform == 'true' && vars.ENABLE_COST_ESTIMATION == 'true'
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     steps:
-      - name: 📥 Checkout Code
+      - name: 📥 Checkout
         uses: actions/checkout@v4
 
       - name: ⚙️ Setup Terraform
@@ -531,16 +239,10 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
-      - name: 🔧 Terraform Init
+      - name: 📋 Generate Plan for Cost
         working-directory: infra/aws/env/dev
         run: |
-          echo "🚀 Initializing Terraform for cost estimation..."
           terraform init
-
-      - name: 📋 Generate Plan for Cost Estimation
-        working-directory: infra/aws/env/dev
-        run: |
-          echo "📋 Generating Terraform plan for cost analysis..."
           terraform plan -out=tfplan.out
           terraform show -json tfplan.out > tfplan.json
 
@@ -551,42 +253,63 @@ jobs:
 
       - name: 💰 Generate Cost Estimate
         working-directory: infra/aws/env/dev
-        run: |
-          echo "💰 Generating infrastructure cost breakdown..."
-          infracost breakdown --path=tfplan.json --format=json --out-file=infracost-base.json
+        run: infracost breakdown --path=tfplan.json --format=json --out-file=infracost.json
 
-      - name: 💬 Comment Cost Estimate on PR
+      - name: 💬 Comment Cost on PR
         uses: infracost/actions/comment@v1
         with:
-          path: infra/aws/env/dev/infracost-base.json
+          path: infra/aws/env/dev/infracost.json
           behavior: update
 
   # ========================================
-  # ✅ CI Summary
+  # 💬 PR Summary
   # ========================================
 
-  ci-summary:
-    name: ✅ CI Summary
+  pr-summary:
+    name: 💬 PR Summary
     runs-on: ubuntu-latest
-    needs: [changes, terraform-validate, terraform-security, terraform-go-tests, terraform-plan-test, cost-estimation]
-    if: always()
+    needs: [changes, lint-and-security, go-tests, terraform-plan, cost-estimation]
+    if: github.event_name == 'pull_request' && always()
     steps:
-      - name: 📊 CI Results Summary
-        run: |
-          echo "## 🏗️ Terraform CI Pipeline Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔍 Change Detection | ${{ needs.changes.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🧹 Lint & Validate | ${{ needs.terraform-validate.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔒 Security Scan | ${{ needs.terraform-security.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🧪 Go Tests | ${{ needs.terraform-go-tests.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📋 Plan & Analysis | ${{ needs.terraform-plan-test.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 💰 Cost Estimation | ${{ needs.cost-estimation.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          if [[ "${{ needs.terraform-validate.result }}" == "success" && "${{ needs.terraform-security.result }}" == "success" && "${{ needs.terraform-plan-test.result }}" == "success" ]]; then
-            echo "✅ All CI checks passed! Infrastructure is ready for deployment." >> $GITHUB_STEP_SUMMARY
-          else
-            echo "❌ Some CI checks failed. Please review before proceeding." >> $GITHUB_STEP_SUMMARY
-          fi 
+      - name: 🔍 Find Previous Comment
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '## 🏗️ Terraform CI Results'
+
+      - name: 💬 Create or Update Comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body: |
+            ## 🏗️ Terraform CI Results
+            
+            | Check | Status |
+            |-------|--------|
+            | 🧹 Lint & Security | ${{ needs.lint-and-security.result }} |
+            | 🧪 Go Tests | ${{ needs.go-tests.result }} |
+            | 📋 Terraform Plan | ${{ needs.terraform-plan.result }} |
+            | 💰 Cost Estimation | ${{ needs.cost-estimation.result || '⏭️ Skipped' }} |
+            
+            ### 🔍 Changes Detected
+            - **Terraform**: `${{ needs.changes.outputs.terraform }}`
+            - **Tests**: `${{ needs.changes.outputs.tests }}`
+            
+            ### 📋 Terraform Plan
+            <details>
+            <summary>Show Plan Output</summary>
+            
+            ```hcl
+            ${{ needs.terraform-plan.outputs.plan_output || 'Plan output not available' }}
+            ```
+            </details>
+            
+            ### ✅ Status
+            ${{ (needs.lint-and-security.result == 'success' && needs.terraform-plan.result == 'success') && '🎉 Ready for merge!' || '❌ Please fix issues above.' }}
+            
+            ---
+            *Updated: ${{ github.event.pull_request.updated_at }}*
