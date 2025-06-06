@@ -15,6 +15,12 @@ services:
       - ./container_data/configdb:/data/configdb
     networks:
       - my-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   server:
     build:
@@ -23,7 +29,8 @@ services:
       target: test
     container_name: server
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     environment:
       - NODE_ENV=test
       - TEST_MONGO_URI=mongodb://root:password@mongo:27017/test_db
