@@ -18,6 +18,9 @@ jobs:
   go-security:
     name: 🔒 Go Security Scan
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test-dir: [unit, integration]
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v4
@@ -28,25 +31,29 @@ jobs:
           go-version: '1.22'
 
       - name: 📦 Download Go Dependencies
-        working-directory: infra/aws/test
+        working-directory: infra/aws/test/${{ matrix.test-dir }}
         run: |
+          echo "🔍 Processing Go module in ${{ matrix.test-dir }} directory..."
           go mod download
           go mod tidy
 
       - name: 🔍 Run Gosec Security Scanner
+        working-directory: infra/aws/test/${{ matrix.test-dir }}
         run: |
+          echo "🔒 Running Gosec security scan for ${{ matrix.test-dir }}..."
           go install github.com/securecodewarrior/gosec/v2/cmd/gosec@latest
-          gosec -fmt sarif -out gosec-results.sarif ./infra/aws/test/...
+          gosec -fmt sarif -out gosec-${{ matrix.test-dir }}-results.sarif ./...
 
       - name: 📊 Upload Gosec Results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: gosec-results.sarif
+          sarif_file: infra/aws/test/${{ matrix.test-dir }}/gosec-${{ matrix.test-dir }}-results.sarif
 
       - name: 🛡️ Run Nancy (Go vulnerability check)
-        working-directory: infra/aws/test
+        working-directory: infra/aws/test/${{ matrix.test-dir }}
         run: |
+          echo "🛡️ Running Nancy vulnerability check for ${{ matrix.test-dir }}..."
           go install github.com/sonatypecommunity/nancy@latest
           go list -json -deps ./... | nancy sleuth
 
@@ -79,7 +86,8 @@ jobs:
               echo "✅ Terraform versions are consistent"
             fi
           else
-            echo "⚠️ .terraform-version file not found"
+            echo "⚠️ .terraform-version file not found - this is acceptable"
+            echo "✅ Using workflow version: $WORKFLOW_VERSION"
           fi
 
   terraform-docs-check:
@@ -116,15 +124,18 @@ jobs:
 
       - name: 🔧 Terraform Init
         working-directory: infra/aws/env/dev
-        run: terraform init
+        run: |
+          echo "🚀 Initializing Terraform for cost estimation..."
+          terraform init
 
       - name: 📋 Generate Plan for Cost Estimation
         working-directory: infra/aws/env/dev
         run: |
+          echo "📋 Generating Terraform plan for cost analysis..."
           terraform plan -out=tfplan.out
           terraform show -json tfplan.out > tfplan.json
 
-      - name: 💰 Run Infracost
+      - name: 💰 Setup Infracost
         uses: infracost/actions/setup@v3
         with:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
@@ -132,6 +143,7 @@ jobs:
       - name: 💰 Generate Cost Estimate
         working-directory: infra/aws/env/dev
         run: |
+          echo "💰 Generating infrastructure cost breakdown..."
           infracost breakdown --path=tfplan.json --format=json --out-file=infracost-base.json
 
       - name: 💬 Comment Cost Estimate on PR
@@ -139,4 +151,31 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           path: infra/aws/env/dev/infracost-base.json
-          behavior: update 
+          behavior: update
+
+  # ========================================
+  # 📊 Dependency Summary
+  # ========================================
+
+  dependency-summary:
+    name: 📊 Dependency Check Summary
+    runs-on: ubuntu-latest
+    needs: [go-security, terraform-version-check, terraform-docs-check]
+    if: always()
+    steps:
+      - name: 📊 Generate Summary
+        run: |
+          echo "## 🔍 Dependency Check Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔒 Go Security Scan | ${{ needs.go-security.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📋 Terraform Version Check | ${{ needs.terraform-version-check.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📚 Terraform Docs Check | ${{ needs.terraform-docs-check.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ needs.go-security.result }}" == "success" && "${{ needs.terraform-version-check.result }}" == "success" && "${{ needs.terraform-docs-check.result }}" == "success" ]]; then
+            echo "✅ All dependency checks passed!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Some dependency checks failed. Please review above." >> $GITHUB_STEP_SUMMARY
+          fi 
