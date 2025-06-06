@@ -35,7 +35,10 @@ jobs:
           MONGO_ROOT_PASSWORD: password
           TEST_MONGO_URI: mongodb://root:password@mongo:27017/test_db
 
-      - name: 🧹 環境をクリーンアップ
+      - name: 🧹 テスト後クリーンアップ
         working-directory: server
-        run: docker compose down --volumes --remove-orphans
-        if: always() 
+        if: always()  # テスト成功/失敗に関わらず実行
+        run: |
+          echo "🧹 Cleaning up test environment..."
+          # コンテナとボリュームを完全削除
+          docker compose down --volumes --remove-orphans || true 

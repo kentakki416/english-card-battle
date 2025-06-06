@@ -10,7 +10,7 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
-    volumes:
+    # volumes:
       # ローカル開発データを永続化させたいときだけコメントを外す。コメントを外した状態でgitにpushしないこと
       # - ./container_data/db:/data/db
       # - ./container_data/configdb:/data/configdb
