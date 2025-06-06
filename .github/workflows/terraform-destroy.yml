@@ -109,9 +109,27 @@ jobs:
         run: |
           echo "🔍 Checking for critical resources..."
           
-          if terraform show -no-color destroy.tfplan | grep -i "rds\|database\|s3_bucket\|lb\|load_balancer"; then
-            echo "⚠️ WARNING: Critical resources will be destroyed!"
-            terraform show -no-color destroy.tfplan | grep -i "rds\|database\|s3_bucket\|lb\|load_balancer"
+          CRITICAL_WARNINGS=0
+          
+          # 重要なリソースの削除をチェック
+          # ケース例: データベース(RDS)、ストレージ(S3)、ロードバランサーなど
+          # これらの削除は通常、データ損失やサービス停止を伴うため要注意
+          if terraform show destroy.tfplan | grep -i "rds\|database\|s3_bucket\|lb\|load_balancer"; then
+            echo "⚠️ 警告: 以下の重要なリソースが削除されます"
+            terraform show destroy.tfplan | grep -i "rds\|database\|s3_bucket\|lb\|load_balancer"
+            echo "CRITICAL_DETECTED=true" >> $GITHUB_ENV
+            CRITICAL_WARNINGS=1
+          fi
+          
+          # Destroyは破壊的操作なので警告表示（ユーザーは既に"DESTROY"で確認済み）
+          if [[ $CRITICAL_WARNINGS -gt 0 ]]; then
+            echo ""
+            echo "⚠️ 重要リソースの削除が検出されました"
+            echo "🛑 意図的な削除であることを再確認してください"
+            echo "CRITICAL_WARNINGS_COUNT=$CRITICAL_WARNINGS" >> $GITHUB_ENV
+            sleep 10  # 10秒間の確認時間
+          else
+            echo "✅ 重要リソースの削除は検出されませんでした"
           fi
 
       - name: 💥 Execute Destroy
@@ -146,11 +164,31 @@ jobs:
         run: |
           echo "## 💥 Terraform Destroy Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # 重要リソースの警告がある場合は最初に表示
+          if [[ "${{ env.CRITICAL_WARNINGS_COUNT }}" != "" && "${{ env.CRITICAL_WARNINGS_COUNT }}" != "0" ]]; then
+            echo "### ⚠️ 重要リソース削除警告" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**重要なインフラストラクチャコンポーネントが削除されます:**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "🚨 **以下のリソースが永続的に削除されます:**" >> $GITHUB_STEP_SUMMARY
+            echo "- 📊 データベース (RDS instances)" >> $GITHUB_STEP_SUMMARY
+            echo "- 💾 ストレージバケット (S3)" >> $GITHUB_STEP_SUMMARY
+            echo "- ⚖️ ロードバランサー" >> $GITHUB_STEP_SUMMARY
+            echo "- 🏗️ その他の重要インフラストラクチャ" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ **データ損失やサービス停止の可能性があります**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "---" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
           echo "| Item | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| 🌍 Environment | \`${{ github.event.inputs.environment }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| 🔄 Mode | \`${{ github.event.inputs.dry_run == 'true' && 'Dry Run' || 'Execute' }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| 📊 Resources | \`${{ env.RESOURCE_COUNT }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| ⚠️ Critical Warnings | \`${{ env.CRITICAL_WARNINGS_COUNT || '0' }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| 👤 By | @${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 🕐 Time | $(date -u '+%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -159,7 +197,11 @@ jobs:
             echo "### ℹ️ No resources found to destroy" >> $GITHUB_STEP_SUMMARY
           elif [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
             echo "### 📋 Dry run completed - plan generated" >> $GITHUB_STEP_SUMMARY
-            echo "⚠️ To execute, run again with dry_run=false" >> $GITHUB_STEP_SUMMARY
+            if [[ "${{ env.CRITICAL_WARNINGS_COUNT }}" != "" && "${{ env.CRITICAL_WARNINGS_COUNT }}" != "0" ]]; then
+              echo "⚠️ **重要リソースの削除を確認してから実行してください** - dry_run=falseで再実行" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "✅ 重要リソースの削除なし - dry_run=falseで実行可能です" >> $GITHUB_STEP_SUMMARY
+            fi
           elif [[ "${{ env.DESTROY_STATUS }}" == "success" ]]; then
             echo "### ✅ Destroy completed successfully" >> $GITHUB_STEP_SUMMARY
           elif [[ "${{ env.DESTROY_STATUS }}" == "partial" ]]; then
