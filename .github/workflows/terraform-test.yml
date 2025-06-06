@@ -162,19 +162,24 @@ jobs:
           fi
 
   # ========================================
-  # 📋 Terraform Plan
+  # 📋 Terraform Plan (Multi-Environment)
   # ========================================
 
   terraform-plan:
-    name: 📋 Terraform Plan
+    name: 📋 Terraform Plan (${{ matrix.environment }})
     runs-on: ubuntu-latest
-    needs: [changes, lint-and-security]
+    needs: changes
     if: needs.changes.outputs.terraform == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [dev, prd]
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     outputs:
-      plan_output: ${{ steps.format_plan.outputs.plan_output }}
+      plan_output_dev: ${{ steps.format_plan.outputs.plan_output_dev }}
+      plan_output_prd: ${{ steps.format_plan.outputs.plan_output_prd }}
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
@@ -185,50 +190,83 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
           terraform_wrapper: false
 
+      - name: 🔧 Terraform init
+        working-directory: infra/aws/env/${{ matrix.environment }}
+        run: terraform init
+
       - name: 📋 Generate Plan
-        working-directory: infra/aws/env/dev
+        working-directory: infra/aws/env/${{ matrix.environment }}
         run: |
-          terraform init
           terraform plan -detailed-exitcode -out=tfplan.out | tee plan_output.txt
         continue-on-error: true
 
       - name: 🔍 Safety Checks
-        working-directory: infra/aws/env/dev
+        working-directory: infra/aws/env/${{ matrix.environment }}
         run: |
           if [ -f tfplan.out ]; then
             if terraform show tfplan.out | grep -q "destroy"; then
-              echo "⚠️ WARNING: Plan contains resource destruction!"
+              echo "⚠️ WARNING: Plan contains resource destruction in ${{ matrix.environment }}!"
+              echo "::warning title=Resource Destruction::Plan for ${{ matrix.environment }} contains resource destruction"
             fi
+            
+            # リソース数をカウント
+            RESOURCES_TO_ADD=$(terraform show tfplan.out | grep -c "# .* will be created" || echo "0")
+            RESOURCES_TO_CHANGE=$(terraform show tfplan.out | grep -c "# .* will be updated" || echo "0") 
+            RESOURCES_TO_DESTROY=$(terraform show tfplan.out | grep -c "# .* will be destroyed" || echo "0")
+            
+            echo "📊 Plan Summary for ${{ matrix.environment }}:"
+            echo "  ✅ To Add: $RESOURCES_TO_ADD"
+            echo "  🔄 To Change: $RESOURCES_TO_CHANGE"
+            echo "  🗑️ To Destroy: $RESOURCES_TO_DESTROY"
+            
+            # GitHub Summary に追加
+            echo "### 📊 ${{ matrix.environment }} Plan Summary" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Resources to Add: **$RESOURCES_TO_ADD**" >> $GITHUB_STEP_SUMMARY
+            echo "- 🔄 Resources to Change: **$RESOURCES_TO_CHANGE**" >> $GITHUB_STEP_SUMMARY
+            echo "- 🗑️ Resources to Destroy: **$RESOURCES_TO_DESTROY**" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: 📝 Format Plan for PR
         id: format_plan
         if: github.event_name == 'pull_request'
-        working-directory: infra/aws/env/dev
+        working-directory: infra/aws/env/${{ matrix.environment }}
         run: |
           if [ -f plan_output.txt ]; then
             PLAN_OUTPUT=$(cat plan_output.txt)
             
-            if [ ${#PLAN_OUTPUT} -gt 10000 ]; then
-              PLAN_OUTPUT="${PLAN_OUTPUT:0:10000}... (truncated)"
+            # 出力サイズ制限
+            if [ ${#PLAN_OUTPUT} -gt 8000 ]; then
+              PLAN_OUTPUT="${PLAN_OUTPUT:0:8000}... (truncated)"
             fi
             
+            # 環境別の出力として保存
             {
-              echo "plan_output<<EOF"
+              echo "plan_output_${{ matrix.environment }}<<EOF"
               echo "$PLAN_OUTPUT"
               echo "EOF"
             } >> $GITHUB_OUTPUT
           fi
+
+      - name: 📤 Upload Plan Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-${{ matrix.environment }}
+          path: infra/aws/env/${{ matrix.environment }}/tfplan.out
+          retention-days: 7
 
   # ========================================
   # 💰 Cost Estimation (Optional)
   # ========================================
 
   cost-estimation:
-    name: 💰 Cost Estimation
+    name: 💰 Cost Estimation (${{ matrix.environment }})
     runs-on: ubuntu-latest
     needs: terraform-plan
     if: github.event_name == 'pull_request' && needs.changes.outputs.terraform == 'true' && vars.ENABLE_COST_ESTIMATION == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [dev, prd]
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -236,16 +274,21 @@ jobs:
       - name: 📥 Checkout
         uses: actions/checkout@v4
 
+      - name: 📥 Download Plan Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-plan-${{ matrix.environment }}
+          path: infra/aws/env/${{ matrix.environment }}
+
       - name: ⚙️ Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
-      - name: 📋 Generate Plan for Cost
-        working-directory: infra/aws/env/dev
+      - name: 📋 Convert Plan to JSON
+        working-directory: infra/aws/env/${{ matrix.environment }}
         run: |
           terraform init
-          terraform plan -out=tfplan.out
           terraform show -json tfplan.out > tfplan.json
 
       - name: 💰 Setup Infracost
@@ -254,13 +297,13 @@ jobs:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
 
       - name: 💰 Generate Cost Estimate
-        working-directory: infra/aws/env/dev
-        run: infracost breakdown --path=tfplan.json --format=json --out-file=infracost.json
+        working-directory: infra/aws/env/${{ matrix.environment }}
+        run: infracost breakdown --path=tfplan.json --format=json --out-file=infracost-${{ matrix.environment }}.json
 
       - name: 💬 Comment Cost on PR
         uses: infracost/actions/comment@v1
         with:
-          path: infra/aws/env/dev/infracost.json
+          path: infra/aws/env/${{ matrix.environment }}/infracost-${{ matrix.environment }}.json
           behavior: update
 
   # ========================================
@@ -294,19 +337,31 @@ jobs:
             |-------|--------|
             | 🧹 Lint & Security | ${{ needs.lint-and-security.result }} |
             | 🧪 Go Tests | ${{ needs.go-tests.result }} |
-            | 📋 Terraform Plan | ${{ needs.terraform-plan.result }} |
+            | 📋 Terraform Plan (dev) | ${{ needs.terraform-plan.result }} |
+            | 📋 Terraform Plan (prd) | ${{ needs.terraform-plan.result }} |
             | 💰 Cost Estimation | ${{ needs.cost-estimation.result || '⏭️ Skipped' }} |
             
             ### 🔍 Changes Detected
             - **Terraform**: `${{ needs.changes.outputs.terraform }}`
             - **Tests**: `${{ needs.changes.outputs.tests }}`
             
-            ### 📋 Terraform Plan
+            ### 📋 Terraform Plans
+            
+            #### 🛠️ Development Environment
             <details>
-            <summary>Show Plan Output</summary>
+            <summary>Show Dev Plan Output</summary>
             
             ```hcl
-            ${{ needs.terraform-plan.outputs.plan_output || 'Plan output not available' }}
+            ${{ needs.terraform-plan.outputs.plan_output_dev || 'Dev plan output not available' }}
+            ```
+            </details>
+            
+            #### 🏭 Production Environment  
+            <details>
+            <summary>Show Prd Plan Output</summary>
+            
+            ```hcl
+            ${{ needs.terraform-plan.outputs.plan_output_prd || 'Prd plan output not available' }}
             ```
             </details>
             
