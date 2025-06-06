@@ -31,7 +31,6 @@ services:
     volumes:
       - .:/app
       - /app/node_modules  # node_modulesをボリュームとしてマウントして高速化
-      - ./coverage:/app/coverage  # カバレッジレポート用
     networks:
       - my-network
     command: npm run test:coverage

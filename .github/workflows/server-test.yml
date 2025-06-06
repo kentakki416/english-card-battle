@@ -29,6 +29,7 @@ jobs:
           echo "🧪 Running tests with MongoDB (auto-started by depends_on)..."
           # depends_onによりmongoコンテナが自動的に起動され、serverイメージも必要に応じてビルドされる
           docker compose run --build --rm server npm run test:coverage
+          echo "✅ Test execution completed!"
         env:
           NODE_ENV: test
           MONGO_ROOT_USERNAME: root
