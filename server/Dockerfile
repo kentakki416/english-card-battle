@@ -52,8 +52,7 @@ COPY --from=build --chown=node:node /work/dist ./dist
 # テスト用環境変数を設定
 ENV NODE_ENV=test
 ENV TEST_MONGO_URI=mongodb://root:password@mongo:27017/test_db
-# 権限設定
-USER node
+
 EXPOSE 8080
 # デフォルトコマンドをテスト実行に設定
 CMD ["npm", "run", "test:coverage"]
