@@ -23,11 +23,19 @@ jobs:
       - name: 📥 リポジトリをチェックアウト
         uses: actions/checkout@v4
 
+      - name: 🐳 イメージビルド
+        working-directory: server
+        run: |
+          echo "🐳 Building Docker images..."
+          docker compose build --no-cache
+        env:
+          NODE_ENV: test
+          MONGO_ROOT_USERNAME: root
+
       - name: 🧪 テスト実行（依存関係自動処理）
         working-directory: server
         run: |
-          echo "🧪 Running tests with MongoDB (auto-started by depends_on)..."
-          # depends_onによりmongoコンテナが自動的に起動され、serverイメージも必要に応じてビルドされる
+          echo "🧪 Running tests"
           docker compose run --build --rm server npm run test:coverage
           echo "✅ Test execution completed!"
         env:
