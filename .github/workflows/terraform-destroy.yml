@@ -100,8 +100,11 @@ jobs:
           echo "📋 Creating destroy plan..."
           terraform plan -destroy -detailed-exitcode -out=destroy.tfplan
           
-          echo "📊 Plan summary:"
-          terraform show -no-color destroy.tfplan
+      - name: 🔍 Terraform show
+        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
+        run: |
+          echo "📋 Showing destroy plan..."
+          terraform show destroy.tfplan
 
       - name: 🔍 Critical Resource Check
         if: env.RESOURCE_COUNT != '0'
