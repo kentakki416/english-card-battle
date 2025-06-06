@@ -12,8 +12,8 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
-    "test:docker": "docker-compose up --build --abort-on-container-exit --exit-code-from server",
-    "test:docker:down": "docker-compose down --volumes --remove-orphans",
+    "test:docker": "docker compose up --build --abort-on-container-exit --exit-code-from server",
+    "test:docker:down": "docker compose down --volumes --remove-orphans",
     "test:ci": "npm run test:docker && npm run test:docker:down"
   },
   "keywords": [],

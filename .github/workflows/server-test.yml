@@ -27,7 +27,7 @@ jobs:
         working-directory: server
         run: |
           # MongoDBとServerコンテナを起動してテストを実行
-          docker-compose up --build --abort-on-container-exit --exit-code-from server
+          docker compose up --build --abort-on-container-exit --exit-code-from server
         env:
           # CI環境用の設定
           NODE_ENV: test
@@ -37,5 +37,5 @@ jobs:
 
       - name: 🧹 環境をクリーンアップ
         working-directory: server
-        run: docker-compose down --volumes --remove-orphans
+        run: docker compose down --volumes --remove-orphans
         if: always() 
