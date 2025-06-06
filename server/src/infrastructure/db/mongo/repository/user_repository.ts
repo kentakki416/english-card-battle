@@ -1,8 +1,8 @@
 import { ObjectId, type Collection, type Db, type Filter } from 'mongodb'
 
-import { User } from '../../../../1-domain/entity/user'
-import type { ILogger } from '../../../../3-adapter/interface/ilogger'
-import type { IUserRepository } from '../../../../3-adapter/interface/repository/iuser_repository'
+import { User } from '../../../../domain/entity/user'
+import type { ILogger } from '../../../../adapter/interface/ilogger'
+import type { IUserRepository } from '../../../../adapter/interface/repository/iuser_repository'
 import type { UserCollection } from '../../../../../types/mongo'
 
 export class UserRepository implements IUserRepository {

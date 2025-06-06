@@ -1,6 +1,6 @@
 import { CONSTANT } from '../../../../constant'
 import type { Response, SignupResponse } from '../../../../types/controller'
-import type { User } from '../../../1-domain/entity/user'
+import type { User } from '../../../domain/entity/user'
 
 export class SignupSerializer {
   /**

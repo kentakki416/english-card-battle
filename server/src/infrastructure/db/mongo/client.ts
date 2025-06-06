@@ -1,12 +1,13 @@
 import * as mongo from 'mongodb'
 
-import type { PinoLogger } from '../../log/pino/logger'
+import type { IDbClient } from '../../../adapter/interface/idb_client'
+import type { ILogger } from '../../../adapter/interface/ilogger'
 
-export class MongoClient {
+export class MongoClient implements IDbClient {
   private _client: mongo.MongoClient
-  private _logger: PinoLogger
+  private _logger: ILogger
 
-  constructor(logger: PinoLogger) {
+  constructor(logger: ILogger) {
     let mongoURI = 'mongodb://root:password@localhost:27017'
     if (process.env.NODE_ENV === 'dev') {
       // TODO: 適切なURIを設定
@@ -46,7 +47,7 @@ export class MongoClient {
   /**
    * MognoDBとの接続を切断
    */
-  public async disconnect() {
+  public async close() {
     try {
       await this._client.close()
       this._logger.info('MongoDB disconnected')

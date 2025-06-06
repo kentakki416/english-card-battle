@@ -1,0 +1,107 @@
+name: 🐳 Server Image Push
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'server/**'
+      - '.github/workflows/server-image-push.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to build for'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+        - dev
+        - prd
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: ap-northeast-1
+  ECR_REPOSITORY: english-card-battle-server
+
+jobs:
+  build-and-push:
+    name: 🐳 Build & Push Docker Image
+    runs-on: ubuntu-latest
+    environment: 
+      name: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prd' || 'dev') }}
+    
+    steps:
+      - name: 📥 リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 🔑 AWS認証を設定
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 🔐 ECRにログイン
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: 🏷️ イメージタグを生成
+        id: image-tag
+        run: |
+          ENVIRONMENT=${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prd' || 'dev') }}
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          SHORT_SHA=${GITHUB_SHA::7}
+          
+          echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
+          echo "image_tag=${ENVIRONMENT}-${TIMESTAMP}-${SHORT_SHA}" >> $GITHUB_OUTPUT
+          echo "latest_tag=${ENVIRONMENT}-latest" >> $GITHUB_OUTPUT
+
+      - name: 🐳 Dockerイメージをビルド・プッシュ
+        working-directory: server
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ steps.image-tag.outputs.image_tag }}
+          LATEST_TAG: ${{ steps.image-tag.outputs.latest_tag }}
+        run: |
+          # マルチプラットフォームビルドのセットアップ
+          docker buildx create --use --name multiarch-builder
+          
+          # イメージをビルド・プッシュ
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:$LATEST_TAG \
+            --push \
+            .
+
+      - name: 🏷️ イメージ情報を出力
+        run: |
+          echo "✅ Docker イメージが正常にプッシュされました"
+          echo "🐳 Repository: ${{ env.ECR_REPOSITORY }}"
+          echo "🏷️ Tag: ${{ steps.image-tag.outputs.image_tag }}"
+          echo "📍 Registry: ${{ steps.login-ecr.outputs.registry }}"
+
+      - name: 📝 プッシュ結果をアーティファクトに保存
+        run: |
+          mkdir -p artifacts
+          cat << EOF > artifacts/image-info.json
+          {
+            "repository": "${{ env.ECR_REPOSITORY }}",
+            "tag": "${{ steps.image-tag.outputs.image_tag }}",
+            "latest_tag": "${{ steps.image-tag.outputs.latest_tag }}",
+            "registry": "${{ steps.login-ecr.outputs.registry }}",
+            "full_image_uri": "${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.image-tag.outputs.image_tag }}",
+            "environment": "${{ steps.image-tag.outputs.environment }}",
+            "git_sha": "${{ github.sha }}",
+            "build_time": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+      - name: 📤 イメージ情報をアップロード
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image-info-${{ steps.image-tag.outputs.environment }}
+          path: artifacts/image-info.json
+          retention-days: 30 

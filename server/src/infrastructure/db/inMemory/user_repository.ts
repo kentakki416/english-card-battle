@@ -1,5 +1,5 @@
-import type { User } from '../../../1-domain/entity/user'
-import type { IUserRepository } from '../../../3-adapter/interface/repository/iuser_repository'
+import type { User } from '../../../domain/entity/user'
+import type { IUserRepository } from '../../../adapter/interface/repository/iuser_repository'
 
 
 export class InMemoryUserRepository implements IUserRepository {

@@ -1,5 +1,5 @@
 import type { Controller } from '../../../../types'
-import type { SignupUsecase } from '../../../2-usecase/auth/signup_usecase'
+import type { SignupUsecase } from '../../../usecase/auth/signup_usecase'
 import type { ILogger } from '../../interface/ilogger'
 import type { SignupSerializer } from '../../serializer/auth/signup_serializer'
 

@@ -1,7 +1,7 @@
 import express from 'express'
 import { pinoHttp } from 'pino-http'
 
-import type { MongoClient } from '../db/mongo/client'
+import type { IDbClient } from '../../adapter/interface/idb_client'
 import type { PinoLogger } from '../log/pino/logger'
 import { ExpressRouter } from '../router/router'
 import { ApiTokenGenerator } from '../middleware/api_token' 
@@ -9,14 +9,14 @@ import { ApiTokenGenerator } from '../middleware/api_token'
 export class ExpressServer {
   private _app: express.Express
   private _port: number
-  private _mongoClient: MongoClient
+  private _dbClient: IDbClient
   private _logger: PinoLogger
   private _apiToken: ApiTokenGenerator
 
-  constructor(port: number, mongoClient: MongoClient, logger: PinoLogger, apiToken: ApiTokenGenerator) {
+  constructor(port: number, dbClient: IDbClient, logger: PinoLogger, apiToken: ApiTokenGenerator) {
     this._app = express()
     this._port = port
-    this._mongoClient = mongoClient
+    this._dbClient = dbClient
     this._logger = logger
     this._apiToken = apiToken
   }
@@ -34,7 +34,7 @@ export class ExpressServer {
       // TODO: ここでAPIトークンをログに追加する
 
       // ルーティングの設定
-      const router = new ExpressRouter(this._mongoClient, this._logger, apiToken)
+      const router = new ExpressRouter(this._dbClient, this._logger, apiToken)
       this._app.use('/api',router.getRouter())
 
       this._app.listen(this._port, () => {

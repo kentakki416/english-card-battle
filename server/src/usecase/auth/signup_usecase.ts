@@ -1,9 +1,9 @@
 import type { Controller } from '../../../types'
-import { User, userBisinessRule } from '../../1-domain/entity/user'
-import { UserDomainService } from '../../1-domain/service/user/check_name_duplicate'
-import type { IHash } from '../../3-adapter/interface/ihash'
-import type { ILogger } from '../../3-adapter/interface/ilogger'
-import type { IUserRepository } from '../../3-adapter/interface/repository/iuser_repository'
+import { User, userBisinessRule } from '../../domain/entity/user'
+import { UserDomainService } from '../../domain/service/user/check_name_duplicate'
+import type { IHash } from '../../adapter/interface/ihash'
+import type { ILogger } from '../../adapter/interface/ilogger'
+import type { IUserRepository } from '../../adapter/interface/repository/iuser_repository'
 
 export class SignupUsecase {
   private _userRepo: IUserRepository
@@ -16,10 +16,10 @@ export class SignupUsecase {
     this._hash = hash
   }
 
-  public async exucute(body: Controller.SignupRequest, apiToken: string): Promise<User> {
+  public async exucute(body: Controller.SignupRequest, _apiToken: string): Promise<User> {
     try {
       // ハッシュ化前のパスワードのチェック
-      if (userBisinessRule.checkPasswordLength(body.password)) {
+      if (!userBisinessRule.checkPasswordLength(body.password)) {
         throw new Error('パスワードは5文字以上12文字以下である必要があります')
       }
       // パスワードが一致しているかの確認

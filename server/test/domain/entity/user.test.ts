@@ -1,4 +1,4 @@
-import { User, userBisinessRule } from '../../../src/1-domain/entity/user'
+import { User, userBisinessRule } from '../../../src/domain/entity/user'
 
 describe(__filename, () => {
   describe('【正常系', () => {

@@ -1,4 +1,4 @@
-import type { IUserRepository } from '../../../3-adapter/interface/repository/iuser_repository'
+import type { IUserRepository } from '../../../adapter/interface/repository/iuser_repository'
 
 export class UserDomainService {
   private _userRepo: IUserRepository

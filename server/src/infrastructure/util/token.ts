@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 
-import type { IToken } from '../../3-adapter/interface/itoken'
+import type { IToken } from '../../adapter/interface/itoken'
 
 export class Jwt implements IToken {
   /**

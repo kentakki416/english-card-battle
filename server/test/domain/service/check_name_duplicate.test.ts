@@ -1,20 +1,41 @@
-import { describe } from 'node:test'
-import  { IUserRepository } from '../../../src/3-adapter/interface/repository/iuser_repository'
-import { UserDomainService } from '../../../src/1-domain/service/user/check_name_duplicate'
+import { UserDomainService } from '../../../src/domain/service/user/check_name_duplicate'
+import { createMockUserRepository, createMockUser } from '../../utils/test-helper'
 
-describe(__filename, () => {
-  let userRepo: jest.Mocked<Pick<IUserRepository, 'findOne'>>
+describe('UserDomainService', () => {
+  let userRepo: ReturnType<typeof createMockUserRepository>
   let userDomainService: UserDomainService
 
   beforeEach(() => {
-    userRepo = {
-      findOne: jest.fn(),
-    }
-    userDomainService = new UserDomainService(userRepo as unknown as IUserRepository)
+    userRepo = createMockUserRepository()
+    userDomainService = new UserDomainService(userRepo)
   })
-  describe('【正常系】', () => {
-    test('ユーザー名が重複していない場合,trueが買える', async () => {
 
+  describe('【正常系】', () => {
+    test('ユーザー名が重複していない場合、trueが返る', async () => {
+      // Arrange
+      userRepo.findOne.mockResolvedValue(null)
+
+      // Act
+      const result = await userDomainService.checkNameDuplicate('testuser')
+
+      // Assert
+      expect(result).toBe(true)
+      expect(userRepo.findOne).toHaveBeenCalledWith({ name: 'testuser' })
+    })
+  })
+
+  describe('【異常系】', () => {
+    test('ユーザー名が重複している場合、falseが返る', async () => {
+      // Arrange
+      const existingUser = createMockUser('1', 'testuser')
+      userRepo.findOne.mockResolvedValue(existingUser)
+
+      // Act
+      const result = await userDomainService.checkNameDuplicate('testuser')
+
+      // Assert
+      expect(result).toBe(false)
+      expect(userRepo.findOne).toHaveBeenCalledWith({ name: 'testuser' })
     })
   })
 })
