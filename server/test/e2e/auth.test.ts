@@ -40,7 +40,7 @@ describe('Auth E2E Tests', () => {
       expect(response.status).toBe(CONSTANT.STATUS_CODE.SUCCESS)
       
       if ('data' in response) {
-        const data = response.data as any
+        const data = response.data as { id: string; name: string; gender: string; profilePic: string }
         expect(data.name).toBe('e2euser')
         expect(data.gender).toBe('female')
         expect(data.profilePic).toContain('e2euser')

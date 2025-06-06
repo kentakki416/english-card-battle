@@ -21,12 +21,12 @@ describe('SignupController', () => {
   beforeEach(() => {
     mockSignupUsecase = {
       exucute: jest.fn(),
-    } as any
+    } as unknown as jest.Mocked<SignupUsecase>
 
     mockSerializer = {
       execute: jest.fn(),
       error: jest.fn(),
-    } as any
+    } as unknown as jest.Mocked<SignupSerializer>
 
     logger = createMockLogger()
     controller = new SignupController(mockSignupUsecase, mockSerializer, logger)

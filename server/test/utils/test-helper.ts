@@ -6,6 +6,8 @@ import { User } from '../../src/domain/entity/user'
 
 // テスト用のモックユーザーデータ
 export const createMockUser = (_id = '1', name = 'testuser'): User => {
+  // _idは将来のID機能拡張のため保持
+  void _id
   return new User(name, 'hashedpassword', 'male', 'http://example.com/profile.jpg')
 }
 

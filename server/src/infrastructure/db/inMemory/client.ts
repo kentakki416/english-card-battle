@@ -28,6 +28,8 @@ export class InMemoryClient implements IDbClient {
    * dev環境ではDBを使わないためnullを返す
    */
   public getDb(_dbName: string): Db | null {
+    // _dbNameは意図的に未使用（インターフェース実装のため）
+    void _dbName
     return null
   }
 } 

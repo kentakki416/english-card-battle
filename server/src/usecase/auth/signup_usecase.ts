@@ -17,6 +17,8 @@ export class SignupUsecase {
   }
 
   public async exucute(body: Controller.SignupRequest, _apiToken: string): Promise<User> {
+    // _apiTokenは現在未使用だが将来の拡張のため保持
+    void _apiToken
     try {
       // ハッシュ化前のパスワードのチェック
       if (!userBisinessRule.checkPasswordLength(body.password)) {
