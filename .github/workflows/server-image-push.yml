@@ -23,7 +23,6 @@ permissions:
 
 env:
   AWS_REGION: ap-northeast-1
-  ECR_REPOSITORY: english-card-battle-server
 
 jobs:
   build-and-push:
@@ -47,7 +46,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: 🏷️ イメージタグを生成
+      - name: 🏷️ イメージタグとリポジトリ名を生成
         id: image-tag
         run: |
           ENVIRONMENT=${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prd' || 'dev') }}
@@ -62,15 +61,20 @@ jobs:
             BRANCH_NAME="${BRANCH_NAME:0:20}"
           fi
           
+          # ECRリポジトリ名を環境別に生成
+          ECR_REPO_NAME="english-card-battle-server-${ENVIRONMENT}"
+          
           echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
           echo "branch_name=${BRANCH_NAME}" >> $GITHUB_OUTPUT
           echo "image_tag=${ENVIRONMENT}-${BRANCH_NAME}-${TIMESTAMP}" >> $GITHUB_OUTPUT
           echo "latest_tag=${ENVIRONMENT}-latest" >> $GITHUB_OUTPUT
+          echo "ecr_repository=${ECR_REPO_NAME}" >> $GITHUB_OUTPUT
 
       - name: 🐳 Dockerイメージをビルド・プッシュ
         working-directory: server
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ steps.image-tag.outputs.ecr_repository }}
           IMAGE_TAG: ${{ steps.image-tag.outputs.image_tag }}
           LATEST_TAG: ${{ steps.image-tag.outputs.latest_tag }}
         run: |
@@ -88,9 +92,9 @@ jobs:
       - name: ✅ プッシュ完了
         run: |
           echo "✅ Docker イメージが正常にプッシュされました"
-          echo "🐳 Repository: ${{ env.ECR_REPOSITORY }}"
+          echo "🐳 Repository: ${{ steps.image-tag.outputs.ecr_repository }}"
           echo "🌿 Branch: ${{ steps.image-tag.outputs.branch_name }}"
           echo "🏷️ Tag: ${{ steps.image-tag.outputs.image_tag }}"
           echo "🏷️ Latest Tag: ${{ steps.image-tag.outputs.latest_tag }}"
           echo "📍 Registry: ${{ steps.login-ecr.outputs.registry }}"
-          echo "🔗 Full URI: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.image-tag.outputs.image_tag }}" 
+          echo "🔗 Full URI: ${{ steps.login-ecr.outputs.registry }}/${{ steps.image-tag.outputs.ecr_repository }}:${{ steps.image-tag.outputs.image_tag }}" 
