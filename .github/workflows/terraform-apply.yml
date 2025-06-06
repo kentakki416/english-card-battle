@@ -161,59 +161,107 @@ jobs:
           echo "📊 Total resources managed: $RESOURCE_COUNT"
           echo "RESOURCE_COUNT=$RESOURCE_COUNT" >> $GITHUB_ENV
 
+      - name: 📊 Plan Summary
+        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
+        run: |
+          echo "📊 Extracting plan changes..."
+          
+          # terraform showの出力をパースして動的にリソース変更を抽出
+          PLAN_OUTPUT=$(terraform show apply.tfplan 2>/dev/null || echo "")
+          
+          # 各操作タイプのリソースを抽出
+          RESOURCES_TO_CREATE=$(echo "$PLAN_OUTPUT" | grep "^  # .* will be created$" | sed 's/^  # \(.*\) will be created$/\1/' || true)
+          RESOURCES_TO_UPDATE=$(echo "$PLAN_OUTPUT" | grep "^  # .* will be updated in-place$" | sed 's/^  # \(.*\) will be updated in-place$/\1/' || true)
+          RESOURCES_TO_DESTROY=$(echo "$PLAN_OUTPUT" | grep "^  # .* will be destroyed$" | sed 's/^  # \(.*\) will be destroyed$/\1/' || true)
+          RESOURCES_TO_REPLACE=$(echo "$PLAN_OUTPUT" | grep "^  # .* must be replaced$" | sed 's/^  # \(.*\) must be replaced$/\1/' || true)
+          
+          # カウント
+          CREATE_COUNT=$(echo "$RESOURCES_TO_CREATE" | grep -c . || echo "0")
+          UPDATE_COUNT=$(echo "$RESOURCES_TO_UPDATE" | grep -c . || echo "0")
+          DESTROY_COUNT=$(echo "$RESOURCES_TO_DESTROY" | grep -c . || echo "0")
+          REPLACE_COUNT=$(echo "$RESOURCES_TO_REPLACE" | grep -c . || echo "0")
+          
+          # 環境変数とファイルに保存
+          echo "CREATE_COUNT=$CREATE_COUNT" >> $GITHUB_ENV
+          echo "UPDATE_COUNT=$UPDATE_COUNT" >> $GITHUB_ENV  
+          echo "DESTROY_COUNT=$DESTROY_COUNT" >> $GITHUB_ENV
+          echo "REPLACE_COUNT=$REPLACE_COUNT" >> $GITHUB_ENV
+          
+          echo "$RESOURCES_TO_CREATE" > /tmp/resources_create.txt
+          echo "$RESOURCES_TO_UPDATE" > /tmp/resources_update.txt
+          echo "$RESOURCES_TO_DESTROY" > /tmp/resources_destroy.txt
+          echo "$RESOURCES_TO_REPLACE" > /tmp/resources_replace.txt
+          
+          echo "📊 Plan analysis completed: +$CREATE_COUNT ~$UPDATE_COUNT -$DESTROY_COUNT ↻$REPLACE_COUNT"
+
       - name: 📊 Summary
         run: |
-          echo "## 🚀 Terraform Apply Results" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚀 Terraform Plan Summary (${{ github.event.inputs.environment }})" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          # 安全性チェックの警告がある場合は最初に表示
-          if [[ "${{ env.SAFETY_WARNINGS_COUNT }}" != "" && "${{ env.SAFETY_WARNINGS_COUNT }}" != "0" ]]; then
-            echo "### ⚠️ 安全性チェック警告" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**${{ env.SAFETY_WARNINGS_COUNT }}件の警告が検出されました:**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            
-            if [[ "${{ env.DESTROY_DETECTED }}" == "true" ]]; then
-              echo "🗑️ **リソース削除操作**: 既存のリソースが削除されます" >> $GITHUB_STEP_SUMMARY
-              echo "   - 意図的な削除の場合は問題ありません" >> $GITHUB_STEP_SUMMARY
-              echo "   - 予期しない削除の場合は設定を確認してください" >> $GITHUB_STEP_SUMMARY
-              echo "" >> $GITHUB_STEP_SUMMARY
+          # プラン変更サマリー
+          echo "### 📋 Plan Changes" >> $GITHUB_STEP_SUMMARY
+          echo "| Operation | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| ➕ Create | ${{ env.CREATE_COUNT }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔄 Update | ${{ env.UPDATE_COUNT }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🗑️ Destroy | ${{ env.DESTROY_COUNT }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔁 Replace | ${{ env.REPLACE_COUNT }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # 作成されるリソース
+          if [[ "${{ env.CREATE_COUNT }}" != "0" ]]; then
+            echo "### ➕ Resources to Create" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            cat /tmp/resources_create.txt 2>/dev/null | head -10 >> $GITHUB_STEP_SUMMARY || echo "No resources to create" >> $GITHUB_STEP_SUMMARY
+            if [[ "${{ env.CREATE_COUNT }}" -gt 10 ]]; then
+              echo "... and $(($(echo "${{ env.CREATE_COUNT }}" | sed 's/[^0-9]//g') - 10)) more" >> $GITHUB_STEP_SUMMARY
             fi
-            
-            if [[ "${{ env.SENSITIVE_DETECTED }}" == "true" ]]; then
-              echo "🔐 **機密情報露出**: パスワードやAPIキーが平文で表示されています" >> $GITHUB_STEP_SUMMARY
-              echo "   - Terraformで \`sensitive = true\` を設定してください" >> $GITHUB_STEP_SUMMARY
-              echo "   - 機密情報がログに記録される可能性があります" >> $GITHUB_STEP_SUMMARY
-              echo "" >> $GITHUB_STEP_SUMMARY
-            fi
-            
-            echo "---" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
           fi
           
-          echo "| Item | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 🌍 Environment | \`${{ github.event.inputs.environment }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔄 Mode | \`${{ github.event.inputs.dry_run == 'true' && 'Dry Run' || 'Execute' }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📊 Resources | \`${{ env.RESOURCE_COUNT || 'N/A' }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| ⚠️ Warnings | \`${{ env.SAFETY_WARNINGS_COUNT || '0' }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| 👤 By | @${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🕐 Time | $(date -u '+%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
-            echo "### 📋 Dry run completed - plan generated" >> $GITHUB_STEP_SUMMARY
-            if [[ "${{ env.SAFETY_WARNINGS_COUNT }}" != "" && "${{ env.SAFETY_WARNINGS_COUNT }}" != "0" ]]; then
-              echo "⚠️ **警告を確認してから実行してください** - dry_run=falseで再実行" >> $GITHUB_STEP_SUMMARY
-            else
-              echo "✅ 問題なし - dry_run=falseで実行可能です" >> $GITHUB_STEP_SUMMARY
+          # 更新されるリソース
+          if [[ "${{ env.UPDATE_COUNT }}" != "0" ]]; then
+            echo "### 🔄 Resources to Update" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            cat /tmp/resources_update.txt 2>/dev/null | head -10 >> $GITHUB_STEP_SUMMARY || echo "No resources to update" >> $GITHUB_STEP_SUMMARY
+            if [[ "${{ env.UPDATE_COUNT }}" -gt 10 ]]; then
+              echo "... and $(($(echo "${{ env.UPDATE_COUNT }}" | sed 's/[^0-9]//g') - 10)) more" >> $GITHUB_STEP_SUMMARY
             fi
-          else
-            echo "### ✅ Apply completed successfully" >> $GITHUB_STEP_SUMMARY
-            echo "🎉 Infrastructure has been deployed to ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Next Steps:**" >> $GITHUB_STEP_SUMMARY
-            echo "- Check AWS Console for deployed resources" >> $GITHUB_STEP_SUMMARY
-            echo "- Verify application functionality" >> $GITHUB_STEP_SUMMARY
-            echo "- Monitor CloudWatch for any issues" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # 削除されるリソース
+          if [[ "${{ env.DESTROY_COUNT }}" != "0" ]]; then
+            echo "### 🗑️ Resources to Destroy" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            cat /tmp/resources_destroy.txt 2>/dev/null | head -10 >> $GITHUB_STEP_SUMMARY || echo "No resources to destroy" >> $GITHUB_STEP_SUMMARY
+            if [[ "${{ env.DESTROY_COUNT }}" -gt 10 ]]; then
+              echo "... and $(($(echo "${{ env.DESTROY_COUNT }}" | sed 's/[^0-9]//g') - 10)) more" >> $GITHUB_STEP_SUMMARY
+            fi
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # 置換されるリソース
+          if [[ "${{ env.REPLACE_COUNT }}" != "0" ]]; then
+            echo "### 🔁 Resources to Replace" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            cat /tmp/resources_replace.txt 2>/dev/null | head -10 >> $GITHUB_STEP_SUMMARY || echo "No resources to replace" >> $GITHUB_STEP_SUMMARY
+            if [[ "${{ env.REPLACE_COUNT }}" -gt 10 ]]; then
+              echo "... and $(($(echo "${{ env.REPLACE_COUNT }}" | sed 's/[^0-9]//g') - 10)) more" >> $GITHUB_STEP_SUMMARY
+            fi
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # 実行ステータス
+          if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
+            echo "### 📋 Dry Run Completed" >> $GITHUB_STEP_SUMMARY
+            echo "✅ プランが正常に生成されました。実行するには \`dry_run=false\` で再実行してください。" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ✅ Apply Completed Successfully" >> $GITHUB_STEP_SUMMARY
+            echo "🎉 インフラストラクチャが正常にデプロイされました。" >> $GITHUB_STEP_SUMMARY
           fi 

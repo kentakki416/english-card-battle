@@ -167,50 +167,84 @@ jobs:
             echo "DESTROY_STATUS=partial" >> $GITHUB_ENV
           fi
 
-      - name: 📊 Summary
+      - name: 📊 Plan Analysis
+        if: env.RESOURCE_COUNT != '0'
+        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
         run: |
-          echo "## 💥 Terraform Destroy Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📊 Analyzing destroy plan..."
           
-          # 重要リソースの警告がある場合は最初に表示
-          if [[ "${{ env.CRITICAL_WARNINGS_COUNT }}" != "" && "${{ env.CRITICAL_WARNINGS_COUNT }}" != "0" ]]; then
-            echo "### ⚠️ 重要リソース削除警告" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**重要なインフラストラクチャコンポーネントが削除されます:**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "🚨 **${{ env.RESOURCE_COUNT }}個のリソースが永続的に削除されます**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "💡 **削除対象の詳細確認:**" >> $GITHUB_STEP_SUMMARY
-            echo "- Terraformプラン出力で具体的なリソースを確認してください" >> $GITHUB_STEP_SUMMARY
-            echo "- データベース、ストレージ、ネットワークリソースが含まれる可能性があります" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "⚠️ **データ損失やサービス停止の可能性があります**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "---" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
+          # terraform showの出力をパースして削除対象リソースを抽出
+          PLAN_OUTPUT=$(terraform show destroy.tfplan 2>/dev/null || echo "")
+          
+          # 削除されるリソース名を抽出
+          RESOURCES_TO_DESTROY=$(echo "$PLAN_OUTPUT" | grep "^  # .* will be destroyed$" | sed 's/^  # \(.*\) will be destroyed$/\1/' || true)
+          DESTROY_COUNT=$(echo "$RESOURCES_TO_DESTROY" | grep -c . || echo "0")
+          
+          echo "DESTROY_COUNT=$DESTROY_COUNT" >> $GITHUB_ENV
+          
+          # 全リソースを保存（カテゴリ分けなし、完全動的）
+          echo "$RESOURCES_TO_DESTROY" > /tmp/all_resources.txt
+          
+          # リソースタイプを自動抽出してカウント（完全動的）
+          if [[ -n "$RESOURCES_TO_DESTROY" ]]; then
+            echo "$RESOURCES_TO_DESTROY" | sed 's/\[.*\]//' | cut -d'.' -f1 | sort | uniq -c | sort -nr > /tmp/resource_types.txt
+            
+            echo "📊 Resource types to be destroyed:"
+            cat /tmp/resource_types.txt | while read count type; do
+              echo "  - $type: $count resources"
+            done
           fi
           
-          echo "| Item | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 🌍 Environment | \`${{ github.event.inputs.environment }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔄 Mode | \`${{ github.event.inputs.dry_run == 'true' && 'Dry Run' || 'Execute' }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📊 Resources | \`${{ env.RESOURCE_COUNT }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| ⚠️ Critical Warnings | \`${{ env.CRITICAL_WARNINGS_COUNT || '0' }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| 👤 By | @${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🕐 Time | $(date -u '+%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
+          echo "📊 Destroy plan analysis completed: $DESTROY_COUNT total resources"
+
+      - name: 📊 Summary
+        run: |
+          echo "## 💥 Terraform Destroy Plan (${{ github.event.inputs.environment }})" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
           if [[ "${{ env.RESOURCE_COUNT }}" == "0" ]]; then
-            echo "### ℹ️ No resources found to destroy" >> $GITHUB_STEP_SUMMARY
-          elif [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
-            echo "### 📋 Dry run completed - plan generated" >> $GITHUB_STEP_SUMMARY
-            if [[ "${{ env.CRITICAL_WARNINGS_COUNT }}" != "" && "${{ env.CRITICAL_WARNINGS_COUNT }}" != "0" ]]; then
-              echo "⚠️ **重要リソースの削除を確認してから実行してください** - dry_run=falseで再実行" >> $GITHUB_STEP_SUMMARY
-            else
-              echo "✅ 重要リソースの削除なし - dry_run=falseで実行可能です" >> $GITHUB_STEP_SUMMARY
+            echo "### ℹ️ No Resources to Destroy" >> $GITHUB_STEP_SUMMARY
+            echo "現在のステートにはリソースが存在しません。" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### 🗑️ Destroy Summary" >> $GITHUB_STEP_SUMMARY
+            echo "**${{ env.DESTROY_COUNT }}個のリソースが削除されます**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            # リソースタイプ別の統計を動的表示
+            if [[ -s /tmp/resource_types.txt ]]; then
+              echo "#### 📊 Resource Types" >> $GITHUB_STEP_SUMMARY
+              echo "| Resource Type | Count |" >> $GITHUB_STEP_SUMMARY
+              echo "|---------------|-------|" >> $GITHUB_STEP_SUMMARY
+              cat /tmp/resource_types.txt | while read count type; do
+                echo "| \`$type\` | $count |" >> $GITHUB_STEP_SUMMARY
+              done
+              echo "" >> $GITHUB_STEP_SUMMARY
             fi
+            
+            # 削除対象リソース一覧（最大10件まで表示）
+            echo "#### 🗑️ Resources to be Destroyed" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            if [[ -s /tmp/all_resources.txt ]]; then
+              head -10 /tmp/all_resources.txt >> $GITHUB_STEP_SUMMARY
+              TOTAL_RESOURCES=$(cat /tmp/all_resources.txt | wc -l)
+              if [[ $TOTAL_RESOURCES -gt 10 ]]; then
+                echo "... and $((TOTAL_RESOURCES - 10)) more resources" >> $GITHUB_STEP_SUMMARY
+              fi
+            else
+              echo "No resources found" >> $GITHUB_STEP_SUMMARY
+            fi
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # 実行ステータス
+          if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
+            echo "### 📋 Dry Run Completed" >> $GITHUB_STEP_SUMMARY
+            echo "✅ 削除プランが生成されました。実行するには \`dry_run=false\` で再実行してください。" >> $GITHUB_STEP_SUMMARY
           elif [[ "${{ env.DESTROY_STATUS }}" == "success" ]]; then
-            echo "### ✅ Destroy completed successfully" >> $GITHUB_STEP_SUMMARY
+            echo "### ✅ Destroy Completed Successfully" >> $GITHUB_STEP_SUMMARY
+            echo "💥 すべてのリソースが正常に削除されました。" >> $GITHUB_STEP_SUMMARY
           elif [[ "${{ env.DESTROY_STATUS }}" == "partial" ]]; then
-            echo "### ⚠️ Partial destroy - some resources remain" >> $GITHUB_STEP_SUMMARY
+            echo "### ⚠️ Partial Destroy" >> $GITHUB_STEP_SUMMARY
+            echo "一部のリソースが残っています。手動での確認が必要です。" >> $GITHUB_STEP_SUMMARY
           fi 
