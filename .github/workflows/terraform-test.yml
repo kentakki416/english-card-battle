@@ -113,12 +113,6 @@ jobs:
           output_format: sarif
           output_file_path: checkov-results.sarif
 
-      - name: 📊 Upload Security Results
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: checkov-results.sarif
-
   # ========================================
   # 🧪 Go Tests
   # ========================================
@@ -246,13 +240,6 @@ jobs:
               echo "EOF"
             } >> $GITHUB_OUTPUT
           fi
-
-      - name: 📤 Upload Plan Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: terraform-plan-${{ matrix.environment }}
-          path: infra/aws/env/${{ matrix.environment }}/tfplan.out
-          retention-days: 7
 
   # ========================================
   # 💰 Cost Estimation (Optional)

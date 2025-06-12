@@ -94,11 +94,13 @@ module "vpc" {
   route_tables = {
     # パブリックサブネット1をIGW用ルートテーブルに関連付け
     public-1-rt = {
+      global_type    = "public"
       subnet_id      = module.vpc.subnets["public-1"].id
       route_table_id = module.vpc.igw_route_table_id
     }
     # パブリックサブネット2をIGW用ルートテーブルに関連付け
     public-2-rt = {
+      global_type    = "public"
       subnet_id      = module.vpc.subnets["public-2"].id
       route_table_id = module.vpc.igw_route_table_id
     }
