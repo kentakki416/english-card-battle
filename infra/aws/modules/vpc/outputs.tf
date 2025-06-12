@@ -3,6 +3,11 @@ output "vpc_id" {
   description = "VPC ID"
 }
 
+output "igw_route_table_id" {
+  value       = var.create_internet_gateway ? aws_route_table.route_table_igw[0].id : null
+  description = "Internet Gateway Route Table ID"
+}
+
 output "security_group_ids" {
   value = {
     for sg_name, sg in aws_security_group.security_groups : sg_name => sg.id

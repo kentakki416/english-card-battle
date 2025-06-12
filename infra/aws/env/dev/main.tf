@@ -57,7 +57,7 @@ module "vpc" {
   cidr_block              = local.vpc_cidr # 10.0.0.0/16 (65,536個のIPアドレス)
   enable_dns_support      = true           # Route53プライベートホストゾーン用
   enable_dns_hostnames    = true           # EC2インスタンスのDNS名自動割り当て
-  create_internet_gateway = true           # インターネット接続用
+  create_internet_gateway = true           # インターネットゲートウェイを構築
 
   # === サブネット設定 ===
   # 高可用性のため2つのAZに分散配置
@@ -91,7 +91,18 @@ module "vpc" {
 
   # === ルートテーブル設定 ===
   # トラフィックの経路を制御
-  route_tables = {}
+  route_tables = {
+    # パブリックサブネット1をIGW用ルートテーブルに関連付け
+    public-1-rt = {
+      subnet_id      = module.vpc.subnets["public-1"].id
+      route_table_id = module.vpc.igw_route_table_id
+    }
+    # パブリックサブネット2をIGW用ルートテーブルに関連付け
+    public-2-rt = {
+      subnet_id      = module.vpc.subnets["public-2"].id
+      route_table_id = module.vpc.igw_route_table_id
+    }
+  }
 
   # === セキュリティグループ定義 ===
   security_groups = {
