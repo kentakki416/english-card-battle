@@ -122,28 +122,29 @@ module "vpc" {
 # ALBモジュール呼び出し
 # - インターネットからの通信を受けてECSに振り分け
 # - SSL終端、ヘルスチェック、トラフィック分散を担当
-module "alb" {
-  source = "../../modules/alb"
+# ✍️　dev環境ではルーティングは必要ないのでALBは不要
+# module "alb" {
+#   source = "../../modules/alb"
 
-  # === 基本設定 ===
-  name            = "${local.name_prefix}-alb"
-  vpc_id          = module.vpc.vpc_id                         # VPCモジュールで作成されたVPC
-  security_groups = [module.vpc.security_groups["ecs_sg"].id] # ECS用セキュリティグループ
-  subnets = [
-    module.vpc.subnets["public-1"].id # パブリックサブネット1
-  ]
+#   # === 基本設定 ===
+#   name            = "${local.name_prefix}-alb"
+#   vpc_id          = module.vpc.vpc_id                         # VPCモジュールで作成されたVPC
+#   security_groups = [module.vpc.security_groups["ecs_sg"].id] # ECS用セキュリティグループ
+#   subnets = [
+#     module.vpc.subnets["public-1"].id # パブリックサブネット1
+#   ]
 
-  # === ターゲットグループ設定 ===
-  target_group_port = local.app_port # アプリケーションのリスニングポート (3000)
-  listener_port     = "80"           # ALBのリスニングポート (HTTP)
+#   # === ターゲットグループ設定 ===
+#   target_group_port = local.app_port # アプリケーションのリスニングポート (3000)
+#   listener_port     = "80"           # ALBのリスニングポート (HTTP)
 
-  # === タグ設定 ===
-  tags = {
-    Name        = "${local.name_prefix}-alb"
-    Component   = "LoadBalancer"
-    Environment = local.environment
-  }
-}
+#   # === タグ設定 ===
+#   tags = {
+#     Name        = "${local.name_prefix}-alb"
+#     Component   = "LoadBalancer"
+#     Environment = local.environment
+#   }
+# }
 
 # =============================================================================
 # コンテナ実行環境設定 (ECS Fargate)
@@ -179,7 +180,7 @@ module "ecs" {
   }
 
   # === ロードバランサー連携 ===
-  target_group_arn = module.alb.target_group_arn # ALBのターゲットグループ
+  # target_group_arn = module.alb.target_group_arn # ALBのターゲットグループ
 
   # === ログ設定 ===
   log_retention_in_days = 3 # dev環境なので短期保存

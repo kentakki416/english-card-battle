@@ -205,6 +205,7 @@ variable "network_configuration" {
 variable "target_group_arn" {
   description = "Target group ARN for load balancer"
   type        = string
+  default     = null
 }
 
 variable "log_retention_in_days" {
