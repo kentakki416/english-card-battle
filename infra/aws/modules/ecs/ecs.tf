@@ -74,10 +74,13 @@ resource "aws_ecs_service" "main" {
   }
 
   # ロードバランサー連携設定
-  load_balancer {
-    target_group_arn = var.target_group_arn
-    container_name   = var.container_name
-    container_port   = var.container_port
+  dynamic "load_balancer" {
+    for_each = var.target_group_arn != "" ? [1] : []
+    content {
+      target_group_arn = var.target_group_arn
+      container_name   = var.container_name
+      container_port   = var.container_port
+    }
   }
 
   # サービス作成前にIAMロールが準備されるのを待機
