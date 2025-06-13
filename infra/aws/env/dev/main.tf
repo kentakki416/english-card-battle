@@ -38,8 +38,8 @@ module "ecr" {
   environment  = local.environment  # dev
 
   # === イメージ保持設定 ===
-  image_retention_count         = 10 # 最新10個のイメージを保持
-  untagged_image_retention_days = 1  # タグなしイメージは1日で削除
+  image_retention_count         = 5 # 最新5個のイメージを保持
+  untagged_image_retention_days = 1 # タグなしイメージは1日で削除
 }
 
 # =============================================================================
@@ -47,8 +47,8 @@ module "ecr" {
 # =============================================================================
 
 # VPCモジュール呼び出し
-# - 開発環境用のプライベートネットワークを構築
-# - パブリック/プライベートサブネットを2つのAZに分散配置
+# - 開発環境用のシンプルなネットワークを構築
+# - パブリックサブネットのみを使用
 module "vpc" {
   source = "../../modules/vpc"
 
@@ -60,48 +60,23 @@ module "vpc" {
   create_internet_gateway = true           # インターネットゲートウェイを構築
 
   # === サブネット設定 ===
-  # 高可用性のため2つのAZに分散配置
+  # 開発環境では1つのAZのみ使用
   subnets = {
-    # --- パブリックサブネット (ALB配置用) ---
-    # インターネットからの通信を受ける
+    # --- パブリックサブネット (ALBとECS配置用) ---
     public-1 = {
       cidr_block        = "10.0.1.0/24" # 256個のIPアドレス (ap-northeast-1a)
       availability_zone = "ap-northeast-1a"
       subnet_type       = "public" # Internet Gateway経由でインターネット接続
-    }
-    public-2 = {
-      cidr_block        = "10.0.2.0/24" # 256個のIPアドレス (ap-northeast-1c)
-      availability_zone = "ap-northeast-1c"
-      subnet_type       = "public"
-    }
-
-    # --- プライベートサブネット (ECS配置用) ---
-    # セキュリティを重視し、直接インターネット接続なし
-    private-1 = {
-      cidr_block        = "10.0.11.0/24" # 256個のIPアドレス (ap-northeast-1a)
-      availability_zone = "ap-northeast-1a"
-      subnet_type       = "private" # NAT Gateway経由でアウトバウンド通信のみ
-    }
-    private-2 = {
-      cidr_block        = "10.0.12.0/24" # 256個のIPアドレス (ap-northeast-1c)
-      availability_zone = "ap-northeast-1c"
-      subnet_type       = "private"
     }
   }
 
   # === ルートテーブル設定 ===
   # トラフィックの経路を制御
   route_tables = {
-    # パブリックサブネット1をIGW用ルートテーブルに関連付け
+    # パブリックサブネットをIGW用ルートテーブルに関連付け
     public-1-rt = {
       global_type    = "public"
       subnet_id      = module.vpc.subnets["public-1"].id
-      route_table_id = module.vpc.igw_route_table_id
-    }
-    # パブリックサブネット2をIGW用ルートテーブルに関連付け
-    public-2-rt = {
-      global_type    = "public"
-      subnet_id      = module.vpc.subnets["public-2"].id
       route_table_id = module.vpc.igw_route_table_id
     }
   }
@@ -111,56 +86,22 @@ module "vpc" {
     # ECSタスク用セキュリティグループ
     ecs_sg = {
       name        = "${local.name_prefix}-ecs-sg"
-      description = "Security group for ECS tasks - Allow access from ALB only"
-    }
-    # ALB用セキュリティグループ  
-    alb_sg = {
-      name        = "${local.name_prefix}-alb-sg"
-      description = "Security group for ALB - Allow HTTP/HTTPS from internet"
+      description = "Security group for ECS tasks"
     }
   }
 
   # === セキュリティグループルール ===
   # 最小権限の原則に基づく通信制御
   security_group_rules = [
-    # --- ALB用ルール ---
-    {
-      security_group_name = "alb_sg"
-      type                = "ingress"
-      from_port           = 80
-      to_port             = 80
-      protocol            = "tcp"
-      cidr_blocks         = ["0.0.0.0/0"] # 全インターネットからHTTP受信
-      description         = "HTTP access from internet"
-    },
-    {
-      security_group_name = "alb_sg"
-      type                = "ingress"
-      from_port           = 443
-      to_port             = 443
-      protocol            = "tcp"
-      cidr_blocks         = ["0.0.0.0/0"] # 全インターネットからHTTPS受信
-      description         = "HTTPS access from internet"
-    },
-    {
-      security_group_name = "alb_sg"
-      type                = "egress"
-      from_port           = 0
-      to_port             = 0
-      protocol            = "-1"          # 全プロトコル
-      cidr_blocks         = ["0.0.0.0/0"] # 全送信先へのアウトバウンド許可
-      description         = "All outbound traffic"
-    },
-
     # --- ECS用ルール ---
     {
-      security_group_name        = "ecs_sg"
-      type                       = "ingress"
-      from_port                  = local.app_port # アプリケーションポート (3000)
-      to_port                    = local.app_port
-      protocol                   = "tcp"
-      source_security_group_name = "alb_sg" # ALBからのみアクセス許可
-      description                = "Application port from ALB only"
+      security_group_name = "ecs_sg"
+      type                = "ingress"
+      from_port           = local.app_port # アプリケーションポート (3000)
+      to_port             = local.app_port
+      protocol            = "tcp"
+      cidr_blocks         = ["0.0.0.0/0"] # 全インターネットからアクセス
+      description         = "Application port access"
     },
     {
       security_group_name = "ecs_sg"
@@ -168,8 +109,8 @@ module "vpc" {
       from_port           = 0
       to_port             = 0
       protocol            = "-1"
-      cidr_blocks         = ["0.0.0.0/0"] # 外部API呼び出し等のため
-      description         = "All outbound traffic for external API calls"
+      cidr_blocks         = ["0.0.0.0/0"] # 全送信先へのアウトバウンド許可
+      description         = "All outbound traffic"
     }
   ]
 }
@@ -187,10 +128,9 @@ module "alb" {
   # === 基本設定 ===
   name            = "${local.name_prefix}-alb"
   vpc_id          = module.vpc.vpc_id                         # VPCモジュールで作成されたVPC
-  security_groups = [module.vpc.security_groups["alb_sg"].id] # ALB用セキュリティグループ
+  security_groups = [module.vpc.security_groups["ecs_sg"].id] # ECS用セキュリティグループ
   subnets = [
-    module.vpc.subnets["public-1"].id, # パブリックサブネット1
-    module.vpc.subnets["public-2"].id  # パブリックサブネット2
+    module.vpc.subnets["public-1"].id # パブリックサブネット1
   ]
 
   # === ターゲットグループ設定 ===
@@ -232,18 +172,17 @@ module "ecs" {
   # === ネットワーク設定 ===
   network_configuration = {
     subnets = [
-      module.vpc.subnets["private-1"].id, # プライベートサブネット1
-      module.vpc.subnets["private-2"].id  # プライベートサブネット2
+      module.vpc.subnets["public-1"].id # パブリックサブネット1
     ]
     security_groups  = [module.vpc.security_groups["ecs_sg"].id] # ECS用セキュリティグループ
-    assign_public_ip = false                                     # パブリックIP不要 (プライベートサブネット)
+    assign_public_ip = true                                      # パブリックIPを割り当て
   }
 
   # === ロードバランサー連携 ===
   target_group_arn = module.alb.target_group_arn # ALBのターゲットグループ
 
   # === ログ設定 ===
-  log_retention_in_days = 7 # dev環境なので短期保存
+  log_retention_in_days = 3 # dev環境なので短期保存
 
   # === タグ設定 ===
   tags = {
