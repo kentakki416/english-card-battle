@@ -60,24 +60,34 @@ module "vpc" {
   create_internet_gateway = true           # インターネットゲートウェイを構築
 
   # === サブネット設定 ===
-  # 開発環境では1つのAZのみ使用
   subnets = {
-    # --- パブリックサブネット (ALBとECS配置用) ---
+    # --- パブリックサブネット (ALB配置用) ---
     public-1 = {
       cidr_block        = "10.0.1.0/24" # 256個のIPアドレス (ap-northeast-1a)
       availability_zone = "ap-northeast-1a"
       subnet_type       = "public" # Internet Gateway経由でインターネット接続
     }
+    # --- プライベートサブネット (ECS配置用) ---
+    private-1 = {
+      cidr_block        = "10.0.2.0/24" # 256個のIPアドレス (ap-northeast-1a)
+      availability_zone = "ap-northeast-1a"
+      subnet_type       = "private" # NAT Gateway経由でインターネット接続
+    }
   }
 
   # === ルートテーブル設定 ===
-  # トラフィックの経路を制御
   route_tables = {
     # パブリックサブネットをIGW用ルートテーブルに関連付け
     public-1-rt = {
       global_type    = "public"
       subnet_id      = module.vpc.subnets["public-1"].id
       route_table_id = module.vpc.igw_route_table_id
+    }
+    # プライベートサブネットをNAT Gateway用ルートテーブルに関連付け
+    private-1-rt = {
+      global_type    = "private"
+      subnet_id      = module.vpc.subnets["private-1"].id
+      route_table_id = module.vpc.nat_route_table_id
     }
   }
 
@@ -122,29 +132,28 @@ module "vpc" {
 # ALBモジュール呼び出し
 # - インターネットからの通信を受けてECSに振り分け
 # - SSL終端、ヘルスチェック、トラフィック分散を担当
-# ✍️　dev環境ではルーティングは必要ないのでALBは不要
-# module "alb" {
-#   source = "../../modules/alb"
+module "alb" {
+  source = "../../modules/alb"
 
-#   # === 基本設定 ===
-#   name            = "${local.name_prefix}-alb"
-#   vpc_id          = module.vpc.vpc_id                         # VPCモジュールで作成されたVPC
-#   security_groups = [module.vpc.security_groups["ecs_sg"].id] # ECS用セキュリティグループ
-#   subnets = [
-#     module.vpc.subnets["public-1"].id # パブリックサブネット1
-#   ]
+  # === 基本設定 ===
+  name            = "${local.name_prefix}-alb"
+  vpc_id          = module.vpc.vpc_id                         # VPCモジュールで作成されたVPC
+  security_groups = [module.vpc.security_groups["ecs_sg"].id] # ECS用セキュリティグループ
+  subnets = [
+    module.vpc.subnets["public-1"].id # パブリックサブネット1
+  ]
 
-#   # === ターゲットグループ設定 ===
-#   target_group_port = local.app_port # アプリケーションのリスニングポート (3000)
-#   listener_port     = "80"           # ALBのリスニングポート (HTTP)
+  # === ターゲットグループ設定 ===
+  target_group_port = local.app_port # アプリケーションのリスニングポート
+  listener_port     = "80"           # ALBのリスニングポート (HTTP)
 
-#   # === タグ設定 ===
-#   tags = {
-#     Name        = "${local.name_prefix}-alb"
-#     Component   = "LoadBalancer"
-#     Environment = local.environment
-#   }
-# }
+  # === タグ設定 ===
+  tags = {
+    Name        = "${local.name_prefix}-alb"
+    Component   = "LoadBalancer"
+    Environment = local.environment
+  }
+}
 
 # =============================================================================
 # コンテナ実行環境設定 (ECS Fargate)
@@ -173,14 +182,14 @@ module "ecs" {
   # === ネットワーク設定 ===
   network_configuration = {
     subnets = [
-      module.vpc.subnets["public-1"].id # パブリックサブネット1
+      module.vpc.subnets["private-1"].id # プライベートサブネット1
     ]
     security_groups  = [module.vpc.security_groups["ecs_sg"].id] # ECS用セキュリティグループ
-    assign_public_ip = true                                      # パブリックIPを割り当て
+    assign_public_ip = false                                     # プライベートサブネットなのでfalse
   }
 
   # === ロードバランサー連携 ===
-  # target_group_arn = module.alb.target_group_arn # ALBのターゲットグループ
+  target_group_arn = module.alb.target_group_arn # ALBのターゲットグループ
 
   # === ログ設定 ===
   log_retention_in_days = 3 # dev環境なので短期保存
