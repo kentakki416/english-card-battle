@@ -90,3 +90,15 @@ variable "security_group_rules" {
   default     = []
   description = "security group ruleを定義"
 }
+
+variable "create_nat_gateway" {
+  description = "Whether to create NAT Gateway"
+  type        = bool
+  default     = false
+}
+
+variable "nat_gateway_subnet_id" {
+  description = "Subnet ID where NAT Gateway will be created"
+  type        = string
+  default     = null
+}

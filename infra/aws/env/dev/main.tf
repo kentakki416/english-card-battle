@@ -48,7 +48,7 @@ module "ecr" {
 
 # VPCモジュール呼び出し
 # - 開発環境用のシンプルなネットワークを構築
-# - パブリックサブネットのみを使用
+# - パブリックサブネットとプライベートサブネットを使用
 module "vpc" {
   source = "../../modules/vpc"
 
@@ -58,6 +58,7 @@ module "vpc" {
   enable_dns_support      = true           # Route53プライベートホストゾーン用
   enable_dns_hostnames    = true           # EC2インスタンスのDNS名自動割り当て
   create_internet_gateway = true           # インターネットゲートウェイを構築
+  create_nat_gateway      = true           # NATゲートウェイを構築
 
   # === サブネット設定 ===
   subnets = {
@@ -107,7 +108,7 @@ module "vpc" {
     {
       security_group_name = "ecs_sg"
       type                = "ingress"
-      from_port           = local.app_port # アプリケーションポート (3000)
+      from_port           = local.app_port # アプリケーションポート (80)
       to_port             = local.app_port
       protocol            = "tcp"
       cidr_blocks         = ["0.0.0.0/0"] # 全インターネットからアクセス
@@ -123,6 +124,9 @@ module "vpc" {
       description         = "All outbound traffic"
     }
   ]
+
+  # === NAT Gateway設定 ===
+  nat_gateway_subnet_id = module.vpc.subnets["public-1"].id # パブリックサブネットにNAT Gatewayを配置
 }
 
 # =============================================================================
@@ -177,7 +181,7 @@ module "ecs" {
   # === コンテナ設定 ===
   container_name  = "${local.name_prefix}-app" # コンテナ名
   container_image = local.container_image      # コンテナイメージ (nginx:latest)
-  container_port  = local.app_port             # コンテナ内ポート (3000)
+  container_port  = local.app_port             # コンテナ内ポート (80)
 
   # === ネットワーク設定 ===
   network_configuration = {
