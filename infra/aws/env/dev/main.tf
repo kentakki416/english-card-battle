@@ -75,12 +75,12 @@ module "vpc" {
     }
     # --- プライベートサブネット (ECS配置用) ---
     private-1 = {
-      cidr_block        = "10.0.3.0/24" # 256個のIPアドレス (ap-northeast-1a)
+      cidr_block        = "10.0.11.0/24" # 256個のIPアドレス (ap-northeast-1a)
       availability_zone = "ap-northeast-1a"
       subnet_type       = "private" # NAT Gateway経由でインターネット接続
     }
     private-2 = {
-      cidr_block        = "10.0.4.0/24" # 256個のIPアドレス (ap-northeast-1c)
+      cidr_block        = "10.0.12.0/24" # 256個のIPアドレス (ap-northeast-1c)
       availability_zone = "ap-northeast-1c"
       subnet_type       = "private" # NAT Gateway経由でインターネット接続
     }
