@@ -68,10 +68,20 @@ module "vpc" {
       availability_zone = "ap-northeast-1a"
       subnet_type       = "public" # Internet Gateway経由でインターネット接続
     }
+    public-2 = {
+      cidr_block        = "10.0.2.0/24" # 256個のIPアドレス (ap-northeast-1c)
+      availability_zone = "ap-northeast-1c"
+      subnet_type       = "public" # Internet Gateway経由でインターネット接続
+    }
     # --- プライベートサブネット (ECS配置用) ---
     private-1 = {
-      cidr_block        = "10.0.2.0/24" # 256個のIPアドレス (ap-northeast-1a)
+      cidr_block        = "10.0.3.0/24" # 256個のIPアドレス (ap-northeast-1a)
       availability_zone = "ap-northeast-1a"
+      subnet_type       = "private" # NAT Gateway経由でインターネット接続
+    }
+    private-2 = {
+      cidr_block        = "10.0.4.0/24" # 256個のIPアドレス (ap-northeast-1c)
+      availability_zone = "ap-northeast-1c"
       subnet_type       = "private" # NAT Gateway経由でインターネット接続
     }
   }
@@ -84,10 +94,20 @@ module "vpc" {
       subnet_id      = module.vpc.subnets["public-1"].id
       route_table_id = module.vpc.igw_route_table_id
     }
+    public-2-rt = {
+      global_type    = "public"
+      subnet_id      = module.vpc.subnets["public-2"].id
+      route_table_id = module.vpc.igw_route_table_id
+    }
     # プライベートサブネットをNAT Gateway用ルートテーブルに関連付け
     private-1-rt = {
       global_type    = "private"
       subnet_id      = module.vpc.subnets["private-1"].id
+      route_table_id = module.vpc.nat_route_table_id
+    }
+    private-2-rt = {
+      global_type    = "private"
+      subnet_id      = module.vpc.subnets["private-2"].id
       route_table_id = module.vpc.nat_route_table_id
     }
   }
@@ -144,7 +164,8 @@ module "alb" {
   vpc_id          = module.vpc.vpc_id                         # VPCモジュールで作成されたVPC
   security_groups = [module.vpc.security_groups["ecs_sg"].id] # ECS用セキュリティグループ
   subnets = [
-    module.vpc.subnets["public-1"].id # パブリックサブネット1
+    module.vpc.subnets["public-1"].id, # パブリックサブネット1
+    module.vpc.subnets["public-2"].id  # パブリックサブネット2
   ]
 
   # === ターゲットグループ設定 ===
@@ -186,7 +207,8 @@ module "ecs" {
   # === ネットワーク設定 ===
   network_configuration = {
     subnets = [
-      module.vpc.subnets["private-1"].id # プライベートサブネット1
+      module.vpc.subnets["private-1"].id, # プライベートサブネット1
+      module.vpc.subnets["private-2"].id  # プライベートサブネット2
     ]
     security_groups  = [module.vpc.security_groups["ecs_sg"].id] # ECS用セキュリティグループ
     assign_public_ip = false                                     # プライベートサブネットなのでfalse
