@@ -1,326 +1,265 @@
-
-
-<a id="readme-top"></a>
-
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![Unlicense License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
-
-
+# English Card Battle
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a>
-
-  <h3 align="center">English-Card-Battle</h3>
+  <h3 align="center">English Card Battle</h3>
 
   <p align="center">
-    This project is an app for engineers to enjoy learning English.
+    エンジニアが楽しみながら英語を学べるカードバトルアプリケーション
     <br />
-    <a href="https://github.com/othneildrew/Best-README-Template"><strong>Explore the docs »</strong></a>
+    <a href="#about-the-project"><strong>詳細を見る »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/othneildrew/Best-README-Template">View Demo</a>
+    <a href="#report-bug">バグ報告</a>
     ·
-    <a href="https://github.com/othneildrew/Best-README-Template/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
-    ·
-    <a href="https://github.com/othneildrew/Best-README-Template/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    <a href="#request-feature">機能リクエスト</a>
   </p>
 </div>
 
-
-
 <!-- TABLE OF CONTENTS -->
 <details>
-  <summary>Table of Contents</summary>
+  <summary>目次</summary>
   <ol>
     <li>
-      <a href="#about-the-project">About The Project</a>
+      <a href="#about-the-project">プロジェクトについて</a>
       <ul>
-        <li><a href="#built-with">Built With</a></li>
+        <li><a href="#features">主な機能</a></li>
+        <li><a href="#architecture">アーキテクチャ</a></li>
       </ul>
     </li>
     <li>
-      <a href="#getting-started">Getting Started</a>
+      <a href="#tech-stack">技術スタック</a>
       <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
+        <li><a href="#frontend">フロントエンド</a></li>
+        <li><a href="#backend">バックエンド</a></li>
+        <li><a href="#infrastructure">インフラストラクチャ</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
+    <li><a href="#project-structure">プロジェクト構成</a></li>
+    <li><a href="#getting-started">セットアップ</a></li>
+    <li><a href="#development">開発</a></li>
+    <li><a href="#license">ライセンス</a></li>
   </ol>
 </details>
 
-
-
 <!-- ABOUT THE PROJECT -->
-## About The Project
+## プロジェクトについて
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+English Card Battleは、エンジニアが楽しみながら英語を学べるカードバトルアプリケーションです。リアルタイムバトルとソロ学習の両方に対応し、効率的な英語学習をサポートします。
 
-English Card Battle is an exciting and engaging application designed specifically for engineers who want to improve their English skills. This app combines the thrill of real-time battles with the convenience of solo practice sessions to create a comprehensive learning experience.
+### 主な機能
 
-Here's why this project stands out:
-* **Engaging Battles**: Compete with other users in real-time to test and enhance your English proficiency.
-* **Solo Learning**: Improve your skills at your own pace with dedicated solo practice sessions.
-* **Modern Technologies**: Built using the latest front-end and back-end technologies to provide a smooth and efficient user experience.
+- **リアルタイムバトル**: 他のユーザーとリアルタイムで対戦し、英語力を競い合う
+- **ソロ学習**: 自分のペースで英語学習を進められる
+- **カードシステム**: 動物のカードを使用した楽しい学習体験
+- **認証システム**: 安全なユーザー管理とセッション管理
 
-This application is designed to make learning English fun and effective for engineers. Whether you're competing in real-time battles or practicing on your own, English Card Battle offers a dynamic and interactive way to boost your language skills.
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+### アーキテクチャ
 
+このプロジェクトは**クリーンアーキテクチャ**と**ドメイン駆動設計**の原則に基づいて構築されています：
 
+- **ドメイン層**: ビジネスロジックとエンティティ
+- **ユースケース層**: アプリケーションのビジネスルール
+- **アダプター層**: 外部システムとのインターフェース
+- **インフラストラクチャ層**: データベース、外部API、フレームワーク
 
-## Built With
-<div style="display: flex; justify-content: space-around;">
-  <div style="flex: 1; padding: 10px;">
-    <h3>Frontend</h3>
-    <ul>
-      <li><img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" /></li>
-      <li><img src="https://img.shields.io/badge/Javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="Javascript" /></li>
-      <li><img src="https://img.shields.io/badge/Typescript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="Typescript" /></li>
-      <li><img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" /></li>
-      <li><img src="https://img.shields.io/badge/TailwindCSS-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="TailwindCSS" /></li>
-    </ul>
-  </div>
-  <div style="flex: 1; padding: 10px;">
-    <h3>Backend</h3>
-    <ul>
-      <li><img src="https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js" /></li>
-      <li><img src="https://img.shields.io/badge/Javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="Javascript" /></li>
-      <li><img src="https://img.shields.io/badge/Typescript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="Typescript" /></li>
-      <li><img src="https://img.shields.io/badge/Socket.io-010101?style=for-the-badge&logo=socket.io&logoColor=white" alt="Socket.io" /></li>
-      <li><img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jwt&logoColor=white" alt="JWT" /></li>
-    </ul>
-  </div>
-   <div style="flex: 1; padding: 10px;">
-    <h3>Infra</h3>
-    <ul>
-      <li><img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" /></li>
-      <li><img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" /></li>
-      <li><img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis" /></li>
-      <li><img src="https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white"/></li>
-      <li><img src="https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white"</li>
-      <li><img src="https://img.shields.io/badge/-terraform-20232A?style=for-the-badge&logo=terraform&logoColor=844EBA"></li>
-    </ul>
-  </div>
+<p align="right">(<a href="#readme-top">トップに戻る</a>)</p>
+
+## 技術スタック
+
+### フロントエンド
+
+<div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0;">
+  <img src="https://img.shields.io/badge/Next.js-14-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js 14" />
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
+  <img src="https://img.shields.io/badge/shadcn/ui-000000?style=for-the-badge&logo=shadcnui&logoColor=white" alt="shadcn/ui" />
 </div>
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+- **Next.js 14**: App Routerを使用した最新のReactフレームワーク
+- **TypeScript**: 型安全性を確保した開発
+- **Tailwind CSS**: 効率的なスタイリング
+- **shadcn/ui**: 再利用可能なUIコンポーネント
 
-<!-- ## Build With Frontend
-* [![React][React.js]][React-url]
-* [![Javascript][Javascript]][Javascript-url]
-* [![Typescript][Typescript]][Typescript-url]
-* [![Vite][Vite]][Vite-url]
-* [![Tailwindcss][Tailwindcss]][Tailwindcss-url]
+### バックエンド
 
+<div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0;">
+  <img src="https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js" />
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express.js" />
+  <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" />
+  <img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=json-web-tokens&logoColor=white" alt="JWT" />
+</div>
 
-### Built With Backend
+- **Node.js**: サーバーサイドJavaScriptランタイム
+- **Express.js**: Webアプリケーションフレームワーク
+- **MongoDB**: NoSQLデータベース
+- **JWT**: 認証トークン管理
+- **クリーンアーキテクチャ**: 保守性とテスタビリティを重視した設計
 
-* [![Node][Node.js]][Node.js-url]
-* [![Javascript][Javascript]][Javascript-url]
-* [![Typescript][Typescript]][Typescript-url]
-* [![Socket.io][Socket.io]][Socket.io-url]
-* [![JWT][JWT]][JWT-url]
+### インフラストラクチャ
 
-### Build with Infra
-* [![Docker][Docker]][Docker-url]
-* [![Mongo][Mongo]][Mongo-url]
-* [![Redis][Redis]][Redis-url]
-* [![GithubActions][GithubActions]][GithubActions-url]
-* [![Terraform][Terraform]][Terraform-url]
-* [![AWS][AWS]][AWS-url]
+<div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0;">
+  <img src="https://img.shields.io/badge/AWS-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white" alt="AWS" />
+  <img src="https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white" alt="Terraform" />
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
+  <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white" alt="GitHub Actions" />
+</div>
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p> -->
+- **AWS ECS**: コンテナオーケストレーション
+- **AWS ALB**: ロードバランサー
+- **AWS VPC**: ネットワーク分離
+- **Terraform**: インフラストラクチャのコード化
+- **Docker**: コンテナ化
+- **GitHub Actions**: CI/CDパイプライン
 
+<p align="right">(<a href="#readme-top">トップに戻る</a>)</p>
 
-<!-- GETTING STARTED -->
-## Getting Started
+## プロジェクト構成
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+```
+english-card-battle/
+├── client/                 # フロントエンド (Next.js)
+│   ├── app/               # App Router
+│   ├── components/        # UIコンポーネント
+│   ├── lib/              # ユーティリティ
+│   └── public/           # 静的ファイル
+├── server/               # バックエンド (Node.js)
+│   ├── src/
+│   │   ├── adapter/      # アダプター層
+│   │   ├── domain/       # ドメイン層
+│   │   ├── usecase/      # ユースケース層
+│   │   └── infrastructure/ # インフラ層
+│   └── test/             # テストファイル
+└── infra/               # インフラストラクチャ
+    ├── aws/             # AWS Terraform設定
+    └── cdk/             # AWS CDK設定
+```
 
-### Prerequisites
+### アーキテクチャ詳細
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+#### フロントエンド構成
+- **App Router**: Next.js 14の新しいルーティングシステム
+- **shadcn/ui**: 統一されたUIコンポーネント
+- **Tailwind CSS**: ユーティリティファーストCSS
 
-### Installation
+#### バックエンド構成
+- **クリーンアーキテクチャ**: 依存関係の方向を制御
+- **ドメイン駆動設計**: ビジネスロジックの明確な分離
+- **依存性注入**: テスタビリティの向上
 
-_Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
+#### インフラ構成
+- **Terraform**: インフラのコード化とバージョン管理
+- **ECS Fargate**: サーバーレスコンテナ実行環境
+- **ALB**: 高可用性ロードバランシング
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
-   ```sh
-   git clone https://github.com/github_username/repo_name.git
+<p align="right">(<a href="#readme-top">トップに戻る</a>)</p>
+
+## セットアップ
+
+### 前提条件
+
+- Node.js 18以上
+- npm または yarn
+- Docker
+- MongoDB（ローカル開発用）
+
+### インストール手順
+
+1. リポジトリのクローン
+   ```bash
+   git clone https://github.com/your-username/english-card-battle.git
+   cd english-card-battle
    ```
-3. Install NPM packages
-   ```sh
+
+2. フロントエンドのセットアップ
+   ```bash
+   cd client
    npm install
    ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
-5. Change git remote url to avoid accidental pushes to base project
-   ```sh
-   git remote set-url origin github_username/repo_name
-   git remote -v # confirm the changes
+
+3. バックエンドのセットアップ
+   ```bash
+   cd ../server
+   npm install
    ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+4. 環境変数の設定
+   ```bash
+   # client/.env.local
+   NEXT_PUBLIC_API_URL=http://localhost:3001
+   
+   # server/.env
+   MONGODB_URI=mongodb://localhost:27017/english-card-battle
+   JWT_SECRET=your-secret-key
+   PORT=3001
+   ```
 
+### 開発サーバーの起動
 
+```bash
+# フロントエンド（ポート3000）
+cd client
+npm run dev
 
-<!-- USAGE EXAMPLES -->
-## Usage
+# バックエンド（ポート3001）
+cd server
+npm run dev
+```
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+<p align="right">(<a href="#readme-top">トップに戻る</a>)</p>
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+## 開発
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+### テスト実行
 
+```bash
+# フロントエンドテスト
+cd client
+npm test
 
+# バックエンドテスト
+cd server
+npm test
+```
 
-<!-- ROADMAP
-## Roadmap
+### コード品質
 
-- [x] Add Changelog
-- [x] Add back to top links
-- [ ] Add Additional Templates w/ Examples
-- [ ] Add "components" document to easily copy & paste sections of the readme
-- [ ] Multi-language Support
-    - [ ] Chinese
-    - [ ] Spanish
+```bash
+# ESLint
+npm run lint
 
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
+# TypeScript型チェック
+npm run type-check
+```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p> -->
+### デプロイ
 
+```bash
+# インフラのデプロイ
+cd infra/aws
+terraform init
+terraform plan
+terraform apply
+```
 
+<p align="right">(<a href="#readme-top">トップに戻る</a>)</p>
 
-<!-- CONTRIBUTING -->
-<!-- ## Contributing
+## ライセンス
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+このプロジェクトは [Unlicense License](LICENSE) の下で公開されています。
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-### Top contributors:
-
-<a href="https://github.com/othneildrew/Best-README-Template/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=othneildrew/Best-README-Template" alt="contrib.rocks image" />
-</a>
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p> -->
-
-
-
-<!-- LICENSE -->
-## License
-
-Distributed under the Unlicense License. See `LICENSE.txt` for more information.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- CONTACT -->
-## Contact
-
-Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
-
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- ACKNOWLEDGMENTS
-## Acknowledgments
-
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
-
-* [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-* [Malven's Flexbox Cheatsheet](https://flexbox.malven.co/)
-* [Malven's Grid Cheatsheet](https://grid.malven.co/)
-* [Img Shields](https://shields.io)
-* [GitHub Pages](https://pages.github.com)
-* [Font Awesome](https://fontawesome.com)
-* [React Icons](https://react-icons.github.io/react-icons/search)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p> -->
-
-
+<p align="right">(<a href="#readme-top">トップに戻る</a>)</p>
 
 <!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
-[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
-[forks-url]: https://github.com/othneildrew/Best-README-Template/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
-[license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/othneildrew
-[product-screenshot]: images/screenshot.png
-<!-- frontend -->
-[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
-[React-url]: https://reactjs.org/
-[Tailwindcss]: https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white
-[Tailwindcss-url]: https://tailwindcss.com
-[Vite]: https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white
-[Vite-url]: https://ja.vite.dev/
-[Typescript]: https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white
-[Typescript-url]: https://www.typescriptlang.org/
-[Javascript]: https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E
-[Javascript-url]: https://developer.mozilla.org/ja/docs/Web/JavaScript
-<!-- backend -->
-[Node.js]: https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white
-[Node.js-url]: https://nodejs.org/en
-[Socket.io]: https://img.shields.io/badge/Socket.io-black?style=for-the-badge&logo=socket.io&badgeColor=010101
-[Socket.io-url]: https://socket.io/
-[JWT]: https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens
-[JWT-url]: https://jwt.io/
-
-<!-- infra-->
-[Docker]: https://img.shields.io/badge/-Docker-1488C6.svg?logo=docker&style=for-the-badge
-[Docker-url]: https://www.docker.com/ja-jp/
-[GithubActions]: https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white
-[GIthubActions-url]: https://docs.github.com/ja/actions
-[AWS]: https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white
-[AWS-url]: https://aws.amazon.com/jp/free/?sc_channel=ps
-[Terraform]: https://img.shields.io/badge/-terraform-20232A?style=for-the-badge&logo=terraform&logoColor=844EBA
-[Terraform-url]: https://www.terraform.io/
-[Mongo]: https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white
-[Mongo-url]: https://www.mongodb.com/ja-jp
-[Redis]: https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white
-[Redis-url]: https://redis.io/docs/latest/
-er
+[contributors-shield]: https://img.shields.io/github/contributors/your-username/english-card-battle.svg?style=for-the-badge
+[contributors-url]: https://github.com/your-username/english-card-battle/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/your-username/english-card-battle.svg?style=for-the-badge
+[forks-url]: https://github.com/your-username/english-card-battle/network/members
+[stars-shield]: https://img.shields.io/github/stars/your-username/english-card-battle.svg?style=for-the-badge
+[stars-url]: https://github.com/your-username/english-card-battle/stargazers
+[issues-shield]: https://img.shields.io/github/issues/your-username/english-card-battle.svg?style=for-the-badge
+[issues-url]: https://github.com/your-username/english-card-battle/issues
+[license-shield]: https://img.shields.io/github/license/your-username/english-card-battle.svg?style=for-the-badge
+[license-url]: https://github.com/your-username/english-card-battle/blob/main/LICENSE
