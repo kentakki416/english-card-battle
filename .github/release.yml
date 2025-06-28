@@ -1,0 +1,22 @@
+changelog:
+  categories:
+    - title: '✨ Enhancement' # 機能改善
+      labels:
+      - enhancement # Enhancementに掲載するラベル
+    - title: '⚒️ Bug Fix' # バグ修正
+      labels:
+       - bug-fix
+    - title: '🔄 Refactor' # リファクタリング
+      labels:
+       - refactor
+    - title: '🚀 New Feature' # 新機能
+      labels:
+       - new-feature
+    # - title: '🧨 Breaking Changes' # リファクタリング
+    #   labels:
+    #    - refactor
+    exclude:
+      labels: # 除外するラベル
+        - dependencies
+      authors:
+        - dependabot
