@@ -288,7 +288,7 @@ jobs:
         run: infracost breakdown --path=tfplan.json --format=json --out-file=infracost-${{ matrix.environment }}.json
 
       - name: 💬 Comment Cost on PR
-        uses: infracost/actions/comment@v1
+        uses: infracost/actions/comment@v3
         with:
           path: infra/aws/env/${{ matrix.environment }}/infracost-${{ matrix.environment }}.json
           behavior: update
