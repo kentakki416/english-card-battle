@@ -1,4 +1,4 @@
-name: Auto Merge
+name: ♻️ Auto Merge
 on: pull_request
 
 jobs:
@@ -11,14 +11,53 @@ jobs:
     env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
-      - id: meta # 依存関係のメタデータを取得
-        uses: dependabot/fetch-metadata@v2 # 条件分岐でパッチバージョンかチェック
-        # パッチバージョン、開発環境の依存関係（npmのみ）、github actionsの依存関係は自動マージの対象
-      - if: >- 
-          ${{ steps.meta.outputs.update-type == 'version-update:semver-patch' ||
-          steps.meta.outputs.dependency-type == 'direct:development' && steps.meta.outputs.update-type != 'version-update:semver-major' ||
-          steps.meta.outputs.package-ecosystem == 'github_actions' && steps.meta.outputs.update-type != 'version-update:semver-major' }}
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        
+      - name: 🔍 Fetch Dependabot Metadata
+        id: meta
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: 📋 Log Update Information
         run: |
+          echo "🔍 Update Type: ${{ steps.meta.outputs.update-type }}"
+          echo "📦 Package Ecosystem: ${{ steps.meta.outputs.package-ecosystem }}"
+          echo "🔗 Dependency Type: ${{ steps.meta.outputs.dependency-type }}"
+      
+      # dependabotが作成するPRのうち、パッチアップデート、開発依存パッケージ、GitHub Actionsのパッチアップデートの場合は自動マージ
+      - name: ✅ Auto Merge
+        if: >-
+          ${{ steps.meta.outputs.update-type == 'version-update:semver-patch' ||
+          (steps.meta.outputs.dependency-type == 'direct:development' && steps.meta.outputs.update-type != 'version-update:semver-major') ||
+          (steps.meta.outputs.package-ecosystem == 'github_actions' && steps.meta.outputs.update-type != 'version-update:semver-major') }}
+        run: |
+          echo "🚀 Starting auto merge process..."
+          
+          # プルリクエストを承認
+          echo "✅ Approving pull request..."
           gh pr review "${GITHUB_HEAD_REF}" --approve
+          
+          # 自動マージを実行
+          echo "🔄 Merging pull request..."
           gh pr merge "${GITHUB_HEAD_REF}" --merge --auto
+          
+          echo "🎉 Auto merge completed successfully!"
+          
+      - name: ⏭️ Skip Major Updates
+        if: >-
+          ${{ steps.meta.outputs.update-type == 'version-update:semver-major'}}
+        run: |
+          echo "⚠️ Skipping major version update for security reasons"
+          echo "🔗 Please review manually: ${{ github.event.pull_request.html_url }}"
+          
+      - name: ⏭️ Skip Other Updates
+        if: >-
+          ${{ steps.meta.outputs.update-type != 'version-update:semver-patch' &&
+          !(steps.meta.outputs.dependency-type == 'direct:development' && steps.meta.outputs.update-type != 'version-update:semver-major') &&
+          !(steps.meta.outputs.package-ecosystem == 'github_actions' && steps.meta.outputs.update-type != 'version-update:semver-major') }}
+        run: |
+          echo "⏭️ Skipping update - not eligible for auto merge"
+          echo "🔍 Update Type: ${{ steps.meta.outputs.update-type }}"
+          echo "🔗 Please review manually: ${{ github.event.pull_request.html_url }}"
