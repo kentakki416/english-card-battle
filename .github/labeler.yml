@@ -1,0 +1,29 @@
+# ディレクトリ別ラベリング
+admin:
+  - changed-files:
+    - any-glob-to-any-file: 'admin/**'
+
+client:
+  - changed-files:
+    - any-glob-to-any-file: 'client/**'
+
+infra:
+  - changed-files:
+    - any-glob-to-any-file: 'infra/**'
+
+server:
+  - changed-files:
+    - any-glob-to-any-file: 'server/**'
+
+# ブランチ名別ラベリング
+feature:
+  - head-branch: ['^feat']
+
+enhancement:
+  - head-branch: ['^enh']
+
+bug:
+  - head-branch: ['^fix']
+
+refactor:
+  - head-branch: ['^refactor'] 
