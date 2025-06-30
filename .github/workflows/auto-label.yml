@@ -4,7 +4,8 @@ on:
 jobs:
   label:
     permissions:
-      contents: read
+      contents: write
+      issues: write
       pull-requests: write
     runs-on: ubuntu-latest
     timeout-minutes: 5
