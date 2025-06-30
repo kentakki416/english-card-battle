@@ -3,14 +3,14 @@ name: 🏷️ Auto Label PR
 on: pull_request_target
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
   auto-label:
     runs-on: ubuntu-latest
     steps:
-      - name: 📥 Checkout testt
+      - name: 📥 Checkout
         uses: actions/checkout@v4
 
       - name: 🏷️ Labeling PR
