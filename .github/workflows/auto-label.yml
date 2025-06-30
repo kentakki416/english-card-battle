@@ -10,5 +10,11 @@ jobs:
   auto-label:
     runs-on: ubuntu-latest
     steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
       - name: 🏷️ Labeling PR
         uses: actions/labeler@v5
+        with:
+          sync-labels: true
+          configuration-path: ${{ github.action_path }}/labeler.yml
