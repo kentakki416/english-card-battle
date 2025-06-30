@@ -31,3 +31,6 @@ bug:
 
 refactor:
   - head-branch: ['^refactor'] 
+
+docs:
+  - head-branch: ['^docs']
