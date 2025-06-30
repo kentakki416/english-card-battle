@@ -1,17 +1,14 @@
-name: 🏷️ Auto Label PR
-
-on: pull_request_target
-
-permissions:
-  contents: write
-  pull-requests: write
-
+name: 'PR Labeler'
+on:
+  - pull_request_target
 jobs:
-  auto-label:
+  label:
+    permissions:
+      contents: read
+      pull-requests: write
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - name: 📥 Checkout test
-        uses: actions/checkout@v4
-
-      - name: 🏷️ Labeling PR
-        uses: actions/labeler@v5
+      - uses: actions/labeler@v5
+        with:
+          configuration-path: .github/configs/labeler.yml
