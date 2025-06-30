@@ -1,0 +1,14 @@
+name: 🏷️ Auto Label PR
+
+on: pull_request
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  auto-label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🏷️ Labeling PR
+        uses: actions/labeler@v5
