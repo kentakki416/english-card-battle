@@ -15,6 +15,10 @@ server:
   - changed-files:
     - any-glob-to-any-file: 'server/**'
 
+github-actions:
+  - changed-files:
+    - any-glob-to-any-file: '.github/**'
+
 # ブランチ名別ラベリング
 feature:
   - head-branch: ['^feat']
