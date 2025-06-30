@@ -10,7 +10,7 @@ jobs:
   auto-label:
     runs-on: ubuntu-latest
     steps:
-      - name: 📥 Checkout testt
+      - name: 📥 Checkout
         uses: actions/checkout@v4
 
       - name: 🏷️ Labeling PR
