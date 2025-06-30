@@ -1,0 +1,20 @@
+name: OpenID Connect Test
+on: push
+env:
+  ROLE_ARN: arn:aws:iam::${{ secrets.AWS_ID }}:role/${{ secrets.AWS_ROLE_NAME }}
+  SESSION_NAME: gh-oidc-${{ github.run_id}}-${{ github.run_attempt }}
+
+permissions:
+  id-token: write
+
+jobs:
+  connect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.ROLE_ARN }}
+          role-session-name: ${{ env.SESSION_NAME }}
+          aws-region: ap-northeast-1
+      - run: aws iam list-users # 一時クレデンシャルの利用
+      - run: aws iam create-user --user-name invalid || true
