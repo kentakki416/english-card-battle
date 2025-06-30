@@ -15,7 +15,7 @@ server:
   - changed-files:
     - any-glob-to-any-file: 'server/**'
 
-github-actions:
+github_actions:
   - changed-files:
     - any-glob-to-any-file: '.github/**'
 

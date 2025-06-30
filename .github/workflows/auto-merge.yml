@@ -21,7 +21,7 @@ jobs:
         id: meta
         uses: dependabot/fetch-metadata@v2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ env.GITHUB_TOKEN }}
           
       - name: 📋 Log Update Information
         run: |
