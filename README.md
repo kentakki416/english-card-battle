@@ -65,6 +65,50 @@ English Card Battleは、エンジニアが楽しみながら英語を学べる�
 
 <p align="right">(<a href="#readme-top">トップに戻る</a>)</p>
 
+## 開発ルール
+
+### ブランチ命名規則
+
+このプロジェクトでは、**Conventional Commits**に基づいたブランチ命名規則を採用しています。ブランチ名のプレフィックスにより、GitHub Actionsが自動的にラベルを付与します。
+
+#### ブランチ名の形式
+```
+<type>/<description>
+```
+
+#### プレフィックスの種類
+
+| プレフィックス | 説明 | 自動付与ラベル |
+|---------------|------|---------------|
+| `feat/` | 新機能の追加 | `feature` |
+| `fix/` | バグ修正 | `bug` |
+| `enh/` | 機能の改善・強化 | `enhancement` |
+| `refactor/` | リファクタリング | `refactor` |
+| `docs/` | ドキュメントの更新 | `docs` |
+| `ci/` | CIの更新 | `ci` |
+
+#### 例
+```bash
+# 新機能の追加
+git checkout -b feat/user-authentication
+
+# バグ修正
+git checkout -b fix/login-error
+
+# 機能の改善
+git checkout -b enh/performance-optimization
+
+# リファクタリング
+git checkout -b refactor/clean-architecture
+
+# ドキュメント更新
+git checkout -b docs/api-documentation
+```
+
+### 自動ラベリング
+
+詳しくは.github/labeler.ymlを参照してください
+
 ## 技術スタック
 
 ### フロントエンド
