@@ -69,7 +69,8 @@ English Card Battleは、エンジニアが楽しみながら英語を学べる�
 
 ### ブランチ命名規則
 
-このプロジェクトでは、**Conventional Commits**に基づいたブランチ命名規則を採用しています。ブランチ名のプレフィックスにより、GitHub Actionsが自動的にラベルを付与します。
+このプロジェクトでは、ブランチ名のプレフィックスにより、GitHub Actionsが自動的にラベルを付与します。
+詳しくはlabeler.ymlを参照してください。
 
 #### ブランチ名の形式
 ```
@@ -104,10 +105,6 @@ git checkout -b refactor/clean-architecture
 # ドキュメント更新
 git checkout -b docs/api-documentation
 ```
-
-### 自動ラベリング
-
-詳しくは.github/labeler.ymlを参照してください
 
 ## 技術スタック
 
