@@ -34,3 +34,6 @@ refactor:
 
 docs:
   - head-branch: ['^docs']
+
+ci:
+  - head-branch: ['^ci']
