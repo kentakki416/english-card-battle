@@ -161,7 +161,7 @@ git checkout -b docs/api-documentation
 
 ```
 english-card-battle/
-├── client/                 # フロントエンド (Next.js)
+├── web/                 # フロントエンド (Next.js)
 │   ├── app/               # App Router
 │   ├── components/        # UIコンポーネント
 │   ├── lib/              # ユーティリティ
@@ -216,7 +216,7 @@ english-card-battle/
 
 2. フロントエンドのセットアップ
    ```bash
-   cd client
+   cd web
    npm install
    ```
 
@@ -228,7 +228,7 @@ english-card-battle/
 
 4. 環境変数の設定
    ```bash
-   # client/.env.local
+   # web/.env.local
    NEXT_PUBLIC_API_URL=http://localhost:3001
    
    # server/.env
@@ -241,7 +241,7 @@ english-card-battle/
 
 ```bash
 # フロントエンド（ポート3000）
-cd client
+cd web
 npm run dev
 
 # バックエンド（ポート3001）
@@ -257,7 +257,7 @@ npm run dev
 
 ```bash
 # フロントエンドテスト
-cd client
+cd web
 npm test
 
 # バックエンドテスト
