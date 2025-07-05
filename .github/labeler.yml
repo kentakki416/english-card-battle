@@ -3,9 +3,9 @@ admin:
   - changed-files:
     - any-glob-to-any-file: 'admin/**'
 
-client:
+web:
   - changed-files:
-    - any-glob-to-any-file: 'client/**'
+    - any-glob-to-any-file: 'web/**'
 
 infra:
   - changed-files:
