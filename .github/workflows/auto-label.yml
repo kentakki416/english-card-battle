@@ -8,7 +8,10 @@ permissions:
   pull-requests: write
 
 jobs:
-  label:
+  # ========================================
+  # ブランチとファイル差分を参考にラベル付け
+  # ========================================
+  auto-label:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
