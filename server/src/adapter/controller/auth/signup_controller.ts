@@ -16,7 +16,6 @@ export class SignupController {
 
   public async execute(body: Controller.SignupRequest, apiToken: string) {
     try {
-      console.log(apiToken)
       const user = await this._signupUsecase.exucute(body, apiToken)
       return this._serializer.execute(user, apiToken)
     } catch(error) {
