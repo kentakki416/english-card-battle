@@ -5,7 +5,7 @@
 web/
 ├── app/                    # Next.js App Router（ページ・API）
 │   ├── (auth)/            # 認証関連ページ（グループ化）
-│   ├── api/               # API Routes
+│   ├── api/               # API Routes(サーバーサイドのAPI呼び出し)
 │   ├── globals.css        # グローバルスタイル（必須）
 │   ├── layout.tsx         # ルートレイアウト（必須）
 │   ├── page.tsx           # ホームページ
