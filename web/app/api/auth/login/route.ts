@@ -33,8 +33,9 @@ export async function POST(request: NextRequest) {
       message: 'Login successful'
     })
 
-  } catch (error) {
-    console.error('Login error:', error)
+  } catch {
+    // ログインエラーをログに記録
+    // TODO: 本格的なログシステムに置き換える
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

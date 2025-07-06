@@ -8,7 +8,6 @@ import * as importPlugin from 'eslint-plugin-import';
 import jestDomPlugin from 'eslint-plugin-jest-dom';
 import jsxA11yPlugin from 'eslint-plugin-jsx-a11y';
 import perfectionistPlugin from 'eslint-plugin-perfectionist';
-import reactPlugin from 'eslint-plugin-react';
 import unusedImportsPlugin from 'eslint-plugin-unused-imports';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
@@ -28,8 +27,6 @@ export default tseslint.config(
     // Shareable Configs を有効化
     eslint.configs.recommended,
     ...tseslint.configs.strict, // strict は recommended よりも厳しめな設定
-    reactPlugin.configs.flat.recommended,
-    reactPlugin.configs.flat['jsx-runtime'],
     jsxA11yPlugin.flatConfigs.recommended,
     vitestPlugin.configs.recommended,
     jestDomPlugin.configs['flat/recommended'],
@@ -44,33 +41,17 @@ export default tseslint.config(
         ),
     ),
     {
-        // eslint-plugin-react の設定
+        // React の設定
         settings: {
             react: {
                 version: 'detect',
             },
         },
-        // recommended に含まれていない eslint-plugin-react のルールを有効化
         rules: {
-            'react/destructuring-assignment': 'error', // Props などの分割代入を強制
-            'react/function-component-definition': [
-                // コンポーネントの定義方法をアロー関数に統一
-                'error',
-                {
-                    namedComponents: 'arrow-function',
-                    unnamedComponents: 'arrow-function',
-                },
-            ],
-            'react/hook-use-state': 'error', // useState の返り値の命名を [value, setValue] に統一
-            'react/jsx-boolean-value': 'error', // boolean 型の Props の渡し方を統一
-            'react/jsx-fragments': 'error', // React Fragment の書き方を統一
-            'react/jsx-curly-brace-presence': 'error', // Props と children で不要な中括弧を削除
-            'react/jsx-no-useless-fragment': 'error', // 不要な React Fragment を削除
-            'react/jsx-sort-props': 'error', // Props の並び順をアルファベット順に統一
-            'react/self-closing-comp': 'error', // 子要素がない場合は自己終了タグを使う
-            'react/jsx-pascal-case': 'error', // コンポーネント名をパスカルケースに統一
-            'react/no-danger': 'error', // dangerouslySetInnerHTML を許可しない
-            'react/prop-types': 'off', // Props の型チェックは TS で行う & 誤検知があるため無効化
+            // React の基本的なルール
+            'react/jsx-uses-react': 'off', // React 17+ では不要
+            'react/react-in-jsx-scope': 'off', // React 17+ では不要
+            'react/prop-types': 'off', // TypeScript で型チェックするため無効化
         },
     },
     {
@@ -139,6 +120,12 @@ export default tseslint.config(
         rules: {
             'perfectionist/sort-interfaces': 'warn', // interface のプロパティの並び順をアルファベット順に統一
             'perfectionist/sort-object-types': 'warn', // Object 型のプロパティの並び順をアルファベット順に統一
+        },
+    },
+    {
+        // console.log を禁止するルール
+        rules: {
+            'no-console': 'error', // console.log() などの console メソッドを禁止
         },
     },
     prettierConfig, // フォーマット は Prettier で行うため、フォーマット関連のルールを無効化
