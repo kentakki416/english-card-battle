@@ -10,4 +10,4 @@ export interface GoogleUserInfo {
 
 export interface IGoogleAuth {
   verifyToken(accessToken: string): Promise<Result<GoogleUserInfo, UserError | ServerError | GoogleAuthError>>
-} 
+}

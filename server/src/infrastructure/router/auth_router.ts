@@ -30,9 +30,9 @@ export class AuthRouter {
       const controller = authContainer.getGoogleLoginController()
       
       // リクエストボディをパース
-      const loginRequest = {
+      const loginRequest: Controller.LoginRequest = {
         accessToken: req.body.accessToken
-      } as Controller.LoginRequest
+      }
       
       const response = await controller.execute(loginRequest)
 

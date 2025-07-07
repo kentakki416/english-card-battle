@@ -4,6 +4,7 @@ import { pinoHttp } from 'pino-http'
 import { DIContainer } from '../di/container'
 import { PinoLogger } from '../log/pino/logger'
 import { CorsMiddleware } from '../middleware/cors'
+import { ErrorHandlerMiddleware } from '../middleware/error_handler'
 import { ExpressRouter } from '../router/router'
 
 export class ExpressServer {
@@ -12,6 +13,7 @@ export class ExpressServer {
   private _container: DIContainer
   private _logger: PinoLogger
   private _corsMiddleware: CorsMiddleware
+  private _errorHandlerMiddleware: ErrorHandlerMiddleware
   private _router: ExpressRouter
 
   constructor(port: number, container: DIContainer, logger: PinoLogger) {
@@ -19,7 +21,8 @@ export class ExpressServer {
     this._port = port
     this._logger = logger
     this._container = container
-    this._corsMiddleware = container.setupCorsMiddleware(this._app)
+    this._corsMiddleware = new CorsMiddleware()
+    this._errorHandlerMiddleware = new ErrorHandlerMiddleware(this._logger)
     this._router = new ExpressRouter(this._container)
   }
 
@@ -28,7 +31,7 @@ export class ExpressServer {
    */
   public start() {
     try {
-      this._corsMiddleware.useCors() // CORS設定
+      this._app.use(this._corsMiddleware.useCors()) // CORS設定
       
       this._app.use(express.json()) // JSONをパースするミドルウェア
       this._app.use(express.urlencoded({ extended: true })) // URLエンコードされたデータをパースするミドルウェア
@@ -37,12 +40,17 @@ export class ExpressServer {
       // ルーティングの設定
       this._app.use(this._router.getRouter())
 
+      // 404エラーハンドリング
+      this._app.use(this._errorHandlerMiddleware.useNotFoundHandler())
+
+      // エラーハンドリングミドルウェア
+      this._app.use(this._errorHandlerMiddleware.useErrorHandler())
+
       // サーバーの起動
       this._app.listen(this._port, () => {
         this._logger.info(`Server is running on http://localhost:${this._port}`)
       })
     } catch (error) {
-      // TODO: このままではサーバー止まっちゃう？
       this._logger.error(new Error(`Failed to start server: ${error}`))
       process.exit(1)
     }

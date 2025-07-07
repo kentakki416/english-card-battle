@@ -1,9 +1,22 @@
 import { useState } from 'react'
 
 interface ApiResponse {
-  message: string
-  timestamp: string
-  method?: string
+  success: boolean
+  data?: {
+    user: {
+      id: string
+      name: string
+      email: string
+      profilePic?: string
+      providerType: string
+      providerId: string
+      createdAt: string
+      updatedAt: string
+    }
+    token: string
+  }
+  error?: string
+  message?: string
 }
 
 export const useApi = () => {
@@ -11,16 +24,19 @@ export const useApi = () => {
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<ApiResponse | null>(null)
 
-  const callHelloApi = async () => {
+  const callGoogleLogin = async (accessToken: string) => {
     setLoading(true)
     setError(null)
     
     try {
-      const response = await fetch('http://localhost:8080/api/hello', {
+      const response = await fetch('http://localhost:8080/auth/login/google', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          accessToken: accessToken
+        }),
       })
 
       if (!response.ok) {
@@ -40,6 +56,6 @@ export const useApi = () => {
     loading,
     error,
     data,
-    callHelloApi,
+    callGoogleLogin,
   }
 } 

@@ -1,10 +1,8 @@
-import express from 'express'
 import { Db } from 'mongodb'
 
 import { IDbClient } from '../../adapter/interface/idb_client'
 import { ILogger } from '../../adapter/interface/ilogger'
 import { ApiTokenGenerator } from '../middleware/api_token'
-import { CorsMiddleware } from '../middleware/cors'
 
 import { AuthContainer } from './auth_container'
 // import { UserContainer } from './user_container'
@@ -36,7 +34,6 @@ export class DIContainer {
   private _db: Db
   private _logger: ILogger
   private _apiToken: ApiTokenGenerator
-  private _corsMiddleware: CorsMiddleware | null
   
   // 各モジュールコンテナ
   private _authContainer: AuthContainer
@@ -49,9 +46,6 @@ export class DIContainer {
     this._db = this._dbClient.getDb(process.env.DB_NAME || 'chat-app')
     this._logger = logger
     this._apiToken = new ApiTokenGenerator()
-    
-    // CorsMiddlewareはExpressアプリケーションが必要なため、後で設定
-    this._corsMiddleware = null
     
     // 各モジュールコンテナを初期化
     this._authContainer = new AuthContainer(this._logger, this._db)
@@ -88,22 +82,7 @@ export class DIContainer {
     return this._dbClient
   }
 
-  /**
-   * CORSミドルウェアを設定
-   */
-  setupCorsMiddleware(app: express.Express): CorsMiddleware {
-    if (!this._corsMiddleware) {
-      this._corsMiddleware = new CorsMiddleware(app)
-    }
-    return this._corsMiddleware
-  }
 
-  /**
-   * CORSミドルウェアを取得
-   */
-  getCorsMiddleware(): CorsMiddleware | null {
-    return this._corsMiddleware
-  }
 
   /**
    * 認証モジュールコンテナを取得
