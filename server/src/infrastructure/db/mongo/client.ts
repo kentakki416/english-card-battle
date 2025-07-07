@@ -1,7 +1,7 @@
 import * as mongo from 'mongodb'
 
-import type { IDbClient } from '../../../adapter/interface/idb_client'
-import type { ILogger } from '../../../adapter/interface/ilogger'
+import { IDbClient } from '../../../adapter/interface/idb_client'
+import { ILogger } from '../../../adapter/interface/ilogger'
 
 export class MongoClient implements IDbClient {
   private _client: mongo.MongoClient

@@ -1,26 +1,27 @@
+import { Domain, Result, Success, Failure, UserError } from '../../../types'
+import { ERROR } from '../../../constant'
+
 export class User {
   /** DB用のユーザーID */
   private _id = ''
   /** アプリケーション用のユーザーID */
   private readonly _userId: number
-  /** ユーザー名 */
-  private _name: string
-  /** ハッシュ化されたパスワード */
-  private _password: string
-  /** 性別 */
-  private _gender: string
-  /** プロフィール画像URL */
-  private _profilePic: string
+  /** プロバイダー情報 */
+  private readonly _provider: Domain.ProviderUserInfo
+  /** 作成日時 */
+  private readonly _createdAt: Date
+  /** 更新日時 */
+  private _updatedAt: Date
 
-  constructor(userId: number, name: string, password: string, gender: string, profilePic: string) {
-    if (!userBisinessRule.checkNameLength(name)) {
-      throw new Error('ユーザー名は3文字以上8文字以下である必要があります')
-    }
+  private constructor(
+    userId: number,
+    provider: Domain.ProviderUserInfo,
+    createdAt: Date = new Date()
+  ) {
     this._userId = userId
-    this._name = name
-    this._password = password
-    this._gender = gender
-    this._profilePic = profilePic
+    this._provider = provider
+    this._createdAt = createdAt
+    this._updatedAt = createdAt
   }
 
   public get id() {
@@ -31,37 +32,155 @@ export class User {
     return this._userId
   }
 
-  public get name() {
-    return this._name
+  public get provider() {
+    return this._provider
   }
 
-  public get password() {
-    return this._password
+  public get createdAt() {
+    return this._createdAt
   }
 
-  public get gender() {
-    return this._gender
+  public get updatedAt() {
+    return this._updatedAt
   }
-  public get profilePic() {
-    return this._profilePic
+
+  public get providerInfo(): Domain.ProviderUserInfo {
+    return this._provider
+  }
+
+  public get name(): string {
+    return this._provider.name
+  }
+
+  public get email(): string {
+    return this._provider.email
+  }
+
+  public get profilePic(): string | undefined {
+    return this._provider.picture
+  }
+
+  public get providerType(): string {
+    return this._provider.type
+  }
+
+  public get providerId(): string {
+    return this._provider.id
+  }
+
+  public updateTimestamp(): void {
+    this._updatedAt = new Date()
+  }
+
+  /**
+   * プロバイダー情報を更新
+   * UseCase層で使用
+   */
+  updateProviderInfo(newProviderInfo: Domain.ProviderUserInfo): Result<User, UserError> {
+    // ビジネスルールの適用
+    const validationResult = userBusinessRule.validateProviderInfo(newProviderInfo)
+    if (validationResult.isFailure()) {
+      return validationResult
+    }
+    
+    // プロバイダータイプの変更を防ぐ
+    if (newProviderInfo.type !== this._provider.type) {
+      return new Failure(ERROR.USER_ERRORS.PROVIDER_TYPE_MISMATCH)
+    }
+    
+    // 既存のユーザーIDを保持して新しいインスタンスを作成
+    const updatedUser = new User(this._userId, newProviderInfo, this._createdAt)
+    return new Success(updatedUser)
+  }
+
+  /**
+   * プロバイダー情報から新規ユーザーを作成
+   * UseCase層で使用
+   */
+  static createFromProvider(providerInfo: Domain.ProviderUserInfo): Result<User, UserError> {
+    // ビジネスルールの適用
+    const validationResult = userBusinessRule.validateProviderInfo(providerInfo)
+    if (validationResult.isFailure()) {
+      return validationResult
+    }
+    
+    const userId = Math.floor(Math.random() * 1000)
+    const user = new User(userId, providerInfo)
+    return new Success(user)
+  }
+
+  /**
+   * プロバイダー情報から既存ユーザーを作成（既存ユーザーID指定）
+   * UseCase層で使用
+   */
+  static createFromProviderWithId(userId: number, providerInfo: Domain.ProviderUserInfo): Result<User, UserError> {
+    // ビジネスルールの適用
+    const validationResult = userBusinessRule.validateProviderInfo(providerInfo)
+    if (validationResult.isFailure()) {
+      return validationResult
+    }
+    
+    const user = new User(userId, providerInfo)
+    return new Success(user)
+  }
+
+  /**
+   * DBから復元するためのStatic Factory Method
+   * Infrastructure層で使用
+   */
+  static restoreFromDb(
+    userId: number,
+    providerInfo: Domain.ProviderUserInfo,
+    createdAt: Date
+  ): Result<User, UserError> {
+
+    const validationResult = userBusinessRule.validateProviderInfo(providerInfo)
+    if (validationResult.isFailure()) {
+      return validationResult
+    }
+    
+    const user = new User(userId, providerInfo, createdAt)
+    return new Success(user)
   }
 }
 
 /**
-  * ユーザーのビジネスルール
-  * checkがtrueならばOK、falseならば❌
-  */
-export const userBisinessRule = {
+ * ユーザーのビジネスルール
+ */
+export const userBusinessRule = {
   /**
-   * ユーザー名は3文字以上で８文字以下
+   * プロバイダー情報のビジネスルールチェック
    */
-  checkNameLength: (name: string) => {
-    return name.length >= 3 && name.length <= 8
+  validateProviderInfo: (providerInfo: Domain.ProviderUserInfo): Result<Domain.ProviderUserInfo, UserError> => {
+    const nameResult = userBusinessRule.checkNameLength(providerInfo.name)
+    if (nameResult.isFailure()) {
+      return nameResult
+    }
+
+    const emailResult = userBusinessRule.checkEmailFormat(providerInfo.email)
+    if (emailResult.isFailure()) {
+      return emailResult
+    }
+
+    return new Success(providerInfo)
   },
   /**
-   * ハッシュ化される前のパスワードは5文字以上12文字以下
+   * ユーザー名の長さチェック（プロバイダー名から）
    */
-  checkPasswordLength: (pass: string) => {
-    return pass.length >= 5 && pass.length <= 12
-  }
+  checkNameLength: (name: string): Result<string, UserError> => {
+    if (name.length >= 1 && name.length <= 50) {
+      return new Success(name)
+    }
+    return new Failure(ERROR.USER_ERRORS.INVALID_NAME_LENGTH)
+  },
+  /**
+   * メールアドレスの形式チェック
+   */
+  checkEmailFormat: (email: string): Result<string, UserError> => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (emailRegex.test(email)) {
+      return new Success(email)
+    }
+    return new Failure(ERROR.USER_ERRORS.INVALID_EMAIL_FORMAT)
+  },
 }

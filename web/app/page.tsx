@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ApiButton } from '../components/ui/api-button'
 
 const HomePage = () => {
   return (
@@ -11,6 +12,15 @@ const HomePage = () => {
           <p className="text-xl text-gray-600 mb-8">
             楽しく英語を学ぼう！
           </p>
+          
+          {/* APIテストセクション */}
+          <div className="max-w-md mx-auto mb-8 p-6 bg-white rounded-lg shadow-md">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">
+              API通信テスト
+            </h2>
+            <ApiButton />
+          </div>
+          
           <div className="space-x-4">
             <Link 
               className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors"

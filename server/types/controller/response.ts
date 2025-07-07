@@ -9,10 +9,8 @@ export type Response<T> = {
   token?: string
   responsedAt: Date
 } | {
-  status:
-  | typeof CONSTANT.STATUS_CODE.BAD_REQUEST
-  | typeof CONSTANT.STATUS_CODE.NOT_FOUND
-  | typeof CONSTANT.STATUS_CODE.SERVER_ERROR
+  status:number
+  errorCode: number
   message: string
   responsedAt: Date
 }

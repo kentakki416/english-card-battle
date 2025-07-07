@@ -21,6 +21,8 @@
     "moduleResolution": "node", // モジュール解決方法を指定する
     "baseUrl": ".", // モジュール解決の基準となるディレクトリ
     "paths": { // モジュール解決のパスエイリアスを設定する
+      "types": ["./types"],
+      "constant": ["./constant"],
       "*": [
         "lib/*"
       ]
@@ -41,6 +43,7 @@
   "include": [ //コンパイル対象。静的型チェックを行うファイル
     "./src",
     "./test",
+    "./types",
     "src/index.ts"
   ],
   "exclude": [ // コンパイル対象外。静的型チェックを行わないファイル

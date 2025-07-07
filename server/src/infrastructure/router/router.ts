@@ -1,23 +1,16 @@
 import { Router } from 'express'
-import type { Db } from 'mongodb'
+
+import { DIContainer } from '../di/container'
 
 import { AuthRouter } from './auth_router'
-import type { IDbClient } from '../../adapter/interface/idb_client'
-import type { PinoLogger } from '../log/pino/logger'
 
 export class ExpressRouter {
   private _router: Router
-  private _dbClient: IDbClient
-  private _db: Db | null
-  private _logger: PinoLogger
-  private _apiToken: string
+  private _container: DIContainer
 
-  constructor(dbClient: IDbClient, logger: PinoLogger, apiToken: string) {
+  constructor(container: DIContainer) {
     this._router = Router()
-    this._dbClient = dbClient
-    this._db = this._dbClient.getDb(process.env.DB_NAME || 'chat-app')
-    this._logger = logger
-    this._apiToken = apiToken
+    this._container = container
     this._setupRoutes()
   }
 
@@ -25,11 +18,14 @@ export class ExpressRouter {
    * ルーティングを設定
    */
   private _setupRoutes() {
+    // ルートエンドポイント
     this._router.get('/', (_, res) => {
       res.send('Hello World')
     })
-    const authRouter = new AuthRouter(this._router, this._db, this._logger, this._apiToken)
-    this._router.use('/api', authRouter.getRouter())
+    
+    // Auth API
+    const authRouter = new AuthRouter(this._router, this._container)
+    this._router.use('/auth', authRouter.getRouter())
   }
 
   /**

@@ -1,4 +1,5 @@
 import { MongoClient as MongoClientType } from 'mongodb'
+
 import { createMockLogger } from '../utils/test-helper'
 
 let mongoClient: MongoClientType

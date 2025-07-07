@@ -1,7 +1,7 @@
-import type { IUserRepository } from '../../src/adapter/interface/repository/iuser_repository'
-import type { ILogger } from '../../src/adapter/interface/ilogger'
-import type { IHash } from '../../src/adapter/interface/ihash'
-import type { IToken } from '../../src/adapter/interface/itoken'
+import { IHash } from '../../src/adapter/interface/ihash'
+import { ILogger } from '../../src/adapter/interface/ilogger'
+import { IToken } from '../../src/adapter/interface/itoken'
+import { IUserRepository } from '../../src/adapter/interface/repository/iuser_repository'
 import { User } from '../../src/domain/entity/user'
 
 // テスト用のモックユーザーデータ

@@ -1,6 +1,6 @@
 import pino from 'pino'
 
-import type { ILogger } from '../../../adapter/interface/ilogger'
+import { ILogger } from '../../../adapter/interface/ilogger'
 
 export class PinoLogger implements ILogger {
   private _logger: pino.Logger
