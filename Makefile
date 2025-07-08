@@ -1,17 +1,4 @@
-.PHONY: help dev dev-server dev-web dev-mongo down clean install install-server install-web
-
-# デフォルトターゲット
-help:
-	@echo "Available commands:"
-	@echo "  dev          - Start all services (web, server, mongo)"
-	@echo "  dev-server    - Start server only"
-	@echo "  dev-web       - Start web only"
-	@echo "  dev-mongo     - Start mongo only"
-	@echo "  down          - Stop all services"
-	@echo "  clean         - Clean up containers and volumes"
-	@echo "  install       - Install dependencies for all services"
-	@echo "  install-server - Install server dependencies"
-	@echo "  install-web   - Install web dependencies"
+.PHONY: dev dev-server dev-web dev-mongo down clean install install-server install-web mongosh
 
 # 全サービスを起動
 dev: install
@@ -61,3 +48,7 @@ install-server:
 install-web:
 	@echo "Installing web dependencies..."
 	cd web && npm install 
+
+mongosh:
+	@echo "Connecting to MongoDB..."
+	cd server && docker exec -it mongo mongosh -u root -p password

@@ -1,10 +1,9 @@
-
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 
 // NextAuth.jsの設定をインポート
-import { authOptions } from '../[...nextauth]/route'
+import { authOptions } from '@/lib/auth'
 
 async function verifyGoogleToken(accessToken: string) {
   const response = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${accessToken}`)
