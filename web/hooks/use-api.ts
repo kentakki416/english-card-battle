@@ -1,22 +1,22 @@
 import { useState } from 'react'
 
 interface ApiResponse {
-  success: boolean
   data?: {
+    token: string
     user: {
+      createdAt: string
+      email: string
       id: string
       name: string
-      email: string
       profilePic?: string
-      providerType: string
       providerId: string
-      createdAt: string
+      providerType: string
       updatedAt: string
     }
-    token: string
   }
   error?: string
   message?: string
+  success: boolean
 }
 
 export const useApi = () => {

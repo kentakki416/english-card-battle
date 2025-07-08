@@ -2,11 +2,12 @@
 
 import { useState } from 'react'
 
-import { useGoogleAuth } from '@/hooks/use-google-auth'
 
 import { LoginModal } from '../auth'
 
 import { Header, Footer } from './index'
+
+import { useGoogleAuth } from '@/hooks/use-google-auth'
 
 interface CommonLayoutProps {
   children: React.ReactNode

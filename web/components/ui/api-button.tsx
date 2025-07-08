@@ -1,7 +1,7 @@
 'use client'
 
-import { useApi } from '../../hooks/use-api'
 import { Button } from './button'
+import { useApi } from '../../hooks/use-api'
 
 export const ApiButton = () => {
   const { loading, error, data, callHelloApi } = useApi()

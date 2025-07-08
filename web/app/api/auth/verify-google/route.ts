@@ -1,6 +1,7 @@
-import { getServerSession } from 'next-auth'
+
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
 
 // NextAuth.jsの設定をインポート
 import { authOptions } from '../[...nextauth]/route'

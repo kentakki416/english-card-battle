@@ -1,5 +1,7 @@
 import Link from 'next/link'
+
 import { ApiButton } from '../components/ui/api-button'
+
 import { CommonLayout } from '@/components/layout'
 
 const HomePage = () => {
