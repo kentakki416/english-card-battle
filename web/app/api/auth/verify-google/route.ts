@@ -28,7 +28,7 @@ export async function POST() {
     const googleUser = await verifyGoogleToken(session.accessToken)
     
     // アプリケーションサーバーに検証済みユーザー情報とセッショントークンを送信
-    const appResponse = await fetch(`${process.env.API_SERVER_URL}/auth/google/login`, {
+    const response = await fetch(`${process.env.API_SERVER_URL}/auth/google/login`, {
       method: 'POST',
       headers: { 
         'Authorization': `Bearer ${session.accessToken}`,
@@ -43,20 +43,25 @@ export async function POST() {
         picture: googleUser.picture
       })
     })
+
+    console.log('response')
+    console.log(response)
     
-    if (!appResponse.ok) {
+    if (!response.ok) {
       return NextResponse.json({ error: 'Failed to authenticate with app server' }, { status: 500 })
     }
     
-    const appToken = await appResponse.json()
+    const responseData = await response.json()
     
-    // アプリケーションJWTをCookieに保存
-    cookies().set('app_token', appToken.jwt, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7 // 7日
-    })
+    // レスポンスデータからトークンを取得してクッキーに保存
+    if (responseData.data?.token) {
+      cookies().set('jwt', responseData.data.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7 // 7日
+      })
+    }
     
     return NextResponse.json({ 
       success: true,

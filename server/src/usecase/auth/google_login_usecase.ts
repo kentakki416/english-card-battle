@@ -68,7 +68,7 @@ export class GoogleLoginUsecase {
       }
 
       // 4. JWTトークンの生成
-      const token = this.tokenService.generateToken(String(user.id))
+      const token = this.tokenService.generateToken(user.googleId)
 
       this.logger.info(`Google login successful for user: ${user.googleName}`)
 

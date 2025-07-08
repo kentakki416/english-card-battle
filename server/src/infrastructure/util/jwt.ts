@@ -6,8 +6,8 @@ export class Jwt implements IToken {
   /**
    * jwtを生成する
    */
-  public generateToken(userId: string) {
-    const token = jwt.sign({ userId }, process.env.JWT_SECRET || 'secret', {
+  public generateToken(payload: string) {
+    const token = jwt.sign({ payload }, process.env.JWT_SECRET || 'secret', {
       expiresIn: '15d'
     })
     return token
