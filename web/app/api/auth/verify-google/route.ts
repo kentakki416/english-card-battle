@@ -44,8 +44,8 @@ export async function POST() {
       })
     })
 
-    console.log('response')
-    console.log(response)
+    // レスポンスの確認（デバッグ用）
+    // console.log('response', response)
     
     if (!response.ok) {
       return NextResponse.json({ error: 'Failed to authenticate with app server' }, { status: 500 })
@@ -56,10 +56,10 @@ export async function POST() {
     // レスポンスデータからトークンを取得してクッキーに保存
     if (responseData.data?.token) {
       cookies().set('jwt', responseData.data.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7 // 7日
+        httpOnly: true,                    // JavaScriptからアクセス不可（XSS攻撃対策）
+        secure: process.env.NODE_ENV === 'production', // HTTPS環境でのみ送信（本番環境では必須）
+        sameSite: 'lax',                   // クロスサイトリクエストでの送信制限（CSRF攻撃対策）
+        maxAge: 60 * 60 * 24 * 7          // 有効期限: 7日間（秒単位）
       })
     }
     

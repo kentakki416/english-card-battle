@@ -1,6 +1,5 @@
 import { Router } from 'express'
 
-import { CONSTANT } from '../../../constant'
 import { Controller } from '../../../types'
 import { DIContainer } from '../di/container'
 import { AuthMiddleware, AuthenticatedRequest } from '../middleware/auth_middleware'
@@ -48,15 +47,6 @@ export class AuthRouter {
         }
         
         const response = await controller.execute(loginRequest)
-
-        // 成功時はJWTをクッキーに設定
-        if (response.status === CONSTANT.STATUS_CODE.SUCCESS && 'data' in response && 'token' in response.data) {
-          res.cookie('jwt', response.data.token, {
-            maxAge: 15 * 24 * 60 * 60 * 1000, // 15日
-            httpOnly: true, // XSS対策
-            sameSite: 'strict', // CSRF対策
-          })
-        }
 
         res.status(response.status).send(response)
         return
