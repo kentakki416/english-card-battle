@@ -1,0 +1,82 @@
+import { getServerSession } from 'next-auth'
+import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
+
+// NextAuth.jsの設定をインポート
+import { authOptions } from '../[...nextauth]/route'
+
+async function verifyGoogleToken(accessToken: string) {
+  const response = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${accessToken}`)
+  
+  if (!response.ok) {
+    throw new Error('Invalid Google token')
+  }
+  
+  return response.json()
+}
+
+export async function POST() {
+  try {
+    // サーバー側でセッションを取得（JWEが自動復号化）
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.accessToken) {
+      return NextResponse.json({ error: 'Access token is required' }, { status: 400 })
+    }
+    
+    // Googleトークンの検証
+    const googleUser = await verifyGoogleToken(session.accessToken)
+    
+    // NextAuth.jsのセッショントークンを取得
+    const cookieStore = await cookies()
+    const sessionToken = cookieStore.get('next-auth.session-token')?.value || 
+                        cookieStore.get('__Secure-next-auth.session-token')?.value
+    
+    if (!sessionToken) {
+      return NextResponse.json({ error: 'Session token not found' }, { status: 401 })
+    }
+    
+    // アプリケーションサーバーに検証済みユーザー情報とセッショントークンを送信
+    const appResponse = await fetch(`${process.env.API_SERVER_URL}/auth/google/login`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionToken}`  // NextAuth.jsのセッショントークンを送信
+      },
+      body: JSON.stringify({
+        userId: googleUser.id,
+        email: googleUser.email,
+        name: googleUser.name,
+        picture: googleUser.picture
+      })
+    })
+    
+    if (!appResponse.ok) {
+      return NextResponse.json({ error: 'Failed to authenticate with app server' }, { status: 500 })
+    }
+    
+    const appToken = await appResponse.json()
+    
+    // アプリケーションJWTをCookieに保存
+    cookieStore.set('app_token', appToken.jwt, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7 // 7日
+    })
+    
+    return NextResponse.json({ 
+      success: true,
+      user: {
+        id: googleUser.id,
+        email: googleUser.email,
+        name: googleUser.name
+      }
+    })
+    
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Google verification error:', error)
+    return NextResponse.json({ error: 'Authentication failed' }, { status: 500 })
+  }
+} 

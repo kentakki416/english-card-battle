@@ -1,5 +1,11 @@
+/**
+ * login APIのリクエストボディ
+ */
 export type LoginRequest = {
-  accessToken: string
+  userId: string,
+  email: string,
+  name: string,
+  picture: string
 }
 
 export type LoginResponse = {

@@ -1,11 +1,9 @@
 import { Db } from 'mongodb'
 
 import { GoogleLoginController } from '../../adapter/controller/auth/google_login_controller'
-import { IGoogleAuth } from '../../adapter/interface/igoogle_auth'
 import { ILogger } from '../../adapter/interface/ilogger'
 import { GoogleLoginSerializer } from '../../adapter/serializer/auth/google_login_serializer'
 import { GoogleLoginUsecase } from '../../usecase/auth/google_login_usecase'
-import { GoogleAuthProvider } from '../auth/google_auth_provider'
 import { UserRepository } from '../db/mongo/repository/user_repository'
 import { Hash } from '../util/hash'
 import { Jwt } from '../util/token'
@@ -27,7 +25,6 @@ export class AuthContainer {
   private _hash: Hash
   private _jwt: Jwt
   private _userRepository: UserRepository
-  private _googleAuth: IGoogleAuth
   private _googleLoginUsecase: GoogleLoginUsecase
   private _googleLoginController: GoogleLoginController
   private _googleLoginSerializer: GoogleLoginSerializer
@@ -37,9 +34,8 @@ export class AuthContainer {
     this._db = db
     this._hash = new Hash()
     this._jwt = new Jwt()
-    this._googleAuth = new GoogleAuthProvider(this._logger)
     this._userRepository = new UserRepository(this._db, this._logger)
-    this._googleLoginUsecase = new GoogleLoginUsecase(this._googleAuth, this._userRepository, this._logger, this._jwt)
+    this._googleLoginUsecase = new GoogleLoginUsecase(this._userRepository, this._logger, this._jwt)
     this._googleLoginSerializer = new GoogleLoginSerializer()
     this._googleLoginController = new GoogleLoginController(this._googleLoginUsecase, this._googleLoginSerializer, this._logger)
   }

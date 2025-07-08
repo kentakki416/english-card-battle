@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 
+import { useGoogleAuth } from '@/hooks/use-google-auth'
+
 import { LoginModal } from '../auth'
 
 import { Header, Footer } from './index'
@@ -13,17 +15,18 @@ interface CommonLayoutProps {
 export const CommonLayout = ({ children }: CommonLayoutProps) => {
   const [showModal, setShowModal] = useState(false)
   
+  // Google認証後のAPI呼び出しを専用フックで処理
+  useGoogleAuth()
+  
   const handleOpenModal = () => setShowModal(true)
   const handleCloseModal = () => setShowModal(false)
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header onLoginClick={handleOpenModal} />
-      <main className="flex-1 flex flex-col items-center justify-center">
-        {children}
-        {showModal && <LoginModal onClose={handleCloseModal} />}
-      </main>
+      {children}
       <Footer />
+      {showModal && <LoginModal onClose={handleCloseModal} />}
     </div>
   )
 } 

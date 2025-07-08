@@ -5,8 +5,6 @@ import NextAuthProvider from './providers';
 
 import type { Metadata } from 'next';
 
-import { CommonLayout } from '@/components/layout';
-
 const font = Nunito({
     subsets: ['latin'],
     variable: '--font-nunito',
@@ -27,9 +25,7 @@ const RootLayout = ({
         <NextAuthProvider>
             <html lang='ja'>
                 <body className={`${font.variable} antialiased`}>
-                    <CommonLayout>
-                        {children}
-                    </CommonLayout>
+                    {children}
                 </body>
             </html>
         </NextAuthProvider>

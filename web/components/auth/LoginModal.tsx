@@ -13,10 +13,16 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
 
   const handleGoogleSignIn = async () => {
     try {
+      // eslint-disable-next-line no-console
+      console.log('Starting Google sign in...')
       await login('google')
-    } catch {
-      // Google認証エラーをログに記録
-      // TODO: 本格的なログシステムに置き換える
+      // onClose()を削除 - モーダルを開いたままにする
+      // eslint-disable-next-line no-console
+      console.log('Google sign in completed')
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Google sign in error:', error)
+      // TODO: エラーハンドリングUIの実装
     }
   }
 

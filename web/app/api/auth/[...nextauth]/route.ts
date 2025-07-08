@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 
-const handler = NextAuth({
+export const authOptions = {
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_OAUTH_CLIENT_ID || '',
@@ -10,37 +10,24 @@ const handler = NextAuth({
     ],
     secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
-        async signIn({ user, account }) {
-            if (account?.provider === 'google') {
-                try {
-                    // サーバーAPIにユーザー情報を送信
-                    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/signup`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            email: user.email,
-                            name: user.name,
-                            image: user.image,
-                        }),
-                    });
-
-                    if (!response.ok) {
-                        // サーバーAPI呼び出しエラーをログに記録
-                        // TODO: 本格的なログシステムに置き換える
-                    }
-                } catch {
-                    // サーバーAPI呼び出しエラーをログに記録
-                    // TODO: 本格的なログシステムに置き換える
-                }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        async jwt({ token, account }: any) {
+            // Persist the OAuth access_token to the token right after signin
+            if (account) {
+              token.accessToken = account.access_token
             }
-            return true;
-        },
-        async session({ session }) {
-            return session;
-        },
-    },
-});
+            return token
+          },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          async session({ session, token }: any) {
+            // Send properties to the client, like an access_token from a provider.
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (session as any).accessToken = (token as any).accessToken
+            return session
+          }
+    }
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
