@@ -28,21 +28,14 @@ export async function POST() {
     // Googleトークンの検証
     const googleUser = await verifyGoogleToken(session.accessToken)
     
-    // NextAuth.jsのセッショントークンを取得
-    const cookieStore = await cookies()
-    const sessionToken = cookieStore.get('next-auth.session-token')?.value || 
-                        cookieStore.get('__Secure-next-auth.session-token')?.value
-    
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'Session token not found' }, { status: 401 })
-    }
-    
     // アプリケーションサーバーに検証済みユーザー情報とセッショントークンを送信
     const appResponse = await fetch(`${process.env.API_SERVER_URL}/auth/google/login`, {
       method: 'POST',
       headers: { 
+        'Authorization': `Bearer ${session.accessToken}`,
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${sessionToken}`  // NextAuth.jsのセッショントークンを送信
+        'X-Auth-Provider': 'google',  // 認証プロバイダー
+        'X-Auth-Status': 'verified',  // 認証状態
       },
       body: JSON.stringify({
         userId: googleUser.id,
@@ -59,7 +52,7 @@ export async function POST() {
     const appToken = await appResponse.json()
     
     // アプリケーションJWTをCookieに保存
-    cookieStore.set('app_token', appToken.jwt, {
+    cookies().set('app_token', appToken.jwt, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

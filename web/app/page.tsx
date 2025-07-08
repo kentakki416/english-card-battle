@@ -1,7 +1,5 @@
 import Link from 'next/link'
 
-import { ApiButton } from '../components/ui/api-button'
-
 import { CommonLayout } from '@/components/layout'
 
 const HomePage = () => {
@@ -22,7 +20,6 @@ const HomePage = () => {
               <h2 className="text-lg font-semibold text-gray-800 mb-4">
                 API通信テスト
               </h2>
-              <ApiButton />
             </div>
             
             <div className="space-x-4">
