@@ -41,11 +41,12 @@ export class GoogleLoginUsecase {
       // ユーザーが見つからない場合、新規作成
       if (userResult.value === null) {
         const providerInfo: Domain.ProviderUserInfo = {
-          type: 'google',
-          id: request.userId,
-          name: request.name,
-          email: request.email,
-          picture: request.picture
+          google: {
+            id: request.userId,
+            name: request.name,
+            email: request.email,
+            picture: request.picture
+          }
         }
         
         const createUserResult = User.createFromProvider(providerInfo)
@@ -61,7 +62,7 @@ export class GoogleLoginUsecase {
         }
 
         user = saveResult.value
-        this.logger.info(`New user created: ${user.name}`)
+        this.logger.info(`New user created: ${user.googleName}`)
       } else {
         user = userResult.value
       }
@@ -69,7 +70,7 @@ export class GoogleLoginUsecase {
       // 4. JWTトークンの生成
       const token = this.tokenService.generateToken(String(user.id))
 
-      this.logger.info(`Google login successful for user: ${user.name}`)
+      this.logger.info(`Google login successful for user: ${user.googleName}`)
 
       return new Success({
         user,

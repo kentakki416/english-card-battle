@@ -28,11 +28,12 @@ export class UserRepository implements IUserRepository {
       }
       
       const providerInfo: Domain.ProviderUserInfo = {
-        type: userDoc.provider.type,
-        id: userDoc.provider.id,
-        name: userDoc.provider.name,
-        email: userDoc.provider.email,
-        picture: userDoc.provider.picture
+        google: {
+          id: userDoc.provider.google.id,
+          name: userDoc.provider.google.name,
+          email: userDoc.provider.google.email,
+          picture: userDoc.provider.google.picture
+        }
       }
       
       const userResult = User.restoreFromDb(
@@ -64,11 +65,12 @@ export class UserRepository implements IUserRepository {
       _id: userId,
       userId: user.userId,
       provider: {
-        type: user.provider.type,
-        id: user.provider.id,
-        name: user.provider.name,
-        email: user.provider.email,
-        picture: user.provider.picture
+        google: {
+          id: user.provider.google.id,
+          name: user.provider.google.name,
+          email: user.provider.google.email,
+          picture: user.provider.google.picture
+        }
       },
       createdAt: user.createdAt,
       updatedAt: now
@@ -88,11 +90,12 @@ export class UserRepository implements IUserRepository {
       {
         $set: {
           provider: {
-            type: user.provider.type,
-            id: user.provider.id,
-            name: user.provider.name,
-            email: user.provider.email,
-            picture: user.provider.picture
+            google: {
+              id: user.provider.google.id,
+              name: user.provider.google.name,
+              email: user.provider.google.email,
+              picture: user.provider.google.picture
+            }
           },
           updatedAt: now
         }

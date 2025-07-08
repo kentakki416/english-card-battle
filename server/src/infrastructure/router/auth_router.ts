@@ -1,17 +1,19 @@
 import { Router } from 'express'
-import jwt from 'jsonwebtoken'
 
 import { CONSTANT } from '../../../constant'
 import { Controller } from '../../../types'
 import { DIContainer } from '../di/container'
+import { AuthMiddleware, AuthenticatedRequest } from '../middleware/auth_middleware'
 
 export class AuthRouter {
   private _router: Router
   private _container: DIContainer
+  private _authMiddleware: AuthMiddleware
 
   constructor(router: Router, container: DIContainer) {
     this._router = router
     this._container = container
+    this._authMiddleware = new AuthMiddleware()
     this._setupRoutes()
   }
 
@@ -23,53 +25,26 @@ export class AuthRouter {
   }
 
   /**
-   * NextAuth.jsのセッショントークンを検証
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private verifyNextAuthSession(token: string): any {
-    try {
-      // NextAuth.jsのセッショントークンを検証
-      // 注意: これはNextAuth.jsのJWEを復号化する必要がある
-      // 実際の実装では、NextAuth.jsのライブラリを使用するか、
-      // 共有シークレットを使用して検証する
-      return jwt.verify(token, process.env.NEXTAUTH_SECRET || '')
-    } catch {
-      throw new Error('Invalid session token')
-    }
-  }
-
-  /**
    * Googleログインエンドポイント
    */
   private _setupGoogleLogin() {
-    this._router.post('/google/login', async (req, res) => {
+    // Google認証middlewareを適用
+    this._router.post('/google/login', this._authMiddleware.verifyGoogleAuth(), async (req: AuthenticatedRequest, res) => {
       try {
-        // NextAuth.jsのセッショントークンを取得
-        const sessionToken = req.headers.authorization?.replace('Bearer ', '')
-        
-        if (!sessionToken) {
-          return res.status(401).json({ error: 'Session token required' })
+        // ユーザー情報の存在確認
+        if (!req.user) {
+          return res.status(401).json({ error: 'User information not found' })
         }
 
-        // セッショントークンを検証
-        const session = this.verifyNextAuthSession(sessionToken)
-        
-        if (!session?.accessToken) {
-          return res.status(401).json({ error: 'Valid Google session required' })
-        }
-
-        // Google APIでユーザー情報を検証
-        const googleUser = await this.verifyGoogleUser(session.accessToken)
-        
         const authContainer = this._container.getAuthContainer()
         const controller = authContainer.getGoogleLoginController()
         
-        // 検証済みのユーザー情報を使用
+        // 検証済みユーザー情報を使用
         const loginRequest: Controller.LoginRequest = {
-          userId: googleUser.id,
-          email: googleUser.email,
-          name: googleUser.name,
-          picture: googleUser.picture
+          userId: req.user.id,
+          email: req.user.email,
+          name: req.user.name,
+          picture: req.user.picture
         }
         
         const response = await controller.execute(loginRequest)
@@ -84,25 +59,11 @@ export class AuthRouter {
         }
 
         res.status(response.status).send(response)
-        
+        return
       } catch {
-        res.status(401).json({ error: 'Authentication failed' })
+        return res.status(500).json({ error: 'Internal server error' })
       }
     })
-  }
-
-  /**
-   * Google APIでユーザー情報を検証
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async verifyGoogleUser(accessToken: string): Promise<any> {
-    const response = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${accessToken}`)
-    
-    if (!response.ok) {
-      throw new Error('Invalid Google token')
-    }
-    
-    return response.json()
   }
 
   /**

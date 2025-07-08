@@ -31,7 +31,7 @@ export class ExpressServer {
    */
   public start() {
     try {
-      this._app.use(this._corsMiddleware.useCors()) // CORS設定
+      this._app.use(this._corsMiddleware.cors()) // CORS設定
       
       this._app.use(express.json()) // JSONをパースするミドルウェア
       this._app.use(express.urlencoded({ extended: true })) // URLエンコードされたデータをパースするミドルウェア
@@ -41,10 +41,10 @@ export class ExpressServer {
       this._app.use(this._router.getRouter())
 
       // 404エラーハンドリング
-      this._app.use(this._errorHandlerMiddleware.useNotFoundHandler())
+      this._app.use(this._errorHandlerMiddleware.notFoundHandler())
 
       // エラーハンドリングミドルウェア
-      this._app.use(this._errorHandlerMiddleware.useErrorHandler())
+      this._app.use(this._errorHandlerMiddleware.errorHandler())
 
       // サーバーの起動
       this._app.listen(this._port, () => {

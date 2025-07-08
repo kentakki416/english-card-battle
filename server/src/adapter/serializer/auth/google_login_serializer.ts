@@ -53,11 +53,11 @@ export class GoogleLoginSerializer {
     const responseData: Controller.GoogleLoginResponse = {
       user: {
         id: String(data.user.id),
-        name: data.user.name,
-        email: data.user.email,
-        profilePic: data.user.profilePic,
-        providerType: data.user.providerType,
-        providerId: data.user.providerId,
+        name: data.user.googleName,
+        email: data.user.googleEmail,
+        profilePic: data.user.googleProfilePic,
+        providerType: 'google',
+        providerId: data.user.googleId,
         createdAt: new Date(data.user.createdAt).toISOString(),
         updatedAt: new Date(data.user.updatedAt).toISOString()
       },

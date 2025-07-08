@@ -9,3 +9,6 @@
 
 # coverage
 **/coverage/
+
+# .env
+.envrc

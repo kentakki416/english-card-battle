@@ -48,49 +48,24 @@ export class User {
     return this._provider
   }
 
-  public get name(): string {
-    return this._provider.name
+  public get googleName(): string {
+    return this._provider.google.name
   }
 
-  public get email(): string {
-    return this._provider.email
+  public get googleEmail(): string {
+    return this._provider.google.email
   }
 
-  public get profilePic(): string | undefined {
-    return this._provider.picture
+  public get googleProfilePic(): string | undefined {
+    return this._provider.google.picture
   }
 
-  public get providerType(): string {
-    return this._provider.type
-  }
-
-  public get providerId(): string {
-    return this._provider.id
+  public get googleId(): string {
+    return this._provider.google.id
   }
 
   public updateTimestamp(): void {
     this._updatedAt = new Date()
-  }
-
-  /**
-   * プロバイダー情報を更新
-   * UseCase層で使用
-   */
-  updateProviderInfo(newProviderInfo: Domain.ProviderUserInfo): Result<User, UserError> {
-    // ビジネスルールの適用
-    const validationResult = userBusinessRule.validateProviderInfo(newProviderInfo)
-    if (validationResult.isFailure()) {
-      return validationResult
-    }
-    
-    // プロバイダータイプの変更を防ぐ
-    if (newProviderInfo.type !== this._provider.type) {
-      return new Failure(ERROR.USER_ERRORS.PROVIDER_TYPE_MISMATCH)
-    }
-    
-    // 既存のユーザーIDを保持して新しいインスタンスを作成
-    const updatedUser = new User(this._userId, newProviderInfo, this._createdAt)
-    return new Success(updatedUser)
   }
 
   /**
@@ -152,12 +127,12 @@ export const userBusinessRule = {
    * プロバイダー情報のビジネスルールチェック
    */
   validateProviderInfo: (providerInfo: Domain.ProviderUserInfo): Result<Domain.ProviderUserInfo, UserError> => {
-    const nameResult = userBusinessRule.checkNameLength(providerInfo.name)
+    const nameResult = userBusinessRule.checkNameLength(providerInfo.google.name)
     if (nameResult.isFailure()) {
       return nameResult
     }
 
-    const emailResult = userBusinessRule.checkEmailFormat(providerInfo.email)
+    const emailResult = userBusinessRule.checkEmailFormat(providerInfo.google.email)
     if (emailResult.isFailure()) {
       return emailResult
     }

@@ -7,9 +7,10 @@ export type ProviderType = 'google' | 'github'
  * プロバイダーのユーザー情報
  */
 export type ProviderUserInfo = {
-  type: ProviderType
-  id: string
-  name: string
-  email: string
-  picture?: string
+  google: {
+    id: string
+    name: string
+    email: string
+    picture?: string
+  }
 }

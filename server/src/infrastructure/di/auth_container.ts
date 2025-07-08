@@ -6,7 +6,7 @@ import { GoogleLoginSerializer } from '../../adapter/serializer/auth/google_logi
 import { GoogleLoginUsecase } from '../../usecase/auth/google_login_usecase'
 import { UserRepository } from '../db/mongo/repository/user_repository'
 import { Hash } from '../util/hash'
-import { Jwt } from '../util/token'
+import { Jwt } from '../util/jwt'
 
 /**
  * 認証モジュール専用DIコンテナ

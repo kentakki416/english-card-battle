@@ -14,7 +14,7 @@ export class ErrorHandlerMiddleware {
   /**
    * エラーハンドリングミドルウェアを設定
    */
-  public useErrorHandler() {
+  public errorHandler() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return (error: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
       // エラーをログに記録
@@ -35,7 +35,7 @@ export class ErrorHandlerMiddleware {
   /**
    * 404エラーハンドリング
    */
-  public useNotFoundHandler() {
+  public notFoundHandler() {
     return (req: express.Request, res: express.Response) => {
       this._logger.error(new Error(`Not found API: ${req.method} ${req.path}`))
       res.status(404).json({
