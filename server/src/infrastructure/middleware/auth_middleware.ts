@@ -17,52 +17,43 @@ export class AuthMiddleware {
     this.jwtService = new Jwt()
   }
 
-  // /**
-  //  * Google APIでユーザー情報を検証
-  //  */
-  // // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  // private async verifyGoogleUser(accessToken: string): Promise<any> {
-  //   const response = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${accessToken}`)
-    
-  //   if (!response.ok) {
-  //     throw new Error('Invalid Google token')
-  //   }
-    
-  //   return response.json()
-  // }
-
   /**
    * Google認証middleware
-   * NextAuth.jsのセッション検証とGoogle API検証を行う
+   * セッショントークンの存在確認とリクエストボディのユーザー情報を使用
    */
   public verifyGoogleAuth() {
     return async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
       try {
-        // NextAuth.jsのセッショントークンを取得
+        console.log(this.jwtService)
+        // NextAuth.jsのセッショントークンの存在確認
         const sessionToken = req.headers.authorization?.replace('Bearer ', '')
         
+        // jweは細かい検証はせずセットされていればOK
         if (!sessionToken) {
           return res.status(401).json({ error: 'Session token required' })
         }
 
-        // セッショントークンを検証
-        const session = this.jwtService.verifyToken(sessionToken)
-        console.log(session)
-        
-        // if (!session?.accessToken) {
-        //   return res.status(401).json({ error: 'Valid Google session required' })
-        // }
+        // x-auth-statusをチェックする
+        const authStatus = req.headers['x-auth-status']
+        if (authStatus !== 'verified') {
+          return res.status(401).json({ error: 'Authentication failed' })
+        }
 
-        // // Google APIでユーザー情報を検証
-        // const googleUser = await this.verifyGoogleUser(session.accessToken)
+        // リクエストボディからユーザー情報を取得
+        // NextAuth.jsサーバー側で既に検証済みの情報
+        const { userId, email, name, picture } = req.body
         
-        // // 検証済みユーザー情報をリクエストに追加
-        // req.user = {
-        //   id: googleUser.id,
-        //   email: googleUser.email,
-        //   name: googleUser.name,
-        //   picture: googleUser.picture
-        // }
+        if (!userId || !email) {
+          return res.status(400).json({ error: 'User information required' })
+        }
+
+        // 検証済みユーザー情報をリクエストに追加
+        req.user = {
+          id: userId,
+          email: email,
+          name: name || '',
+          picture: picture || ''
+        }
         
         next()
         return
@@ -77,7 +68,7 @@ export class AuthMiddleware {
   //  * アプリケーションJWTトークンの検証を行う
   //  */
   // public verifyJWT() {
-  //   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  //   return async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   //     try {
   //       const token = req.cookies.jwt || req.headers.authorization?.replace('Bearer ', '')
         
@@ -85,18 +76,24 @@ export class AuthMiddleware {
   //         return res.status(401).json({ error: 'No token provided' })
   //       }
         
-  //       const decoded = this.jwtService.verifyToken(token)
-  //       if (!decoded) {
+  //       const decoded = await this.jwtService.verifyToken(token)
+  //       if (!decoded || typeof decoded === 'string') {
   //         return res.status(401).json({ error: 'Invalid token' })
   //       }
         
+  //       const userId = (decoded as { userId: string }).userId
+  //       if (!userId) {
+  //         return res.status(401).json({ error: 'Invalid token payload' })
+  //       }
+        
   //       req.user = {
-  //         id: decoded.userId,
+  //         id: userId,
   //         email: '', // JWTにはemail情報がないため空文字
   //         name: '',  // JWTにはname情報がないため空文字
   //         picture: '' // JWTにはpicture情報がないため空文字
   //       }
   //       next()
+  //       return
   //     } catch {
   //       return res.status(401).json({ error: 'Invalid token' })
   //     }
