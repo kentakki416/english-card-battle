@@ -1,10 +1,10 @@
-name: 🧪 Server Test
+name: 🧪 API Server Test
 
 on:
   push:
     paths:
       - 'api-server/**'
-      - '.github/workflows/server-test.yml'
+      - '.github/workflows/api-server-test.yml'
   workflow_dispatch:
 
 permissions:

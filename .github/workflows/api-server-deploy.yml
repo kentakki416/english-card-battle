@@ -1,4 +1,4 @@
-name: 🚀 Server Deploy to ECS
+name: 🚀 API Server Deploy to ECS
 
 on:
   workflow_dispatch:
@@ -20,7 +20,7 @@ on:
         required: true
         type: string
   workflow_run:
-    workflows: ["🐳 Server Image Push"]
+    workflows: ["🐳 API Server Image Push"]
     types: [completed]
     branches: [main, develop]
 
@@ -211,7 +211,7 @@ jobs:
       - name: 📝 デプロイ結果をサマリーに出力
         run: |
           cat << EOF >> $GITHUB_STEP_SUMMARY
-          ## 🚀 Server デプロイ完了
+          ## 🚀 API Server デプロイ完了
           
           ### 📋 デプロイ情報
           - **環境**: ${{ env.ENVIRONMENT }}

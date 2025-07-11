@@ -1,11 +1,11 @@
-name: 🐳 Server Image Push
+name: 🐳 API Server Image Push
 
 on:
   push:
     branches: [ main, develop ]
     paths:
       - 'api-server/**'
-      - '.github/workflows/server-image-push.yml'
+      - '.github/workflows/api-server-image-push.yml'
   workflow_dispatch:
     inputs:
       environment:

@@ -1,10 +1,10 @@
-name: 🧹 Server Lint
+name: 🧹 API Server Lint
 
 on:
   push:
     paths:
       - 'api-server/**'
-      - '.github/workflows/server-lint.yml'
+      - '.github/workflows/api-server-lint.yml'
   workflow_dispatch:
 
 permissions:
