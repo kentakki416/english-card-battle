@@ -222,7 +222,7 @@ english-card-battle/
 
 3. バックエンドのセットアップ
    ```bash
-   cd ../server
+   cd ../api-server
    npm install
    ```
 
@@ -231,7 +231,7 @@ english-card-battle/
    # web/.env.local
    NEXT_PUBLIC_API_URL=http://localhost:3001
    
-   # server/.env
+   # api-server/.env
    MONGODB_URI=mongodb://localhost:27017/english-card-battle
    JWT_SECRET=your-secret-key
    PORT=3001

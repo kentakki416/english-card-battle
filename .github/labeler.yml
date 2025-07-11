@@ -11,9 +11,9 @@ infra:
   - changed-files:
     - any-glob-to-any-file: 'infra/**'
 
-server:
+api-server:
   - changed-files:
-    - any-glob-to-any-file: 'server/**'
+    - any-glob-to-any-file: 'api-server/**'
 
 github_actions:
   - changed-files:

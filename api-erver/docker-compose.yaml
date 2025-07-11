@@ -17,12 +17,12 @@ services:
     networks:
       - my-network
 
-  server:
+  api-server:
     build:
       context: .
       dockerfile: Dockerfile
       target: test
-    container_name: server
+    container_name: api-server
     depends_on:
       - mongo
     environment:

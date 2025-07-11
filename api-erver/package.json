@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "api-server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -12,7 +12,7 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
-    "test:docker": "docker compose up --build --abort-on-container-exit --exit-code-from server",
+    "test:docker": "docker compose up --build --abort-on-container-exit --exit-code-from api-server",
     "test:docker:down": "docker compose down --volumes --remove-orphans",
     "test:ci": "npm run test:docker && npm run test:docker:down"
   },
