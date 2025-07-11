@@ -5,10 +5,6 @@ on:
     paths:
       - 'server/**'
       - '.github/workflows/server-lint.yml'
-  pull_request:
-    paths:
-      - 'server/**'
-    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 permissions:
