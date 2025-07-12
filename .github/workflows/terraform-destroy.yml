@@ -1,5 +1,4 @@
 name: 💥 Terraform Destroy
-
 on:
   workflow_dispatch:
     inputs:
@@ -20,17 +19,22 @@ on:
         required: false
         default: true
         type: boolean
-
 env:
   TF_VERSION: "1.7.0"
   TF_IN_AUTOMATION: true
   TF_INPUT: false
   AWS_REGION: ap-northeast-1
-
+defaults:
+  run:
+    shell: bash
+concurrency:
+  group: ${{ github.workflow}}-${{ github.ref}}
+  cancel-in-progress: true
 jobs:
   terraform-destroy:
     name: 💥 Terraform Destroy
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     environment: 
       name: ${{ github.event.inputs.environment }}-destroy
       url: https://console.aws.amazon.com/

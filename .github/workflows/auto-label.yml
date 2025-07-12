@@ -1,12 +1,16 @@
 name: '🏷️ Auto Label PR'
-
 on:
   - pull_request_target
 permissions:
   contents: read
   issues: write
   pull-requests: write
-
+defaults:
+  run:
+    shell: bash
+concurrency:
+  group: ${{ github.workflow}}-${{ github.ref}}
+  cancel-in-progress: true
 jobs:
   # ========================================
   # ブランチとファイル差分を参考にラベル付け

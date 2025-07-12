@@ -1,5 +1,4 @@
 name: 🚀 API Server Deploy to ECS
-
 on:
   workflow_dispatch:
     inputs:
@@ -23,11 +22,15 @@ on:
     workflows: ["🐳 API Server Image Push"]
     types: [completed]
     branches: [main, develop]
-
 permissions:
   contents: read
   id-token: write
-
+defaults:
+  run:
+    shell: bash
+concurrency:
+  group: ${{ github.workflow}}-${{ github.ref}}
+  cancel-in-progress: true
 env:
   AWS_REGION: ap-northeast-1
   ECR_REPOSITORY: english-card-battle-server
@@ -37,6 +40,7 @@ jobs:
   pre-deploy-checks:
     name: 🔍 Pre-Deploy Checks
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: github.event_name == 'workflow_dispatch'
     outputs:
       should_deploy: ${{ steps.validation.outputs.should_deploy }}
@@ -71,6 +75,7 @@ jobs:
   auto-deploy:
     name: 🤖 Auto Deploy
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
     outputs:
       should_deploy: ${{ steps.setup.outputs.should_deploy }}
@@ -96,6 +101,7 @@ jobs:
   deploy:
     name: 🚀 Deploy to ECS Fargate
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [pre-deploy-checks, auto-deploy]
     if: always() && (needs.pre-deploy-checks.outputs.should_deploy == 'true' || needs.auto-deploy.outputs.should_deploy == 'true')
     environment: 

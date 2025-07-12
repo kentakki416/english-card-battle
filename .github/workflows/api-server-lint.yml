@@ -1,20 +1,23 @@
 name: 🧹 API Server Lint
-
 on:
   push:
     paths:
       - 'api-server/**'
       - '.github/workflows/api-server-lint.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
-
+defaults:
+  run:
+    shell: bash
+concurrency:
+  group: ${{ github.workflow}}-${{ github.ref}}
+  cancel-in-progress: true
 jobs:
   lint:
     name: 🧹 ESLint & Type Check
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 5
     steps:
       - name: 📥 リポジトリをチェックアウト
         uses: actions/checkout@v4

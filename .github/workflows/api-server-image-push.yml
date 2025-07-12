@@ -1,5 +1,4 @@
 name: 🐳 API Server Image Push
-
 on:
   push:
     branches: [ main, develop ]
@@ -16,18 +15,22 @@ on:
         options:
         - dev
         - prd
-
 permissions:
   contents: read
   id-token: write
-
+defaults:
+  run:
+    shell: bash
+concurrency:
+  group: ${{ github.workflow}}-${{ github.ref}}
+  cancel-in-progress: true
 env:
   AWS_REGION: ap-northeast-1
-
 jobs:
   build-and-push:
     name: 🐳 Build & Push Docker Image
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     environment: 
       name: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prd' || 'dev') }}
     

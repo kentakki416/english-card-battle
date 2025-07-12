@@ -1,19 +1,23 @@
 name: 🧪 API Server Test
-
 on:
   push:
     paths:
       - 'api-server/**'
       - '.github/workflows/api-server-test.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
-
+defaults:
+  run:
+    shell: bash
+concurrency:
+  group: ${{ github.workflow}}-${{ github.ref}}
+  cancel-in-progress: true
 jobs:
   test:
     name: 🧪 Docker Compose Integration Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     
     steps:
       - name: 📥 リポジトリをチェックアウト
