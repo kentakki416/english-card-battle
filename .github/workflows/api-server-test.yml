@@ -10,6 +10,9 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash
 jobs:
   test:
     name: 🧪 Docker Compose Integration Tests

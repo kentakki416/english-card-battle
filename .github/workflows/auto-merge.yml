@@ -6,6 +6,10 @@ permissions:
   contents: write
   pull-requests: write
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   # ========================================
   # dependabotが作成するPRの自動マージ

@@ -7,6 +7,9 @@ permissions:
   issues: write
   pull-requests: write
 
+defaults:
+  run:
+    shell: bash
 jobs:
   # ========================================
   # ブランチとファイル差分を参考にラベル付け
