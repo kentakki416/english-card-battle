@@ -1,15 +1,14 @@
 name: ♻️ Auto Merge
-
 on: pull_request
-
 permissions:
   contents: write
   pull-requests: write
-
 defaults:
   run:
     shell: bash
-
+concurrency:
+  group: ${{ github.workflow}}-${{ github.ref}}
+  cancel-in-progress: true
 jobs:
   # ========================================
   # dependabotが作成するPRの自動マージ

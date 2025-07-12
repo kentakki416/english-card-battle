@@ -1,5 +1,4 @@
 name: 🚀 API Server Deploy to ECS
-
 on:
   workflow_dispatch:
     inputs:
@@ -23,15 +22,15 @@ on:
     workflows: ["🐳 API Server Image Push"]
     types: [completed]
     branches: [main, develop]
-
 permissions:
   contents: read
   id-token: write
-
 defaults:
   run:
     shell: bash
-
+concurrency:
+  group: ${{ github.workflow}}-${{ github.ref}}
+  cancel-in-progress: true
 env:
   AWS_REGION: ap-northeast-1
   ECR_REPOSITORY: english-card-battle-server

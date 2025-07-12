@@ -1,5 +1,4 @@
 name: 🏗️ Terraform CI Pipeline
-
 on:
   push:
     branches: [ main, develop ]
@@ -21,22 +20,21 @@ on:
         options:
         - dev
         - prd
-
 permissions:
   contents: read
   pull-requests: write
   security-events: write
-
 defaults:
   run:
     shell: bash
-
+concurrency:
+  group: ${{ github.workflow}}-${{ github.ref}}
+  cancel-in-progress: true
 env:
   TF_VERSION: "1.7.0"
   TF_IN_AUTOMATION: true
   TF_INPUT: false
   AWS_REGION: ap-northeast-1
-
 jobs:
   # ========================================
   # 🔍 Change Detection
