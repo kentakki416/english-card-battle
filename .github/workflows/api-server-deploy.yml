@@ -1,0 +1,227 @@
+name: 🚀 API Server Deploy to ECS
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+        - dev
+        - prd
+      image_tag:
+        description: 'Docker image tag (optional - uses latest if not specified)'
+        required: false
+        type: string
+      confirm_deploy:
+        description: 'Type "DEPLOY" exactly to confirm deployment (case sensitive)'
+        required: true
+        type: string
+  workflow_run:
+    workflows: ["🐳 API Server Image Push"]
+    types: [completed]
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: ap-northeast-1
+  ECR_REPOSITORY: english-card-battle-server
+
+jobs:
+  # デプロイ前の検証
+  pre-deploy-checks:
+    name: 🔍 Pre-Deploy Checks
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    outputs:
+      should_deploy: ${{ steps.validation.outputs.should_deploy }}
+      environment: ${{ steps.validation.outputs.environment }}
+      image_tag: ${{ steps.validation.outputs.image_tag }}
+    
+    steps:
+      - name: 🔍 入力値を検証
+        id: validation
+        run: |
+          if [[ "${{ github.event.inputs.confirm_deploy }}" != "DEPLOY" ]]; then
+            echo "❌ You must type 'DEPLOY' exactly to confirm deployment"
+            exit 1
+          fi
+          
+          ENVIRONMENT="${{ github.event.inputs.environment }}"
+          IMAGE_TAG="${{ github.event.inputs.image_tag }}"
+          
+          if [[ -z "$IMAGE_TAG" ]]; then
+            IMAGE_TAG="${ENVIRONMENT}-latest"
+          fi
+          
+          echo "should_deploy=true" >> $GITHUB_OUTPUT
+          echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
+          echo "image_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          
+          echo "✅ Validation passed"
+          echo "📍 Environment: ${ENVIRONMENT}"
+          echo "🏷️ Image Tag: ${IMAGE_TAG}"
+
+  # 自動デプロイ（Image Pushワークフロー完了後）
+  auto-deploy:
+    name: 🤖 Auto Deploy
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
+    outputs:
+      should_deploy: ${{ steps.setup.outputs.should_deploy }}
+      environment: ${{ steps.setup.outputs.environment }}
+      image_tag: ${{ steps.setup.outputs.image_tag }}
+    
+    steps:
+      - name: ⚙️ 自動デプロイの設定
+        id: setup
+        run: |
+          ENVIRONMENT=${{ github.event.workflow_run.head_branch == 'main' && 'prd' || 'dev' }}
+          IMAGE_TAG="${ENVIRONMENT}-latest"
+          
+          echo "should_deploy=true" >> $GITHUB_OUTPUT
+          echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
+          echo "image_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          
+          echo "🤖 Auto deploy triggered"
+          echo "📍 Environment: ${ENVIRONMENT}"
+          echo "🏷️ Image Tag: ${IMAGE_TAG}"
+
+  # ECSデプロイ
+  deploy:
+    name: 🚀 Deploy to ECS Fargate
+    runs-on: ubuntu-latest
+    needs: [pre-deploy-checks, auto-deploy]
+    if: always() && (needs.pre-deploy-checks.outputs.should_deploy == 'true' || needs.auto-deploy.outputs.should_deploy == 'true')
+    environment: 
+      name: ${{ needs.pre-deploy-checks.outputs.environment || needs.auto-deploy.outputs.environment }}
+      url: https://console.aws.amazon.com/ecs
+    
+    env:
+      ENVIRONMENT: ${{ needs.pre-deploy-checks.outputs.environment || needs.auto-deploy.outputs.environment }}
+      IMAGE_TAG: ${{ needs.pre-deploy-checks.outputs.image_tag || needs.auto-deploy.outputs.image_tag }}
+    
+    steps:
+      - name: 📥 リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 🔑 AWS認証を設定
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 🔐 ECRにログイン
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: 🏷️ デプロイ情報を設定
+        id: deploy-info
+        run: |
+          CLUSTER_NAME="english-card-battle-${ENVIRONMENT}"
+          SERVICE_NAME="english-card-battle-server-${ENVIRONMENT}"
+          TASK_DEFINITION_FAMILY="english-card-battle-server-${ENVIRONMENT}"
+          
+          echo "cluster_name=${CLUSTER_NAME}" >> $GITHUB_OUTPUT
+          echo "service_name=${SERVICE_NAME}" >> $GITHUB_OUTPUT
+          echo "task_definition_family=${TASK_DEFINITION_FAMILY}" >> $GITHUB_OUTPUT
+          echo "image_uri=${{ steps.login-ecr.outputs.registry }}/${ECR_REPOSITORY}:${IMAGE_TAG}" >> $GITHUB_OUTPUT
+
+      - name: 📋 現在のタスク定義を取得
+        id: current-task-def
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ steps.deploy-info.outputs.task_definition_family }} \
+            --query 'taskDefinition' \
+            --output json > current-task-definition.json
+          
+          # 新しいイメージURIで更新
+          jq --arg IMAGE_URI "${{ steps.deploy-info.outputs.image_uri }}" \
+            '.containerDefinitions[0].image = $IMAGE_URI' \
+            current-task-definition.json > new-task-definition.json
+          
+          # ECS用にクリーンアップ（不要なフィールドを削除）
+          jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .placementConstraints, .compatibilities, .registeredAt, .registeredBy)' \
+            new-task-definition.json > clean-task-definition.json
+
+      - name: 🆕 新しいタスク定義を登録
+        id: new-task-def
+        run: |
+          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://clean-task-definition.json \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+          
+          echo "task_definition_arn=${NEW_TASK_DEF_ARN}" >> $GITHUB_OUTPUT
+          echo "📋 New task definition registered: ${NEW_TASK_DEF_ARN}"
+
+      - name: 🔄 ECSサービスを更新
+        run: |
+          echo "🚀 Updating ECS service..."
+          aws ecs update-service \
+            --cluster ${{ steps.deploy-info.outputs.cluster_name }} \
+            --service ${{ steps.deploy-info.outputs.service_name }} \
+            --task-definition ${{ steps.new-task-def.outputs.task_definition_arn }} \
+            --force-new-deployment
+
+      - name: ⏳ デプロイ完了を待機
+        timeout-minutes: 15
+        run: |
+          echo "⏳ Waiting for deployment to complete..."
+          aws ecs wait services-stable \
+            --cluster ${{ steps.deploy-info.outputs.cluster_name }} \
+            --services ${{ steps.deploy-info.outputs.service_name }}
+          
+          echo "✅ Deployment completed successfully!"
+
+      - name: 🔍 デプロイ後の確認
+        run: |
+          echo "🔍 Checking deployment status..."
+          
+          # サービスの状態を確認
+          SERVICE_STATUS=$(aws ecs describe-services \
+            --cluster ${{ steps.deploy-info.outputs.cluster_name }} \
+            --services ${{ steps.deploy-info.outputs.service_name }} \
+            --query 'services[0].status' \
+            --output text)
+          
+          # タスクの状態を確認
+          RUNNING_TASKS=$(aws ecs describe-services \
+            --cluster ${{ steps.deploy-info.outputs.cluster_name }} \
+            --services ${{ steps.deploy-info.outputs.service_name }} \
+            --query 'services[0].runningCount' \
+            --output text)
+          
+          echo "📊 Service Status: ${SERVICE_STATUS}"
+          echo "🏃 Running Tasks: ${RUNNING_TASKS}"
+          
+          if [[ "${SERVICE_STATUS}" == "ACTIVE" && "${RUNNING_TASKS}" -gt 0 ]]; then
+            echo "✅ Deployment verification successful!"
+          else
+            echo "❌ Deployment verification failed!"
+            exit 1
+          fi
+
+      - name: 📝 デプロイ結果をサマリーに出力
+        run: |
+          cat << EOF >> $GITHUB_STEP_SUMMARY
+          ## 🚀 API Server デプロイ完了
+          
+          ### 📋 デプロイ情報
+          - **環境**: ${{ env.ENVIRONMENT }}
+          - **クラスター**: ${{ steps.deploy-info.outputs.cluster_name }}
+          - **サービス**: ${{ steps.deploy-info.outputs.service_name }}
+          - **イメージ**: ${{ steps.deploy-info.outputs.image_uri }}
+          - **タスク定義**: ${{ steps.new-task-def.outputs.task_definition_arn }}
+          
+          ### ✅ ステータス
+          デプロイが正常に完了しました！
+          
+          [ECS Console で確認](https://console.aws.amazon.com/ecs/home?region=${{ env.AWS_REGION }}#/clusters/${{ steps.deploy-info.outputs.cluster_name }}/services/${{ steps.deploy-info.outputs.service_name }}/details)
+          EOF 

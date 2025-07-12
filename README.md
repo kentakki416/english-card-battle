@@ -222,7 +222,7 @@ english-card-battle/
 
 3. バックエンドのセットアップ
    ```bash
-   cd ../server
+   cd ../api-server
    npm install
    ```
 
@@ -231,7 +231,7 @@ english-card-battle/
    # web/.env.local
    NEXT_PUBLIC_API_URL=http://localhost:3001
    
-   # server/.env
+   # api-server/.env
    MONGODB_URI=mongodb://localhost:27017/english-card-battle
    JWT_SECRET=your-secret-key
    PORT=3001
@@ -249,7 +249,38 @@ cd server
 npm run dev
 ```
 
-<p align="right">(<a href="#readme-top">トップに戻る</a>)</p>
+## 環境変数の設定
+
+### Next.js（web）側
+
+1. `web/env.example`を`web/.env.local`にコピー
+2. 必要な値を設定
+
+```bash
+cp web/env.example web/.env.local
+```
+
+### Express.js（server）側
+
+1. `server/env.example`を`server/.env.local`にコピー
+2. 必要な値を設定
+
+```bash
+cp server/env.example server/.env.local
+```
+
+### 必要な環境変数
+
+#### Next.js側
+- `NEXTAUTH_SECRET`: NextAuth.jsのシークレットキー
+- `GOOGLE_OAUTH_CLIENT_ID`: Google OAuthのクライアントID
+- `GOOGLE_OAUTH_CLIENT_SECRET`: Google OAuthのクライアントシークレット
+- `API_SERVER_URL`: APIサーバーのURL
+
+#### Express.js側
+- `JWT_SECRET`: JWTトークンのシークレットキー
+- `DB_NAME`: データベース名
+- `FRONTEND_URL`: フロントエンドのURL
 
 ## 開発
 

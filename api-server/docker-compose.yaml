@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo:latest
+    restart: always # コンテナが何らかの理由で終了した場合、自動で再起動する
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    # volumes:
+      # ローカル開発データを永続化させたいときだけコメントを外す。コメントを外した状態でgitにpushしないこと
+      # - ./container_data/db:/data/db
+      # - ./container_data/configdb:/data/configdb
+    networks:
+      - my-network
+
+  api-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: test
+    container_name: api-server
+    depends_on:
+      - mongo
+    environment:
+      - NODE_ENV=test
+      - TEST_MONGO_URI=mongodb://root:password@mongo:27017/test_db
+    volumes:
+      - .:/app
+      - /app/node_modules  # node_modulesをボリュームとしてマウントして高速化
+    networks:
+      - my-network
+    command: npm run test:coverage
+
+networks:
+  my-network:
+    driver: bridge

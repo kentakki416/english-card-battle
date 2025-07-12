@@ -1,0 +1,101 @@
+name: 🐳 API Server Image Push
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'api-server/**'
+      - '.github/workflows/api-server-image-push.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to build for'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+        - dev
+        - prd
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: ap-northeast-1
+
+jobs:
+  build-and-push:
+    name: 🐳 Build & Push Docker Image
+    runs-on: ubuntu-latest
+    environment: 
+      name: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prd' || 'dev') }}
+    
+    steps:
+      - name: 📥 リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 🔑 AWS認証を設定
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 🔐 ECRにログイン
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: 🏷️ イメージタグとリポジトリ名を生成
+        id: image-tag
+        run: |
+          ENVIRONMENT=${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prd' || 'dev') }}
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          
+          # ブランチ名をDockerタグ用に正規化（スラッシュをハイフンに変換、小文字化）
+          RAW_BRANCH="${{ github.ref_name }}"
+          BRANCH_NAME=$(echo "$RAW_BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+          
+          # ブランチ名が長すぎる場合は短縮（Dockerタグの制限対応）
+          if [ ${#BRANCH_NAME} -gt 20 ]; then
+            BRANCH_NAME="${BRANCH_NAME:0:20}"
+          fi
+          
+          # ECRリポジトリ名を環境別に生成
+          ECR_REPO_NAME="english-card-battle-server-${ENVIRONMENT}"
+          
+          echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
+          echo "branch_name=${BRANCH_NAME}" >> $GITHUB_OUTPUT
+          echo "image_tag=${ENVIRONMENT}-${BRANCH_NAME}-${TIMESTAMP}" >> $GITHUB_OUTPUT
+          echo "latest_tag=${ENVIRONMENT}-latest" >> $GITHUB_OUTPUT
+          echo "ecr_repository=${ECR_REPO_NAME}" >> $GITHUB_OUTPUT
+
+      - name: 🐳 Dockerイメージをビルド・プッシュ
+        working-directory: api-server
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ steps.image-tag.outputs.ecr_repository }}
+          IMAGE_TAG: ${{ steps.image-tag.outputs.image_tag }}
+          LATEST_TAG: ${{ steps.image-tag.outputs.latest_tag }}
+        run: |
+          # マルチプラットフォームビルドのセットアップ
+          docker buildx create --use --name multiarch-builder
+
+          # イメージをビルド・プッシュ
+          docker buildx build \
+            --platform linux/amd64 \
+            --target runtime \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:$LATEST_TAG \
+            --push \
+            .
+
+      - name: ✅ プッシュ完了
+        run: |
+          echo "✅ Docker イメージが正常にプッシュされました"
+          echo "🐳 Repository: ${{ steps.image-tag.outputs.ecr_repository }}"
+          echo "🌿 Branch: ${{ steps.image-tag.outputs.branch_name }}"
+          echo "🏷️ Tag: ${{ steps.image-tag.outputs.image_tag }}"
+          echo "🏷️ Latest Tag: ${{ steps.image-tag.outputs.latest_tag }}"
+          echo "📍 Registry: ${{ steps.login-ecr.outputs.registry }}"
+          echo "🔗 Full URI: ${{ steps.login-ecr.outputs.registry }}/${{ steps.image-tag.outputs.ecr_repository }}:${{ steps.image-tag.outputs.image_tag }}" 
