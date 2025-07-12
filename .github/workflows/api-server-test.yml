@@ -29,7 +29,7 @@ jobs:
         working-directory: api-server
         run: |
           echo "🧪 Running tests"
-          docker compose run --rm server npm run test:coverage
+          docker compose run --rm api-server npm run test:coverage
           echo "✅ Test execution completed!"
 
 
