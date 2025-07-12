@@ -45,6 +45,7 @@ jobs:
   changes:
     name: 🔍 Detect Changes
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       terraform: ${{ steps.changes.outputs.terraform }}
       tests: ${{ steps.changes.outputs.tests }}
@@ -73,6 +74,7 @@ jobs:
   lint-and-security:
     name: 🧹 Lint & Security
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: changes
     if: needs.changes.outputs.terraform == 'true'
     steps:
@@ -124,6 +126,7 @@ jobs:
   go-tests:
     name: 🧪 Go Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: changes
     if: needs.changes.outputs.tests == 'true' || needs.changes.outputs.terraform == 'true'
     env:
@@ -166,6 +169,7 @@ jobs:
   terraform-plan:
     name: 📋 Terraform Plan (${{ matrix.environment }})
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: changes
     if: needs.changes.outputs.terraform == 'true'
     strategy:
@@ -252,6 +256,7 @@ jobs:
   cost-estimation:
     name: 💰 Cost Estimation (${{ matrix.environment }})
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: terraform-plan
     if: github.event_name == 'pull_request' && needs.changes.outputs.terraform == 'true' && vars.ENABLE_COST_ESTIMATION == 'true'
     strategy:
@@ -304,6 +309,7 @@ jobs:
   pr-summary:
     name: 💬 PR Summary
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [changes, lint-and-security, go-tests, terraform-plan, cost-estimation]
     if: github.event_name == 'pull_request' && always()
     steps:

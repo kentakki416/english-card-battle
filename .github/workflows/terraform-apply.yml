@@ -35,6 +35,7 @@ jobs:
   terraform-apply:
     name: 🚀 Terraform Apply
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     environment: 
       name: ${{ github.event.inputs.environment }}
       url: https://console.aws.amazon.com/

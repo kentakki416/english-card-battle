@@ -32,6 +32,7 @@ jobs:
   build-and-push:
     name: 🐳 Build & Push Docker Image
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     environment: 
       name: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prd' || 'dev') }}
     

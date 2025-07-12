@@ -17,6 +17,7 @@ jobs:
   test:
     name: 🧪 Docker Compose Integration Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     
     steps:
       - name: 📥 リポジトリをチェックアウト

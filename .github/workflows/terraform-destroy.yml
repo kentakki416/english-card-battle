@@ -35,6 +35,7 @@ jobs:
   terraform-destroy:
     name: 💥 Terraform Destroy
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     environment: 
       name: ${{ github.event.inputs.environment }}-destroy
       url: https://console.aws.amazon.com/
