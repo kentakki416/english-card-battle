@@ -1,4 +1,4 @@
-import { ERROR } from '../../constant'
+import { ERROR } from "../../constant"
 
 /**
  * ユーザー関連のエラー型

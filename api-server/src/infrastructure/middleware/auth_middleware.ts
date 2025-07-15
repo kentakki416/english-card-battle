@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express'
-import { Jwt } from '../util/jwt'
+import { Request, Response, NextFunction } from "express"
+import { Jwt } from "../util/jwt"
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -26,17 +26,17 @@ export class AuthMiddleware {
       try {
         console.log(this.jwtService)
         // NextAuth.jsのセッショントークンの存在確認
-        const sessionToken = req.headers.authorization?.replace('Bearer ', '')
+        const sessionToken = req.headers.authorization?.replace("Bearer ", "")
         
         // jweは細かい検証はせずセットされていればOK
         if (!sessionToken) {
-          return res.status(401).json({ error: 'Session token required' })
+          return res.status(401).json({ error: "Session token required" })
         }
 
         // x-auth-statusをチェックする
-        const authStatus = req.headers['x-auth-status']
-        if (authStatus !== 'verified') {
-          return res.status(401).json({ error: 'Authentication failed' })
+        const authStatus = req.headers["x-auth-status"]
+        if (authStatus !== "verified") {
+          return res.status(401).json({ error: "Authentication failed" })
         }
 
         // リクエストボディからユーザー情報を取得
@@ -44,21 +44,21 @@ export class AuthMiddleware {
         const { userId, email, name, picture } = req.body
         
         if (!userId || !email) {
-          return res.status(400).json({ error: 'User information required' })
+          return res.status(400).json({ error: "User information required" })
         }
 
         // 検証済みユーザー情報をリクエストに追加
         req.user = {
           id: userId,
           email: email,
-          name: name || '',
-          picture: picture || ''
+          name: name || "",
+          picture: picture || ""
         }
         
         next()
         return
       } catch {
-        return res.status(401).json({ error: 'Authentication failed' })
+        return res.status(401).json({ error: "Authentication failed" })
       }
     }
   }

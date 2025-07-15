@@ -1,9 +1,9 @@
-import { ERROR } from '../../../constant'
-import { Result, Success, Failure, Controller, Domain, ServerError, UserError, GoogleAuthError } from '../../../types'
-import { ILogger } from '../../adapter/interface/ilogger'
-import { IToken } from '../../adapter/interface/itoken'
-import { IUserRepository } from '../../adapter/interface/repository/iuser_repository'
-import { User } from '../../domain/entity/user'
+import { ERROR } from "../../../constant"
+import { Result, Success, Failure, Controller, Domain, ServerError, UserError, GoogleAuthError } from "../../../types"
+import { ILogger } from "../../adapter/interface/ilogger"
+import { IToken } from "../../adapter/interface/itoken"
+import { IUserRepository } from "../../adapter/interface/repository/iuser_repository"
+import { User } from "../../domain/entity/user"
 
 export type GoogleLoginError = GoogleAuthError | UserError | ServerError
 
@@ -27,8 +27,8 @@ export class GoogleLoginUsecase {
     try {
       // 既存ユーザーの取得
       const userResult = await this.userRepository.findOne({
-        'provider.google.id': request.userId,
-        'provider.google.email': request.email
+        "provider.google.id": request.userId,
+        "provider.google.email": request.email
       })
 
       if (userResult.isFailure()) {

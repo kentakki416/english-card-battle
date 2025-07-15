@@ -1,18 +1,18 @@
-import { CONSTANT } from '../../../../constant'
-import { SignupController } from '../../../../src/adapter/controller/auth/signup_controller'
-import { SignupSerializer } from '../../../../src/adapter/serializer/auth/signup_serializer'
-import { SignupUsecase } from '../../../../src/usecase/auth/signup_usecase'
+import { CONSTANT } from "../../../../constant"
+import { SignupController } from "../../../../src/adapter/controller/auth/signup_controller"
+import { SignupSerializer } from "../../../../src/adapter/serializer/auth/signup_serializer"
+import { SignupUsecase } from "../../../../src/usecase/auth/signup_usecase"
 import { 
   createMockLogger, 
   createSignupRequestBody,
   createMockUser 
-} from '../../../utils/test-helper'
+} from "../../../utils/test-helper"
 
 // モック化
-jest.mock('../../../../src/usecase/auth/signup_usecase')
-jest.mock('../../../../src/adapter/serializer/auth/signup_serializer')
+jest.mock("../../../../src/usecase/auth/signup_usecase")
+jest.mock("../../../../src/adapter/serializer/auth/signup_serializer")
 
-describe('SignupController', () => {
+describe("SignupController", () => {
   let mockSignupUsecase: jest.Mocked<SignupUsecase>
   let mockSerializer: jest.Mocked<SignupSerializer>
   let logger: ReturnType<typeof createMockLogger>
@@ -32,18 +32,18 @@ describe('SignupController', () => {
     controller = new SignupController(mockSignupUsecase, mockSerializer, logger)
   })
 
-  describe('【正常系】', () => {
-    test('正常なリクエストで成功レスポンスが返る', async () => {
+  describe("【正常系】", () => {
+    test("正常なリクエストで成功レスポンスが返る", async () => {
       // Arrange
       const requestBody = createSignupRequestBody()
-      const mockUser = createMockUser('1', requestBody.name)
+      const mockUser = createMockUser("1", requestBody.name)
       const mockResponse = {
         status: CONSTANT.STATUS_CODE.SUCCESS,
         data: { 
-          id: '1', 
-          name: 'testuser',
-          gender: 'male',
-          profilePic: 'http://example.com/profile.jpg'
+          id: "1", 
+          name: "testuser",
+          gender: "male",
+          profilePic: "http://example.com/profile.jpg"
         },
         responsedAt: new Date(),
       }
@@ -52,23 +52,23 @@ describe('SignupController', () => {
       mockSerializer.execute.mockReturnValue(mockResponse)
 
       // Act
-      const result = await controller.execute(requestBody, 'api-token')
+      const result = await controller.execute(requestBody, "api-token")
 
       // Assert
       expect(result.status).toBe(CONSTANT.STATUS_CODE.SUCCESS)
-      expect(mockSignupUsecase.exucute).toHaveBeenCalledWith(requestBody, 'api-token')
-      expect(mockSerializer.execute).toHaveBeenCalledWith(mockUser, 'api-token')
+      expect(mockSignupUsecase.exucute).toHaveBeenCalledWith(requestBody, "api-token")
+      expect(mockSerializer.execute).toHaveBeenCalledWith(mockUser, "api-token")
     })
   })
 
-  describe('【異常系】', () => {
-    test('ユースケースでエラーが発生した場合、エラーレスポンスが返る', async () => {
+  describe("【異常系】", () => {
+    test("ユースケースでエラーが発生した場合、エラーレスポンスが返る", async () => {
       // Arrange
       const requestBody = createSignupRequestBody()
-      const error = new Error('パスワードが一致しません')
+      const error = new Error("パスワードが一致しません")
       const errorResponse = {
         status: CONSTANT.STATUS_CODE.SERVER_ERROR,
-        message: 'パスワードが一致しません',
+        message: "パスワードが一致しません",
         responsedAt: new Date(),
       }
       
@@ -76,7 +76,7 @@ describe('SignupController', () => {
       mockSerializer.error.mockReturnValue(errorResponse)
 
       // Act
-      const result = await controller.execute(requestBody, 'api-token')
+      const result = await controller.execute(requestBody, "api-token")
 
       // Assert
       expect(result.status).toBe(CONSTANT.STATUS_CODE.SERVER_ERROR)

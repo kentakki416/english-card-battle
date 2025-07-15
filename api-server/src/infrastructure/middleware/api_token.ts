@@ -1,8 +1,8 @@
-import * as uuid from 'uuid'
+import * as uuid from "uuid"
 export class ApiTokenGenerator {
   private _token:string
   constructor() {
-    this._token = ''
+    this._token = ""
   }
 
   public get token() {

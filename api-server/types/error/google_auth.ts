@@ -1,4 +1,4 @@
-import { ERROR } from '../../constant'
+import { ERROR } from "../../constant"
 
 /**
  * Google認証関連のエラー型
