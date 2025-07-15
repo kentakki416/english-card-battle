@@ -1,7 +1,7 @@
 /**
  * 認証で使用するプロバイダーの種類
  */
-export type ProviderType = 'google' | 'github'
+export type ProviderType = "google" | "github"
 
 /**
  * プロバイダーのユーザー情報

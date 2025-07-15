@@ -1,8 +1,8 @@
-import { Router } from 'express'
+import { Router } from "express"
 
-import { DIContainer } from '../di/container'
+import { DIContainer } from "../di/container"
 
-import { AuthRouter } from './auth_router'
+import { AuthRouter } from "./auth_router"
 
 export class ExpressRouter {
   private _router: Router
@@ -19,13 +19,13 @@ export class ExpressRouter {
    */
   private _setupRoutes() {
     // ルートエンドポイント
-    this._router.get('/', (_, res) => {
-      res.send('Hello World')
+    this._router.get("/", (_, res) => {
+      res.send("Hello World")
     })
     
     // Auth API
     const authRouter = new AuthRouter(this._router, this._container)
-    this._router.use('/auth', authRouter.getRouter())
+    this._router.use("/auth", authRouter.getRouter())
   }
 
   /**

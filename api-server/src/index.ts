@@ -1,7 +1,7 @@
-import { MongoClient } from './infrastructure/db/mongo/client'
-import { DIContainer } from './infrastructure/di/container'
-import { PinoLogger } from './infrastructure/log/pino/logger'
-import { ExpressServer } from './infrastructure/server/server'
+import { MongoClient } from "./infrastructure/db/mongo/client"
+import { DIContainer } from "./infrastructure/di/container"
+import { PinoLogger } from "./infrastructure/log/pino/logger"
+import { ExpressServer } from "./infrastructure/server/server"
 
 (async() => {
   const apiPort = 8080

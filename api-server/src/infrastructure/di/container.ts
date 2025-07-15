@@ -1,10 +1,10 @@
-import { Db } from 'mongodb'
+import { Db } from "mongodb"
 
-import { IDbClient } from '../../adapter/interface/idb_client'
-import { ILogger } from '../../adapter/interface/ilogger'
-import { ApiTokenGenerator } from '../middleware/api_token'
+import { IDbClient } from "../../adapter/interface/idb_client"
+import { ILogger } from "../../adapter/interface/ilogger"
+import { ApiTokenGenerator } from "../middleware/api_token"
 
-import { AuthContainer } from './auth_container'
+import { AuthContainer } from "./auth_container"
 // import { UserContainer } from './user_container'
 // import { StudyContainer } from './study_container'
 // import { BattleContainer } from './battle_container'
@@ -43,7 +43,7 @@ export class DIContainer {
 
   constructor(dbClient: IDbClient, logger: ILogger) {
     this._dbClient = dbClient
-    this._db = this._dbClient.getDb(process.env.DB_NAME || 'chat-app')
+    this._db = this._dbClient.getDb(process.env.DB_NAME || "chat-app")
     this._logger = logger
     this._apiToken = new ApiTokenGenerator()
     

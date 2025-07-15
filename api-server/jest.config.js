@@ -1,20 +1,20 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
+  preset: "ts-jest",
+  testEnvironment: "node",
   transform: {
-    '^.+\\.tsx?$': 'ts-jest',
+    "^.+\\.tsx?$": "ts-jest",
   },
-  testMatch: ['**/test/**/*.test.ts'], // テストファイルのパターンを指定
+  testMatch: ["**/test/**/*.test.ts"], // テストファイルのパターンを指定
   
   // カバレッジ設定
   collectCoverage: true,
-  coverageDirectory: 'coverage',
-  coverageReporters: ['text', 'text-summary', 'html'],
+  coverageDirectory: "coverage",
+  coverageReporters: ["text", "text-summary", "html"],
   collectCoverageFrom: [
-    'src/**/*.{ts,js}',
-    '!src/**/*.d.ts',
-    '!src/**/index.ts',  // エントリーポイントは除外
+    "src/**/*.{ts,js}",
+    "!src/**/*.d.ts",
+    "!src/**/index.ts",  // エントリーポイントは除外
   ],
   // カバレッジ閾値は設定せず、情報表示のみ
   // coverageThreshold: {
@@ -25,4 +25,4 @@ module.exports = {
   //     statements: 40
   //   }
   // }
-};
+}

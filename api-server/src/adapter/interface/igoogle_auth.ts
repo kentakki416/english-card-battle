@@ -1,5 +1,5 @@
-import { Result, UserError, ServerError } from '../../../types'
-import { GoogleAuthError } from '../../../types/error'
+import { Result, UserError, ServerError } from "../../../types"
+import { GoogleAuthError } from "../../../types/error"
 
 export interface GoogleUserInfo {
   id: string

@@ -128,5 +128,16 @@ export default tseslint.config(
             'no-console': 'error', // console.log() などの console メソッドを禁止
         },
     },
+    {
+        // クォート、行の長さ、セミコロンの設定
+        rules: {
+            // クォートをダブルクォートに統一
+            'quotes': ['error', 'double'],
+            // 行の最大文字数を180文字に設定
+            'max-len': ['error', { 'code': 180 }],
+            // セミコロンを禁止
+            'semi': ['error', 'never'],
+        },
+    },
     prettierConfig, // フォーマット は Prettier で行うため、フォーマット関連のルールを無効化
 );

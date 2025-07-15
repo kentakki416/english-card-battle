@@ -1,7 +1,7 @@
-import { Controller } from '../../../../types'
-import { GoogleLoginSerializer } from '../../serializer/auth/google_login_serializer'
-import { GoogleLoginUsecase } from '../../../usecase/auth/google_login_usecase'
-import { ILogger } from '../../interface/ilogger'
+import { Controller } from "../../../../types"
+import { GoogleLoginSerializer } from "../../serializer/auth/google_login_serializer"
+import { GoogleLoginUsecase } from "../../../usecase/auth/google_login_usecase"
+import { ILogger } from "../../interface/ilogger"
 
 
 export class GoogleLoginController {
