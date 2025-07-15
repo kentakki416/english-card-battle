@@ -1,5 +1,5 @@
-import type { Config } from "tailwindcss";
-import defaultTheme from "tailwindcss/defaultTheme";
+import type { Config } from "tailwindcss"
+import defaultTheme from "tailwindcss/defaultTheme"
 
 const config: Config = {
   content: [
@@ -11,7 +11,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Satoshi"', ...defaultTheme.fontFamily.sans],
+        sans: ["Satoshi", ...defaultTheme.fontFamily.sans],
       },
       screens: {
         "2xsm": "375px",
@@ -274,7 +274,7 @@ const config: Config = {
         video: "url('../images/video/video.png')",
       },
       content: {
-        "icon-copy": 'url("../images/icon/icon-copy-alt.svg")',
+        "icon-copy": "url('../images/icon/icon-copy-alt.svg')",
       },
       transitionProperty: { width: "width", stroke: "stroke" },
       borderWidth: {
@@ -382,5 +382,5 @@ const config: Config = {
     },
   },
   plugins: [],
-};
-export default config;
+}
+export default config

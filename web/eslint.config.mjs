@@ -136,11 +136,4 @@ export default tseslint.config(
             "semi": ["error", "never"],
         },
     },
-    {
-        // JSXとTSXファイルのみタブサイズを4に設定
-        files: ["**/*.jsx", "**/*.tsx"],
-        rules: {
-            "indent": ["error", 4],
-        },
-    }
 )

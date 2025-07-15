@@ -2,7 +2,7 @@
 import React from "react"
 import { useSidebarContext } from "../sidebar/SidebarProvider"
 import Link from "next/link"
-import Image from "next/image"
+// import Image from "next/image"
 import { SearchIcon } from "../../../assets/icons"
 
 const Header = () => {
@@ -22,13 +22,13 @@ const Header = () => {
 
       {isMobile && (
         <Link href="/" className="ml-2 max-[430px]:hidden min-[375px]:ml-4">
-          <Image
-            src="/images/logo/logo-icon.svg"
+          {/* <Image
+            src=""
             width={32}
             height={32}
             alt=""
             role="presentation"
-          />
+          /> */}
         </Link>
       )}
 
