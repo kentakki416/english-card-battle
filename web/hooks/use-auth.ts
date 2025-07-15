@@ -1,4 +1,4 @@
-import { useSession, signIn, signOut } from 'next-auth/react'
+import { useSession, signIn, signOut } from "next-auth/react"
 
 export const useAuth = () => {
   const { data: session, status } = useSession()
@@ -7,7 +7,7 @@ export const useAuth = () => {
     session,
     status,
     isAuthenticated: !!session,
-    isLoading: status === 'loading',
+    isLoading: status === "loading",
     login,
     logout,
   }
@@ -18,12 +18,12 @@ export const useAuth = () => {
  * @param provider プロバイダー
  */
 const login = async (provider: string) => {
-  await signIn(provider, { callbackUrl: '/' })
+  await signIn(provider, { callbackUrl: "/" })
 }
 
 /**
  * ログアウト
  */
 const logout = async () => {
-  await signOut({ callbackUrl: '/' })
+  await signOut({ callbackUrl: "/" })
 }
