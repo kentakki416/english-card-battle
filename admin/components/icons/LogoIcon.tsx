@@ -1,8 +1,9 @@
-import darkLogo from "@/assets/logos/dark.svg"
-import logo from "@/assets/logos/main.svg"
 import Image from "next/image"
 
-const Logo = () => {
+import darkLogo from "../../public/logos/dark.svg"
+import logo from "../../public/logos/main.svg"
+
+const LogoIcon = () => {
   return (
     <div className="relative h-8 max-w-[10.847rem]">
       <Image
@@ -25,4 +26,4 @@ const Logo = () => {
   )
 }
 
-export default Logo
+export default LogoIcon

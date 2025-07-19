@@ -1,10 +1,12 @@
 import type { Metadata } from "next"
 import "@/css/style.css"
-import Providers from "./providers"
 import NextTopLoader from "nextjs-toploader"
 import { PropsWithChildren } from "react"
-import Sidebar from "../components/layout/sidebar/Sidebar"
+
 import Header from "../components/layout/header/Header"
+import Sidebar from "../components/layout/sidebar/Sidebar"
+
+import Providers from "./providers"
 
 export const metadata: Metadata = {
   title: "Create Next App",

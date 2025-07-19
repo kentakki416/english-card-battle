@@ -1,4 +1,11 @@
-import * as Icons from "../components/icon/Icons";
+import AlphabetIcon from "../components/icons/sidebar/AlphabetIcon"
+import AuthenticationIcon from "../components/icons/sidebar/AuthenticationIcon"
+import CalendarIcon from "../components/icons/sidebar/CalendarIcon"
+import FourCircleIcon from "../components/icons/sidebar/FourCircleIcon"
+import HomeIcon from "../components/icons/sidebar/HomeIcon"
+import PieChartIcon from "../components/icons/sidebar/PieChartIcon"
+import TableIcon from "../components/icons/sidebar/TableIcon"
+import UserIcon from "../components/icons/sidebar/UserIcon"
 
 export const SIDEBAR_DATA = [
   {
@@ -6,7 +13,7 @@ export const SIDEBAR_DATA = [
     items: [
       {
         title: "Dashboard",
-        icon: Icons.HomeIcon,
+        icon: HomeIcon,
         items: [
           {
             title: "eCommerce",
@@ -17,18 +24,18 @@ export const SIDEBAR_DATA = [
       {
         title: "Calendar",
         url: "/calendar",
-        icon: Icons.Calendar,
+        icon: CalendarIcon,
         items: [],
       },
       {
         title: "Profile",
         url: "/profile",
-        icon: Icons.User,
+        icon: UserIcon,
         items: [],
       },
       {
         title: "Forms",
-        icon: Icons.Alphabet,
+        icon: AlphabetIcon,
         items: [
           {
             title: "Form Elements",
@@ -43,7 +50,7 @@ export const SIDEBAR_DATA = [
       {
         title: "Tables",
         url: "/tables",
-        icon: Icons.Table,
+        icon: TableIcon,
         items: [
           {
             title: "Tables",
@@ -53,7 +60,7 @@ export const SIDEBAR_DATA = [
       },
       {
         title: "Pages",
-        icon: Icons.Alphabet,
+        icon: AlphabetIcon,
         items: [
           {
             title: "Settings",
@@ -68,7 +75,7 @@ export const SIDEBAR_DATA = [
     items: [
       {
         title: "Charts",
-        icon: Icons.PieChart,
+        icon: PieChartIcon,
         items: [
           {
             title: "Basic Chart",
@@ -78,7 +85,7 @@ export const SIDEBAR_DATA = [
       },
       {
         title: "UI Elements",
-        icon: Icons.FourCircle,
+        icon: FourCircleIcon,
         items: [
           {
             title: "Alerts",
@@ -92,7 +99,7 @@ export const SIDEBAR_DATA = [
       },
       {
         title: "Authentication",
-        icon: Icons.Authentication,
+        icon: AuthenticationIcon,
         items: [
           {
             title: "Sign In",
@@ -102,4 +109,4 @@ export const SIDEBAR_DATA = [
       },
     ],
   },
-];
+]
