@@ -29,9 +29,33 @@ const eslintConfig = [
       // クォートをダブルクォートに統一
       "quotes": ["error", "double"],
       // 行の最大文字数を180文字に設定
-      "max-len": ["error", { "code": 180 }],
+      // "max-len": ["error", { "code": 180 }],
       // セミコロンを禁止
-      "semi": ["error", "never"]
+      "semi": ["error", "never"],
+
+      // importの順序ルール
+      "import/order": [
+        "error",
+        {
+          "groups": [
+            "builtin",    // Node.jsの組み込みモジュール
+            "external",   // npmパッケージ
+            "internal",   // 内部モジュール
+            "parent",     // 親ディレクトリ
+            "sibling",    // 同じディレクトリ
+            "index"       // インデックスファイル
+          ],
+          "newlines-between": "always",
+          "alphabetize": {
+            "order": "asc",
+            "caseInsensitive": true
+          }
+        }
+      ],
+      "import/no-unresolved": "error",
+      "import/named": "error",
+      "import/default": "error",
+      "import/namespace": "error"
     },
     settings: {
       tailwindcss: {

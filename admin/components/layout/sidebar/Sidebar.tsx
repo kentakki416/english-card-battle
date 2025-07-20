@@ -1,14 +1,18 @@
 "use client"
 
-import { cn } from "@/lib/utils"
+import Link from "next/link"
 import { usePathname } from "next/navigation"
 import React, { useEffect, useState, useCallback } from "react"
-import { useSidebarContext } from "./SidebarProvider"
+
+import { cn } from "@/lib/utils"
+
 import { SIDEBAR_DATA } from "../../../constants/sidebar"
-import Link from "next/link"
-import { ArrowLeftIcon, ChevronUp } from "../../icon/Icons"
+import ArrowLeftIcon from "../../icons/ArrowLeftIcon"
+import ChevronUpIcon from "../../icons/ChevronUpIcon"
+import LogoIcon from "../../icons/LogoIcon"
+
 import MenuItem from "./MenuItem"
-import Logo from "../../icon/Logo"
+import { useSidebarContext } from "./SidebarProvider"
 
 const Sidebar = () => {
   const pathname = usePathname()
@@ -62,7 +66,7 @@ const Sidebar = () => {
               onClick={() => isMobile && toggleSidebar()}
               className="px-0 py-2.5 min-[850px]:py-0"
             >
-              <Logo />
+              <LogoIcon />
             </Link>
 
             {isMobile && (
@@ -104,7 +108,7 @@ const Sidebar = () => {
 
                               <span>{item.title}</span>
 
-                              <ChevronUp
+                              <ChevronUpIcon
                                 className={cn(
                                   "ml-auto rotate-180 transition-transform duration-200",
                                   expandedItems.includes(item.title) &&
