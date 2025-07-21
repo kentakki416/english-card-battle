@@ -3,6 +3,8 @@ import "source-map-support/register"
 import * as cdk from "aws-cdk-lib"
 import { DevStack } from "../lib/dev-stack"
 import { ServerLessAppStack } from "../lib/serverless-app-stack"
+import { ApiServerStack } from '../lib/ecs-stack'
+import { Environment } from '../lib/parameter'
 
 const app = new cdk.App();
 // new DevStack(app, 'EnglishCardBattleDevStack', {
@@ -16,3 +18,7 @@ const app = new cdk.App();
 // new LambdaStack(app, "SampleLamdbaStack", {})
 
 new ServerLessAppStack(app, "ServerLessApp", {})
+
+new ApiServerStack(app, "ApiServer", {
+  environment: process.env.ENVIRONMENT as Environment,
+})

@@ -1,4 +1,4 @@
-// API Gateway+LambdaやLamdba FunctoinUrlなどの構成
+// API Gateway+LambdaやLamdba FunctoinUrlなどの構成 
 
 import * as cdk from "aws-cdk-lib"
 import { Construct } from "constructs"
