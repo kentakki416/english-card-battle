@@ -1,19 +1,19 @@
-import { Environment, EnvironmentParameters } from './types';
-import { devParameters } from './dev';
-import { stgParameters } from './stg';
-import { prdParameters } from './prd';
+import { devParameters } from "./dev"
+import { prdParameters } from "./prd"
+import { stgParameters } from "./stg"
+import { Environment, EnvironmentParameters } from "./types"
 
 export function getEnvironmentParameters(environment: Environment): EnvironmentParameters {
   switch (environment) {
-    case 'dev':
-      return devParameters;
-    case 'stg':
-      return stgParameters;
-    case 'prd':
-      return prdParameters;
+    case "dev":
+      return devParameters
+    case "stg":
+      return stgParameters
+    case "prd":
+      return prdParameters
     default:
-      throw new Error(`Unsupported environment: ${environment}`);
+      throw new Error(`Unsupported environment: ${environment}`)
   }
 }
 
-export * from './types'; 
+export * from "./types"

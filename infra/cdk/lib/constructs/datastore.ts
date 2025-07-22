@@ -4,7 +4,7 @@ import { Construct } from "constructs"
 
 export class DataStore extends Construct {
   readonly sampleTable: TableV2
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string) {
     super(scope, id)
 
     const sampleTable = new TableV2(this, "SampleTable", {

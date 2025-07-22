@@ -1,9 +1,9 @@
 import * as cdk from "aws-cdk-lib"
-import { Construct } from "constructs"
 import { Peer, Port, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2"
-import { Cluster, ContainerImage, FargateService, FargateTaskDefinition, LogDriver, Protocol } from 'aws-cdk-lib/aws-ecs'
-import { ManagedPolicy, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam'
-import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2'
+import { Cluster, ContainerImage, FargateService, FargateTaskDefinition, LogDriver, Protocol } from "aws-cdk-lib/aws-ecs"
+import { ApplicationLoadBalancer } from "aws-cdk-lib/aws-elasticloadbalancingv2"
+import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam"
+import { Construct } from "constructs"
 
 interface EcsProps extends cdk.StackProps {
   vpc: Vpc,

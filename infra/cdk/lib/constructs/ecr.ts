@@ -1,7 +1,6 @@
 import * as cdk from "aws-cdk-lib"
-
-import { Construct } from "constructs"
 import { Repository, TagStatus } from "aws-cdk-lib/aws-ecr"
+import { Construct } from "constructs"
 
 interface EcrProps extends cdk.StackProps {
   repositoryName: string
@@ -27,9 +26,9 @@ export class EcrConstruct extends Construct {
       ]
     })
 
-    new cdk.CfnOutput(this, 'EcrRepositoryUri', {
+    new cdk.CfnOutput(this, "EcrRepositoryUri", {
       value: repository.repositoryUri,
-      description: 'ECR Repository URI',
-    });
+      description: "ECR Repository URI",
+    })
   }
 }

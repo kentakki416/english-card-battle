@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib"
-import { Construct } from "constructs"
 import { IpAddresses, SubnetType, Vpc } from "aws-cdk-lib/aws-ec2"
+import { Construct } from "constructs"
 
 interface VpcProps extends cdk.StackProps {
   vpcCidr: string,

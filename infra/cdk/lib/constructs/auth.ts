@@ -4,7 +4,7 @@ import { Construct } from "constructs"
 
 export class Auth extends Construct {
   readonly userPool: UserPool
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string) {
     super(scope, id)
 
     const userPool = new UserPool(this, "UserPool", {
@@ -31,7 +31,7 @@ export class Auth extends Construct {
           OAuthScope.OPENID,
         ]
       },
-      authFlows: {adminUserPassword: true}
+      authFlows: { adminUserPassword: true }
     })
 
     this.userPool = userPool

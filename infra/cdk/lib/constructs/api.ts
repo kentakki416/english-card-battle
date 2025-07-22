@@ -1,12 +1,12 @@
-// API Gateway+LambdaやLamdba FunctoinUrlなどの構成 
+// API Gateway+LambdaやLamdba FunctoinUrlなどの構成
 
 import * as cdk from "aws-cdk-lib"
-import { Construct } from "constructs"
-import { Function, Runtime } from "aws-cdk-lib/aws-lambda"
 import { CognitoUserPoolsAuthorizer, Cors, LambdaRestApi } from "aws-cdk-lib/aws-apigateway"
-import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs"
 import { UserPool } from "aws-cdk-lib/aws-cognito"
 import { TableV2 } from "aws-cdk-lib/aws-dynamodb"
+import { Function, Runtime } from "aws-cdk-lib/aws-lambda"
+import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs"
+import { Construct } from "constructs"
 
 interface ApiProps extends cdk.StackProps {
   userPool: UserPool

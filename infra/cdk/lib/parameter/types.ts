@@ -1,4 +1,4 @@
-import { SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { SubnetType } from "aws-cdk-lib/aws-ec2"
 
 export interface VpcParameters {
   vpcCidr: string;
@@ -32,4 +32,4 @@ export interface EnvironmentParameters {
   ecr: EcrParameters;
 }
 
-export type Environment = 'dev' | 'stg' | 'prd'; 
+export type Environment = "dev" | "stg" | "prd";
