@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import "source-map-support/register"
 import * as cdk from "aws-cdk-lib"
+import { AwsSolutionsChecks } from "cdk-nag"
 
 // import { DevStack } from "../lib/dev-stack"
 import { ApiServerStack } from "../lib/api-server-stack"
@@ -8,6 +9,12 @@ import { Environment } from "../lib/parameter"
 import { ServerLessAppStack } from "../lib/serverless-app-stack"
 
 const app = new cdk.App()
+
+// cdk-nagが有効化されいてる場合のみチェックする
+if (process.env.NAG_CHECK === "true") {
+  cdk.Aspects.of(app).add(new AwsSolutionsChecks())
+}
+
 // new DevStack(app, 'EnglishCardBattleDevStack', {
 //   env: {
 //     account: process.env.CDK_DEFAULT_ACCOUNT,
