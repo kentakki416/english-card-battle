@@ -3,7 +3,7 @@ import "source-map-support/register"
 import * as cdk from "aws-cdk-lib"
 
 // import { DevStack } from "../lib/dev-stack"
-import { ApiServerStack } from "../lib/ecs-stack"
+import { ApiServerStack } from "../lib/api-server-stack"
 import { Environment } from "../lib/parameter"
 import { ServerLessAppStack } from "../lib/serverless-app-stack"
 

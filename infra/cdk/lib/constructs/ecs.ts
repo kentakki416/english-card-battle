@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib"
 import { Peer, Port, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2"
-import { Cluster, ContainerImage, FargateService, FargateTaskDefinition, LogDriver, Protocol } from "aws-cdk-lib/aws-ecs"
+import { Cluster, ContainerImage, ContainerInsights, FargateService, FargateTaskDefinition, LogDriver, Protocol } from "aws-cdk-lib/aws-ecs"
 import { ApplicationLoadBalancer } from "aws-cdk-lib/aws-elasticloadbalancingv2"
 import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam"
 import { Construct } from "constructs"
@@ -44,7 +44,7 @@ export class EcsConstruct extends Construct {
     // ECSクラスターの設定
     const cluster = new Cluster(this, "EcsCluster", {
       vpc: props.vpc,
-      containerInsights: true,
+      containerInsightsV2: ContainerInsights.ENABLED,
     })
 
     // タスク実行ロールの設定

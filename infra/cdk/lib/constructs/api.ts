@@ -33,7 +33,7 @@ export class Api extends Construct {
       cognitoUserPools: [props.userPool]
     })
 
-    const restApi = new LambdaRestApi(this, "RestApi", {
+    new LambdaRestApi(this, "RestApi", {
       handler: lambdaFunction,
       defaultCorsPreflightOptions: {
         allowOrigins: Cors.ALL_ORIGINS,
