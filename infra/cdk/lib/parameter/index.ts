@@ -12,7 +12,7 @@ export function getEnvironmentParameters(environment: Environment): EnvironmentP
     case "prd":
       return prdParameters
     default:
-      throw new Error(`Unsupported environment: ${environment}`)
+      return devParameters
   }
 }
 
