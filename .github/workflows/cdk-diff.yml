@@ -63,6 +63,5 @@ jobs:
       - name: 🔍 CDK Diffを実行
         working-directory: infra/cdk
         run: |
-          export TERM=xterm-256color
           npm run diff:${{ env.ENVIRONMENT }}
         
