@@ -3,12 +3,12 @@ on:
   push:
     branches: [ main, develop ]
     paths:
-      - 'infra/**'
+      - 'infra/terraform/**'
       - '.github/workflows/terraform-test.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
-      - 'infra/**'
+      - 'infra/terraform/**'
     types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
