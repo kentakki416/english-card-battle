@@ -28,6 +28,7 @@ env:
   ENVIRONMENT: ${{ github.event.inputs.environment || 'dev' }}
   AWS_REGION: ap-northeast-1
   AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+  FORCE_COLOR: 1
 
 jobs:
   diff:

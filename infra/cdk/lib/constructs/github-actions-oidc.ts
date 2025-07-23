@@ -92,7 +92,7 @@ export class GitHubActionsOidcConstruct extends Construct {
             "cloudformation:CreateChangeSet",
             "cloudformation:DeleteChangeSet",
             "cloudformation:DescribeChangeSet",
-            "cloudformation:DescribeStack",
+            "cloudformation:DescribeStacks",
             "cloudformation:DescribeStackEvents",
             "cloudformation:ExecuteChangeSet",
             "cloudformation:GetStackPolicy",
