@@ -8,6 +8,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
+    "test:updateSnapshot": "jest --updateSnapshot",
     "cdk": "cdk",
     "bootstrap": "cdk bootstrap aws://300126371565/ap-northeast-1",
     "deploy:dev": "ENVIRONMENT=dev cdk deploy",
