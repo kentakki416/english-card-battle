@@ -32,7 +32,7 @@ bug:
 refactor:
   - head-branch: ['^refactor'] 
 
-docs:
+documentation:
   - head-branch: ['^docs']
 
 ci:
