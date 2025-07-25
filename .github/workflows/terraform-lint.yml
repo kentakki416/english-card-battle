@@ -14,6 +14,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  AWS_REGION: ap-northeast-1
+  AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+  FORCE_COLOR: 1  
+
 jobs:
   lint:
     name: 🧹 Terraform Lint
@@ -51,6 +56,12 @@ jobs:
         env:
           # https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/plugins.md#avoiding-rate-limiting
           GITHUB_TOKEN: ${{ github.token }}
+
+      - name: 🔐 AWS認証情報を設定
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: 📝 TFLintの実行
         working-directory: infra/terraform
