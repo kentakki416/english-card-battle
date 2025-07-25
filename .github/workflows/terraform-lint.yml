@@ -30,7 +30,7 @@ jobs:
 
       - name: 🔧 Terraformの初期化
         working-directory: infra/terraform/aws/env/dev
-        run: terraform init
+        run: terraform init -backend=false
 
       - name: 📝 フォーマットチェック
         working-directory: infra/terraform/aws/env/dev
