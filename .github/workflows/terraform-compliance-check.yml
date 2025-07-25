@@ -1,0 +1,51 @@
+name: 🏗️ Terraform Compliance Check
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  pull-requests: write
+  security-events: write
+defaults:
+  run:
+    shell: bash
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trivy-security-scan:
+    name: 🔍 Trivy Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔍 Run Trivy Security Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: 'infra/terraform/'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          exit-code: '1'
+          ignore-unfixed: true
+
+  checkov-security-scan:
+    name: 🔍 Checkov Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔍 Run Checkov Security Scan
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: 'infra/terraform/'
+          framework: 'terraform,terraform_plan'
+          soft_fail: false
+          download_external_modules: true
+          skip_check: 'CKV_AWS_18,CKV_AWS_19,CKV_AWS_20'
+          quiet: false
+          compact: false
+
