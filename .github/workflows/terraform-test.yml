@@ -84,11 +84,11 @@ jobs:
           tflint_version: latest
 
       - name: 📝 Format Check
-        working-directory: infra/aws
+        working-directory: infra/terraform/aws
         run: terraform fmt -check -recursive -diff
 
       - name: ✅ Validate & Lint
-        working-directory: infra/aws/env/dev
+        working-directory: infra/terraform/aws/env/dev
         run: |
           terraform init -backend=false
           terraform validate
@@ -99,13 +99,13 @@ jobs:
       - name: 🔒 Security Scan
         uses: aquasecurity/tfsec-action@v1.0.3
         with:
-          working_directory: infra/aws
+          working_directory: infra/terraform/aws
           soft_fail: true
 
       - name: 🛡️ Checkov Scan
         uses: bridgecrewio/checkov-action@v12
         with:
-          directory: infra/aws
+          directory: infra/terraform/aws
           soft_fail: true
           framework: terraform
           output_format: sarif
@@ -134,7 +134,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
-          cache-dependency-path: infra/aws/test/go.sum
+          cache-dependency-path: infra/terraform/aws/test/go.sum
 
       - name: ⚙️ Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -142,7 +142,7 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
 
       - name: 🧪 Run Tests
-        working-directory: infra/aws/test
+        working-directory: infra/terraform/aws/test
         env:
           TERRATEST_PLAN_ONLY: "true"
         run: |
@@ -185,17 +185,17 @@ jobs:
           terraform_wrapper: false
 
       - name: 🔧 Terraform init
-        working-directory: infra/aws/env/${{ matrix.environment }}
+        working-directory: infra/terraform/aws/env/${{ matrix.environment }}
         run: terraform init
 
       - name: 📋 Generate Plan
-        working-directory: infra/aws/env/${{ matrix.environment }}
+        working-directory: infra/terraform/aws/env/${{ matrix.environment }}
         run: |
           terraform plan -detailed-exitcode -out=tfplan.out | tee plan_output.txt
         continue-on-error: true
 
       - name: 🔍 Safety Checks
-        working-directory: infra/aws/env/${{ matrix.environment }}
+        working-directory: infra/terraform/aws/env/${{ matrix.environment }}
         run: |
           if [ -f tfplan.out ]; then
             if terraform show tfplan.out | grep -q "destroy"; then
@@ -223,7 +223,7 @@ jobs:
       - name: 📝 Format Plan for PR
         id: format_plan
         if: github.event_name == 'pull_request'
-        working-directory: infra/aws/env/${{ matrix.environment }}
+        working-directory: infra/terraform/aws/env/${{ matrix.environment }}
         run: |
           if [ -f plan_output.txt ]; then
             PLAN_OUTPUT=$(cat plan_output.txt)
@@ -266,7 +266,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: terraform-plan-${{ matrix.environment }}
-          path: infra/aws/env/${{ matrix.environment }}
+          path: infra/terraform/aws/env/${{ matrix.environment }}
 
       - name: ⚙️ Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -274,7 +274,7 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
 
       - name: 📋 Convert Plan to JSON
-        working-directory: infra/aws/env/${{ matrix.environment }}
+        working-directory: infra/terraform/aws/env/${{ matrix.environment }}
         run: |
           terraform init
           terraform show -json tfplan.out > tfplan.json
@@ -285,13 +285,13 @@ jobs:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
 
       - name: 💰 Generate Cost Estimate
-        working-directory: infra/aws/env/${{ matrix.environment }}
+        working-directory: infra/terraform/aws/env/${{ matrix.environment }}
         run: infracost breakdown --path=tfplan.json --format=json --out-file=infracost-${{ matrix.environment }}.json
 
       - name: 💬 Comment Cost on PR
         uses: infracost/actions/comment@v3
         with:
-          path: infra/aws/env/${{ matrix.environment }}/infracost-${{ matrix.environment }}.json
+          path: infra/terraform/aws/env/${{ matrix.environment }}/infracost-${{ matrix.environment }}.json
           behavior: update
 
   # ========================================
