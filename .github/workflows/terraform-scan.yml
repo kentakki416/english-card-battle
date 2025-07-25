@@ -1,4 +1,4 @@
-name: 🏗️ Terraform Compliance Check
+name: 🏗️ Terraform Scan
 on:
   workflow_dispatch:
 permissions:
