@@ -310,7 +310,7 @@ npm run type-check
 
 ```bash
 # インフラのデプロイ
-cd infra/aws
+cd infra/terraform/aws
 terraform init
 terraform plan
 terraform apply

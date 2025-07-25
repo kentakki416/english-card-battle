@@ -64,22 +64,22 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
 
       - name: 🔧 Terraform init
-        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
+        working-directory: infra/terraform/aws/env/${{ github.event.inputs.environment }}
         run: terraform init
 
       - name: 📋 Generate Destroy Plan
-        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
+        working-directory: infra/terraform/aws/env/${{ github.event.inputs.environment }}
         run: |
           echo "📋 Creating destroy plan..."
           terraform plan -destroy -detailed-exitcode -out=destroy.tfplan
           
       - name: 🔍 Show Destroy Plan
-        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
+        working-directory: infra/terraform/aws/env/${{ github.event.inputs.environment }}
         run: terraform show destroy.tfplan
 
       - name: 💥 Execute Destroy
         if: github.event.inputs.dry_run != 'true'
-        working-directory: infra/aws/env/${{ github.event.inputs.environment }}
+        working-directory: infra/terraform/aws/env/${{ github.event.inputs.environment }}
         run: |
           echo "💥 Executing destroy for ${{ github.event.inputs.environment }}..."
           echo "⚠️ Starting in 5 seconds..."
