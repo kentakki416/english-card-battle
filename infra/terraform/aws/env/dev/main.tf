@@ -36,8 +36,8 @@ module "ecr" {
   environment  = local.environment  # dev
 
   # === イメージ保持設定 ===
-  image_retention_count         = 5 # 最新5個のイメージを保持
-  untagged_image_retention_days = 1 # タグなしイメージは1日で削除
+  # image_retention_count         = 5 # 最新5個のイメージを保持
+  # untagged_image_retention_days = 1 # タグなしイメージは1日で削除
 }
 
 # =============================================================================
