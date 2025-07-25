@@ -1,0 +1,59 @@
+name: 🧹 Terraform Lint
+on:
+  push:
+    paths:
+      - 'infra/terraform/**'
+      - '.github/workflows/terraform-lint.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: 🧹 Terraform Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 📥 リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Terraformのセットアップ
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.7.0'
+
+      - name: 🔧 Terraformの初期化
+        working-directory: infra/terraform/aws/env/dev
+        run: terraform init
+
+      - name: 📝 フォーマットチェック
+        working-directory: infra/terraform/aws/env/dev
+        run: terraform fmt -check -recursive -diff
+
+      - name: 📝 バリデーションチェック
+        working-directory: infra/terraform/aws/env/dev
+        run: terraform validate
+
+      - name: 🎯 Tflintのセットアップ
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+
+      - name: 🔧 TFLintの初期化
+        working-directory: infra/terraform
+        run: tflint --init --config .tflint.hcl
+        env:
+          # https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/plugins.md#avoiding-rate-limiting
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: 📝 TFLintの実行
+        working-directory: infra/terraform
+        run: tflint --recursive -c $(realpath ./.tflint.hcl)
+
+

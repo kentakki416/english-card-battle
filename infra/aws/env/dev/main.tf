@@ -7,7 +7,6 @@ locals {
   # 基本設定
   project_name = "english-card-battle"
   environment  = "dev"
-  aws_region   = "ap-northeast-1"
   name_prefix  = "${local.project_name}-${local.environment}"
 
   # ネットワーク設定
@@ -18,9 +17,8 @@ locals {
   container_image = "nginx:latest" # TODO: 実際のアプリイメージに変更
 
   # ECS設定
-  ecs_task_cpu      = "256" # 0.25 vCPU
-  ecs_task_memory   = "512" # 512 MB
-  ecs_desired_count = 1     # dev環境は1台で十分
+  ecs_task_cpu    = "256" # 0.25 vCPU
+  ecs_task_memory = "512" # 512 MB
 }
 
 # =============================================================================

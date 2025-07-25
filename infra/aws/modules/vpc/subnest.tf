@@ -6,6 +6,6 @@ resource "aws_subnet" "subnets" {
   availability_zone = each.value.availability_zone
   tags = {
     Name       = "${var.name}-${each.key}"
-    SubnetType = "${each.value.subnet_type}"
+    SubnetType = each.value.subnet_type
   }
 }
