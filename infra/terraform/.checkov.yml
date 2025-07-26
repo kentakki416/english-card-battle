@@ -23,25 +23,9 @@ skip-path:
 # 出力形式
 output: cli
 
-# 色付き出力
-no-color: false
-
-# 詳細出力
-verbose: true
-
-# 最小限の重要度
-min-cve-severity: MEDIUM
-
 # 外部チェックの設定
 external-checks-dir:
   - "aws/test/checkov"
 
 # レポート出力
-output-file-path: "checkov-report.json"
-
-# 重要度別の設定
-severity:
-  CRITICAL: true
-  HIGH: true
-  MEDIUM: true
-  LOW: false 
+output-file-path: "checkov-report.json" 
