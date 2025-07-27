@@ -1,17 +1,16 @@
 # Checkov Configuration
-# English Card Battle - Terraform Infrastructure
 
 # フレームワーク設定
 framework:
   - terraform
   - terraform_plan
 
-# 除外するチェック（必要に応じて）
+# 除外するチェック
 skip-check:
   # 開発環境では一部の厳格なルールを除外
-  - CKV_AWS_18  # セキュリティグループの説明が必須
-  - CKV_AWS_19  # セキュリティグループの名前が必須
-  - CKV_AWS_20  # セキュリティグループのルールに説明が必須
+  # - CKV_AWS_18  # セキュリティグループの説明が必須
+  # - CKV_AWS_19  # セキュリティグループの名前が必須
+  # - CKV_AWS_20  # セキュリティグループのルールに説明が必須
 
 # 除外するディレクトリ
 skip-path:
@@ -20,12 +19,7 @@ skip-path:
   - "**/test/**"
   - "**/examples/**"
 
-# 出力形式
-output: cli
-
 # 外部チェックの設定
 external-checks-dir:
   - "aws/test/checkov"
 
-# レポート出力
-output-file-path: "checkov-report.json" 
