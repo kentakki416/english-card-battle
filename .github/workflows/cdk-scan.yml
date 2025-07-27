@@ -1,4 +1,4 @@
-name: 🛡️ CDK Policy Check
+name: 🛡️ CDK Scan
 on:
   workflow_dispatch:
     inputs:
@@ -21,8 +21,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  nag-check:
-    name: 🛡️ CDK Policy Check
+  cdk-scan:
+    name: 🛡️ CDK Scan
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -40,6 +40,6 @@ jobs:
         working-directory: infra/cdk
         run: npm ci
 
-      - name: 🛡️ CDK Policy Check
+      - name: 🛡️ CDK Scan
         working-directory: infra/cdk
         run: npm run nag-check:${{ inputs.environment }}
