@@ -27,7 +27,7 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="relative rounded-xl border-gray-500 bg-white px-16 shadow-lg">
                 <button
                     className="popup-close absolute right-2.5 top-3 ml-auto inline-flex items-center rounded-lg 
