@@ -1,6 +1,6 @@
 import { ReactNode } from "react"
 
-interface AuthLayoutProps {
+type AuthLayoutProps = {
   children: ReactNode
 }
 

@@ -20,12 +20,12 @@ export const useSidebarContext = () => {
   return context
 }
 
-interface Props {
+type SidebarProviderProps = {
   children: React.ReactNode
   defaultOpen?: boolean
 }
 
-const SidebarProvider = ({children, defaultOpen = true}: Props) => {
+const SidebarProvider = ({children, defaultOpen = true}: SidebarProviderProps) => {
 
   const [isOpen, setIsOpen] = useState(defaultOpen)
   const isMobile = useIsMobile()

@@ -6,7 +6,7 @@ import { Button } from "../ui"
 
 import { useAuth } from "@/hooks/use-auth"
 
-interface HeaderProps {
+type HeaderProps = {
   onLoginClick?: () => void
 }
 

@@ -1,10 +1,10 @@
 const ArrowLeftIcon = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg
-      width="18"
+      fill="currentColor"
       height="18"
       viewBox="0 0 18 18"
-      fill="currentColor"
+      width="18"
       {...props}
     >
       <path

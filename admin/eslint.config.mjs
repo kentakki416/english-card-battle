@@ -2,6 +2,7 @@ import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
 import tailwindcss from "eslint-plugin-tailwindcss";
+import perfectionist from "eslint-plugin-perfectionist";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,6 +17,7 @@ const eslintConfig = [
     files: ["**/*.{js,jsx,ts,tsx}"],
     plugins: {
       tailwindcss,
+      perfectionist
     },
     rules: {
       "tailwindcss/classnames-order": "warn",
@@ -23,7 +25,7 @@ const eslintConfig = [
       "tailwindcss/enforces-shorthand": "warn",
       "tailwindcss/migration-from-tailwind-2": "warn",
       "tailwindcss/no-arbitrary-value": "off",
-      "tailwindcss/no-custom-classname": "warn",
+      "tailwindcss/no-custom-classname": "off",
       "tailwindcss/no-contradicting-classname": "error",
       "tailwindcss/no-unnecessary-arbitrary-value": "error",
       // クォートをダブルクォートに統一
@@ -55,7 +57,14 @@ const eslintConfig = [
       "import/no-unresolved": "error",
       "import/named": "error",
       "import/default": "error",
-      "import/namespace": "error"
+      "import/namespace": "error",
+      "perfectionist/sort-jsx-props": [
+        "error",
+        {
+          type: "natural",
+          order: "asc"
+        }
+      ]
     },
     settings: {
       tailwindcss: {

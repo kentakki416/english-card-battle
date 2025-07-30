@@ -56,8 +56,8 @@ const Notification = () => {
       }}
     >
       <DropdownTrigger
-        className="grid size-12 place-items-center rounded-full border bg-gray-2 text-dark outline-none hover:text-primary focus-visible:border-primary focus-visible:text-primary dark:border-dark-4 dark:bg-dark-3 dark:text-white dark:focus-visible:border-primary"
         aria-label="View Notifications"
+        className="grid size-12 place-items-center rounded-full border bg-gray-2 text-dark outline-none hover:text-primary focus-visible:border-primary focus-visible:text-primary dark:border-dark-4 dark:bg-dark-3 dark:text-white dark:focus-visible:border-primary"
       >
         <span className="relative">
           <BellIcon />
@@ -91,16 +91,16 @@ const Notification = () => {
           {notificationList.map((item, index) => (
             <li key={index} role="menuitem">
               <Link
+                className="flex items-center gap-4 rounded-lg px-2 py-1.5 outline-none hover:bg-gray-2 focus-visible:bg-gray-2 dark:hover:bg-dark-3 dark:focus-visible:bg-dark-3"
                 href="#"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-4 rounded-lg px-2 py-1.5 outline-none hover:bg-gray-2 focus-visible:bg-gray-2 dark:hover:bg-dark-3 dark:focus-visible:bg-dark-3"
               >
                 <Image
-                  src={item.image}
-                  className="size-14 rounded-full object-cover"
-                  width={200}
-                  height={200}
                   alt="User"
+                  className="size-14 rounded-full object-cover"
+                  height={200}
+                  src={item.image}
+                  width={200}
                 />
 
                 <div>
@@ -118,9 +118,9 @@ const Notification = () => {
         </ul>
 
         <Link
+          className="block rounded-lg border border-primary p-2 text-center text-sm font-medium tracking-wide text-primary outline-none transition-colors hover:bg-blue-light-5 focus:bg-blue-light-5 focus:text-primary focus-visible:border-primary dark:border-dark-3 dark:text-dark-6 dark:hover:border-dark-5 dark:hover:bg-dark-3 dark:hover:text-dark-7 dark:focus-visible:border-dark-5 dark:focus-visible:bg-dark-3 dark:focus-visible:text-dark-7"
           href="#"
           onClick={() => setIsOpen(false)}
-          className="block rounded-lg border border-primary p-2 text-center text-sm font-medium tracking-wide text-primary outline-none transition-colors hover:bg-blue-light-5 focus:bg-blue-light-5 focus:text-primary focus-visible:border-primary dark:border-dark-3 dark:text-dark-6 dark:hover:border-dark-5 dark:hover:bg-dark-3 dark:hover:text-dark-7 dark:focus-visible:border-dark-5 dark:focus-visible:bg-dark-3 dark:focus-visible:text-dark-7"
         >
           See all notifications
         </Link>

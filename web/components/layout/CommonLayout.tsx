@@ -9,7 +9,7 @@ import { Header, Footer } from "./index"
 
 import { useGoogleAuth } from "@/hooks/use-google-auth"
 
-interface CommonLayoutProps {
+type CommonLayoutProps = {
   children: React.ReactNode
 }
 

@@ -1,10 +1,10 @@
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg
-      width="20"
+      fill="currentColor"
       height="20"
       viewBox="0 0 20 20"
-      fill="currentColor"
+      width="20"
       {...props}
     >
       <g clipPath="url(#clip0_1715_17244)">
@@ -27,7 +27,7 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => {
       </g>
       <defs>
         <clipPath id="clip0_1715_17244">
-          <rect width="20" height="20" fill="white" />
+          <rect fill="white" height="20" width="20" />
         </clipPath>
       </defs>
     </svg>

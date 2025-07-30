@@ -24,10 +24,7 @@ const DropdownContent = ({
 
   return (
     <div
-      ref={contentRef}
-      role="menu"
       aria-orientation="vertical"
-      // eslint-disable-next-line
       className={cn(
         "fade-in-0 zoom-in-95 pointer-events-auto absolute z-99 mt-2 min-w-32 origin-top-right rounded-lg",
         {
@@ -37,6 +34,9 @@ const DropdownContent = ({
         },
         className,
       )}
+      ref={contentRef}
+       
+      role="menu"
     >
       {children}
     </div>

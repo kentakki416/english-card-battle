@@ -1,10 +1,10 @@
 const LogoutIcon = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg
-      width={20}
+      fill="currentColor"
       height={20}
       viewBox="0 0 18 18"
-      fill="currentColor"
+      width={20}
       {...props}
     >
       <g clipPath="url(#clip0_7095_11691)">
@@ -13,7 +13,7 @@ const LogoutIcon = (props: React.SVGProps<SVGSVGElement>) => {
       </g>
       <defs>
         <clipPath id="clip0_7095_11691">
-          <rect width={18} height={18} rx={5} />
+          <rect height={18} rx={5} width={18} />
         </clipPath>
       </defs>
     </svg>

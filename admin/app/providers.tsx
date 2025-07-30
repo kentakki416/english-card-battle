@@ -6,7 +6,7 @@ import SidebarProvider from "@/components/layout/sidebar/SidebarProvider"
 
 const Providers = ({children}: {children: React.ReactNode}) => {
   return (
-    <ThemeProvider defaultTheme="light" attribute="class">
+    <ThemeProvider attribute="class" defaultTheme="light">
       <SidebarProvider>{children}</SidebarProvider>
     </ThemeProvider>
   )

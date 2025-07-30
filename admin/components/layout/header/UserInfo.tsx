@@ -31,12 +31,12 @@ const UserInfo = () => {
 
         <figure className="flex items-center gap-3">
           <Image
-            src={USER.img}
-            className="size-12"
             alt={`Avatar of ${USER.name}`}
-            role="presentation"
-            width={200}
+            className="size-12"
             height={200}
+            role="presentation"
+            src={USER.img}
+            width={200}
           />
           <figcaption className="flex items-center gap-1 font-medium text-dark dark:text-dark-6 max-[1024px]:sr-only">
             <span>{USER.name}</span>
@@ -54,19 +54,19 @@ const UserInfo = () => {
       </DropdownTrigger>
 
       <DropdownContent
-        className="border border-stroke bg-white shadow-md dark:border-dark-3 dark:bg-gray-dark min-[230px]:min-w-70"
         align="end"
+        className="border border-stroke bg-white shadow-md dark:border-dark-3 dark:bg-gray-dark min-[230px]:min-w-70"
       >
         <h2 className="sr-only">User information</h2>
 
         <figure className="flex items-center gap-2.5 px-5 py-3.5">
           <Image
-            src={USER.img}
-            className="size-12"
             alt={`Avatar for ${USER.name}`}
-            role="presentation"
-            width={200}
+            className="size-12"
             height={200}
+            role="presentation"
+            src={USER.img}
+            width={200}
           />
 
           <figcaption className="space-y-1 text-base font-medium">
@@ -82,9 +82,9 @@ const UserInfo = () => {
 
         <div className="p-2 text-base text-[#4B5563] dark:text-dark-6 [&>*]:cursor-pointer">
           <Link
+            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-[9px] hover:bg-gray-2 hover:text-dark dark:hover:bg-dark-3 dark:hover:text-white"
             href={"/profile"}
             onClick={() => setIsOpen(false)}
-            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-[9px] hover:bg-gray-2 hover:text-dark dark:hover:bg-dark-3 dark:hover:text-white"
           >
             <UserIcon />
 
@@ -92,9 +92,9 @@ const UserInfo = () => {
           </Link>
 
           <Link
+            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-[9px] hover:bg-gray-2 hover:text-dark dark:hover:bg-dark-3 dark:hover:text-white"
             href={"/pages/settings"}
             onClick={() => setIsOpen(false)}
-            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-[9px] hover:bg-gray-2 hover:text-dark dark:hover:bg-dark-3 dark:hover:text-white"
           >
             <SettingsIcon />
 
