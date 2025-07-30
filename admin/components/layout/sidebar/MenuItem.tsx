@@ -38,9 +38,6 @@ const MenuItem = (
   if (props.as === "link") {
     return (
       <Link
-        href={props.href}
-        // Close sidebar on clicking link if it's mobile
-        onClick={() => isMobile && toggleSidebar()}
         className={cn(
           menuItemBaseStyles({
             isActive: props.isActive,
@@ -48,6 +45,9 @@ const MenuItem = (
           }),
           props.className,
         )}
+        href={props.href}
+        // Close sidebar on clicking link if it's mobile
+        onClick={() => isMobile && toggleSidebar()}
       >
         {props.children}
       </Link>
@@ -56,12 +56,12 @@ const MenuItem = (
 
   return (
     <button
-      onClick={props.onClick}
       aria-expanded={props.isActive}
       className={menuItemBaseStyles({
         isActive: props.isActive,
         className: "flex w-full items-center gap-3 py-3",
       })}
+      onClick={props.onClick}
     >
       {props.children}
     </button>

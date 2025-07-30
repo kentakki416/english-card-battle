@@ -1,10 +1,10 @@
 const TrendingUpIcon = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg
-      width="14"
+      fill="currentColor"
       height="15"
       viewBox="0 0 14 15"
-      fill="currentColor"
+      width="14"
       {...props}
     >
       <path

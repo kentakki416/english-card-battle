@@ -9,11 +9,11 @@ const DropdownTrigger = ({ children, className }: DropdownTriggerProps) => {
 
   return (
     <button
-      className={className}
-      onClick={handleOpen}
       aria-expanded={isOpen}
       aria-haspopup="menu"
+      className={className}
       data-state={isOpen ? "open" : "closed"}
+      onClick={handleOpen}
     >
       {children}
     </button>

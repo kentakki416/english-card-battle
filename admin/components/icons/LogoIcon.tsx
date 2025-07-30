@@ -7,20 +7,20 @@ const LogoIcon = () => {
   return (
     <div className="relative h-8 max-w-[10.847rem]">
       <Image
-        src={logo}
-        fill
-        className="dark:hidden"
         alt="EnglishCardBattle Admin Logo"
-        role="presentation"
+        className="dark:hidden"
+        fill
         quality={100}
+        role="presentation"
+        src={logo}
       />
       <Image
-        src={darkLogo}
-        fill
-        className="hidden dark:block"
         alt="EnglishCardBattle Admin Logo"
-        role="presentation"
+        className="hidden dark:block"
+        fill
         quality={100}
+        role="presentation"
+        src={darkLogo}
       />
     </div>
   )
