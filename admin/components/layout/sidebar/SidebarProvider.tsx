@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useEffect, useState } from "react"
+import React, { createContext, useContext, useEffect, useState } from 'react'
 
-import { useIsMobile } from "../../../hooks/use-mobile"
+import { useIsMobile } from '../../../hooks/use-mobile'
 
 type SidebarContextType = {
-  state: "expanded" | "collapsed"
+  state: 'expanded' | 'collapsed'
   isOpen: boolean
   setIsOpen: (open: boolean) => void
   isMobile: boolean
@@ -15,7 +15,7 @@ const SidebarContext = createContext<SidebarContextType | null>(null)
 export const useSidebarContext = () => {
   const context = useContext(SidebarContext)
   if (!context) {
-    throw new Error("useSidebarContext must be used within a SidebarProvider")
+    throw new Error('useSidebarContext must be used within a SidebarProvider')
   }
   return context
 }
@@ -42,7 +42,7 @@ const SidebarProvider = ({children, defaultOpen = true}: SidebarProviderProps) =
 
   return (
     <SidebarContext.Provider value={{
-      state: isOpen ? "expanded" : "collapsed",
+      state: isOpen ? 'expanded' : 'collapsed',
       isOpen,
       setIsOpen,
       isMobile,

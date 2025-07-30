@@ -1,10 +1,10 @@
-import * as cdk from "aws-cdk-lib"
-import { Construct } from "constructs"
+import * as cdk from 'aws-cdk-lib'
+import { Construct } from 'constructs'
 
-import { EcrConstruct } from "./constructs/ecr"
-import { EcsConstruct } from "./constructs/ecs"
-import { VpcConstruct } from "./constructs/vpc"
-import { getEnvironmentParameters, Environment } from "./parameter"
+import { EcrConstruct } from './constructs/ecr'
+import { EcsConstruct } from './constructs/ecs'
+import { VpcConstruct } from './constructs/vpc'
+import { getEnvironmentParameters, Environment } from './parameter'
 
 interface ApiServerStackProps extends cdk.StackProps {
   environment: Environment;
@@ -18,7 +18,7 @@ export class ApiServerStack extends cdk.Stack {
     const parameters = getEnvironmentParameters(props.environment)
 
     // VPC Constructの作成
-    const vpcConstruct = new VpcConstruct(this, "VpcConstruct", {
+    const vpcConstruct = new VpcConstruct(this, 'VpcConstruct', {
       vpcCidr: parameters.vpc.vpcCidr,
       maxAzs: parameters.vpc.maxAzs,
       natGateways: parameters.vpc.natGateways,
@@ -26,12 +26,12 @@ export class ApiServerStack extends cdk.Stack {
     })
 
     // ECR Constructの作成
-    new EcrConstruct(this, "EcrConstruct", {
+    new EcrConstruct(this, 'EcrConstruct', {
       repositoryName: parameters.ecr.repositoryName,
     })
 
     // ECS Constructの作成
-    new EcsConstruct(this, "EcsConstruct", {
+    new EcsConstruct(this, 'EcsConstruct', {
       vpc: vpcConstruct.vpc,
       cpu: parameters.ecs.cpu,
       memoryLimitMiB: parameters.ecs.memoryLimitMiB,

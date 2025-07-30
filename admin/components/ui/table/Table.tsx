@@ -1,4 +1,4 @@
-import { cn } from "../../../lib/utils"
+import { cn } from '../../../lib/utils'
 
 const Table = ({
   className,
@@ -7,7 +7,7 @@ const Table = ({
   return (
     <div className="relative w-full overflow-auto">
       <table
-        className={cn("w-full caption-bottom text-sm", className)}
+        className={cn('w-full caption-bottom text-sm', className)}
         {...props}
       />
     </div>

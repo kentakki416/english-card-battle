@@ -1,6 +1,6 @@
-import React from "react"
+import React from 'react'
 
-import Skeleton from "../../../../components/ui/skeleton/Skeleton"
+import Skeleton from '../../../../components/ui/skeleton/Skeleton'
 
 const OverviewCardsSkeleton = () => {
   return (

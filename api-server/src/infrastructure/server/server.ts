@@ -1,11 +1,11 @@
-import express from "express"
-import { pinoHttp } from "pino-http"
+import express from 'express'
+import { pinoHttp } from 'pino-http'
 
-import { DIContainer } from "../di/container"
-import { PinoLogger } from "../log/pino/logger"
-import { CorsMiddleware } from "../middleware/cors"
-import { ErrorHandlerMiddleware } from "../middleware/error_handler"
-import { ExpressRouter } from "../router/router"
+import { DIContainer } from '../di/container'
+import { PinoLogger } from '../log/pino/logger'
+import { CorsMiddleware } from '../middleware/cors'
+import { ErrorHandlerMiddleware } from '../middleware/error_handler'
+import { ExpressRouter } from '../router/router'
 
 export class ExpressServer {
   private _app: express.Express

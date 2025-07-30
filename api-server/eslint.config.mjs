@@ -21,7 +21,7 @@ export default [
         }
       ],
       // クォートをダブルクォートに統一
-      "quotes": ["error", "double"],
+      "quotes": ["error", "single"],
       // 行の最大文字数を180文字に設定
       "max-len": ["error", { "code": 180 }],
       // セミコロンを禁止

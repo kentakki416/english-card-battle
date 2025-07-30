@@ -1,4 +1,4 @@
-import { cn } from "../../../lib/utils"
+import { cn } from '../../../lib/utils'
 
 const TableRow = ({
   className,
@@ -7,7 +7,7 @@ const TableRow = ({
   return (
     <tr
       className={cn(
-        "border-b transition-colors hover:bg-neutral-100/50 data-[state=selected]:bg-neutral-100 dark:border-dark-3 dark:hover:bg-dark-2 dark:data-[state=selected]:bg-neutral-800",
+        'border-b transition-colors hover:bg-neutral-100/50 data-[state=selected]:bg-neutral-100 dark:border-dark-3 dark:hover:bg-dark-2 dark:data-[state=selected]:bg-neutral-800',
         className,
       )}
       {...props}

@@ -1,11 +1,11 @@
-import Table from "../table/Table"
-import TableBody from "../table/TableBody"
-import TableCell from "../table/TableCell"
-import TableHead from "../table/TableHead"
-import TableHeader from "../table/TableHeader"
-import TableRow from "../table/TableRow"
+import Table from '../table/Table'
+import TableBody from '../table/TableBody'
+import TableCell from '../table/TableCell'
+import TableHead from '../table/TableHead'
+import TableHeader from '../table/TableHeader'
+import TableRow from '../table/TableRow'
 
-import Skeleton from "./Skeleton"
+import Skeleton from './Skeleton'
 
 const TopChannelsSkeleton = () => {
   return (

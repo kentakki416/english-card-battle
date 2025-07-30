@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef } from "react"
+import { createContext, useContext, useEffect, useRef } from 'react'
 
 type DropdownContextType = {
   isOpen: boolean;
@@ -11,7 +11,7 @@ const DropdownContext = createContext<DropdownContextType | null> (null)
 export const useDropdownContext = () => {
   const context = useContext(DropdownContext)
   if (!context) {
-    throw new Error("useDropdownContext must be used within a DropdownProvider")
+    throw new Error('useDropdownContext must be used within a DropdownProvider')
   }
   return context
 }
@@ -26,7 +26,7 @@ const DropdownProvider = ({ children, isOpen, setIsOpen }: DropdownProviderProps
   const triggerRef = useRef<HTMLElement>(null)
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === "Escape") {
+    if (event.key === 'Escape') {
       handleClose()
     }
   }
@@ -44,9 +44,9 @@ const DropdownProvider = ({ children, isOpen, setIsOpen }: DropdownProviderProps
     if (isOpen) {
       triggerRef.current = document.activeElement as HTMLElement
 
-      document.body.style.pointerEvents = "none"
+      document.body.style.pointerEvents = 'none'
     } else {
-      document.body.style.removeProperty("pointer-events")
+      document.body.style.removeProperty('pointer-events')
 
       setTimeout(() => {
         triggerRef.current?.focus()

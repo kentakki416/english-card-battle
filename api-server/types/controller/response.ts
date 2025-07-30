@@ -1,4 +1,4 @@
-import { CONSTANT } from "../../constant"
+import { CONSTANT } from '../../constant'
 
 /**
  * レスポンスの共通型

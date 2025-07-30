@@ -1,13 +1,13 @@
-"use client"
+'use client'
 
-import { useState } from "react"
+import { useState } from 'react'
 
 
-import { LoginModal } from "../auth"
+import { LoginModal } from '../auth'
 
-import { Header, Footer } from "./index"
+import { Header, Footer } from './index'
 
-import { useGoogleAuth } from "@/hooks/use-google-auth"
+import { useGoogleAuth } from '@/hooks/use-google-auth'
 
 type CommonLayoutProps = {
   children: React.ReactNode
@@ -23,7 +23,7 @@ export const CommonLayout = ({ children }: CommonLayoutProps) => {
     const handleCloseModal = () => setShowModal(false)
 
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="flex min-h-screen flex-col">
             <Header onLoginClick={handleOpenModal} />
             {children}
             <Footer />

@@ -1,9 +1,9 @@
-import PeriodPicker from "../../../../components/util/PeriodPicker"
-import { standardFormat } from "../../../../lib/format-number"
-import { cn } from "../../../../lib/utils"
-import { getPaymentsOverviewData } from "../../fetch"
+import PeriodPicker from '../../../../components/util/PeriodPicker'
+import { standardFormat } from '../../../../lib/format-number'
+import { cn } from '../../../../lib/utils'
+import { getPaymentsOverviewData } from '../../fetch'
 
-import PaymentsOverviewChart from "./PaymentsOverviewChart"
+import PaymentsOverviewChart from './PaymentsOverviewChart'
 
 type PaymentOverviewProps = {
   timeFrame?: string;
@@ -11,7 +11,7 @@ type PaymentOverviewProps = {
 };
 
  const PaymentsOverview = async({
-  timeFrame = "monthly",
+  timeFrame = 'monthly',
   className,
 }: PaymentOverviewProps) => {
   const data = await getPaymentsOverviewData(timeFrame)
@@ -19,7 +19,7 @@ type PaymentOverviewProps = {
   return (
     <div
       className={cn(
-        "grid gap-2 rounded-[10px] bg-white px-7.5 pb-6 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card",
+        'grid gap-2 rounded-[10px] bg-white px-7.5 pb-6 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card',
         className,
       )}
     >

@@ -1,20 +1,20 @@
-import * as mongo from "mongodb"
+import * as mongo from 'mongodb'
 
-import { IDbClient } from "../../../adapter/interface/idb_client"
-import { ILogger } from "../../../adapter/interface/ilogger"
+import { IDbClient } from '../../../adapter/interface/idb_client'
+import { ILogger } from '../../../adapter/interface/ilogger'
 
 export class MongoClient implements IDbClient {
   private _client: mongo.MongoClient
   private _logger: ILogger
 
   constructor(logger: ILogger) {
-    let mongoURI = "mongodb://root:password@localhost:27017"
-    if (process.env.NODE_ENV === "dev") {
+    let mongoURI = 'mongodb://root:password@localhost:27017'
+    if (process.env.NODE_ENV === 'dev') {
       // TODO: 適切なURIを設定
-      mongoURI = "mongodb://root:password@localhost:27017"
-    } else if (process.env.NODE_ENV === "prd") {
+      mongoURI = 'mongodb://root:password@localhost:27017'
+    } else if (process.env.NODE_ENV === 'prd') {
       // TODO: 適切なURIを設定
-      mongoURI = "mongodb://root:password@localhost:27017"
+      mongoURI = 'mongodb://root:password@localhost:27017'
     }
 
     this._client = new mongo.MongoClient(mongoURI)
@@ -29,12 +29,12 @@ export class MongoClient implements IDbClient {
     for (let i = 0; i < maxRetry; i++) {
       try {
         await this._client.connect()
-        this._logger.info("MongoDB connected")
+        this._logger.info('MongoDB connected')
         break
       } catch(error) {
         this._logger.error(error as Error)
         if (i === maxRetry - 1) {
-          this._logger.error(new Error("MongoDB connection retry limit exceeded"))
+          this._logger.error(new Error('MongoDB connection retry limit exceeded'))
           process.exit(1)
         }
         // 5秒待ってリトライ
@@ -49,7 +49,7 @@ export class MongoClient implements IDbClient {
   public async close() {
     try {
       await this._client.close()
-      this._logger.info("MongoDB disconnected")
+      this._logger.info('MongoDB disconnected')
     } catch (error) {
       this._logger.error(error as Error)
     }

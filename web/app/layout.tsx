@@ -1,19 +1,19 @@
-import { Nunito } from "next/font/google"
+import { Nunito } from 'next/font/google'
 
-import "./globals.css"
-import NextAuthProvider from "./providers"
+import './globals.css'
+import NextAuthProvider from './providers'
 
-import type { Metadata } from "next"
+import type { Metadata } from 'next'
 
 const font = Nunito({
-    subsets: ["latin"],
-    variable: "--font-nunito",
-    weight: ["200", "300", "400", "600", "700", "800", "900"],
+    subsets: ['latin'],
+    variable: '--font-nunito',
+    weight: ['200', '300', '400', '600', '700', '800', '900'],
 })
 
 export const metadata: Metadata = {
-    title: "English Card Battle",
-    description: "楽しく英語を学ぼう！",
+    title: 'English Card Battle',
+    description: '楽しく英語を学ぼう！',
 }
 
 const RootLayout = ({

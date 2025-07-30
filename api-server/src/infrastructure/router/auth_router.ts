@@ -1,8 +1,8 @@
-import { Router } from "express"
+import { Router } from 'express'
 
-import { Controller } from "../../../types"
-import { DIContainer } from "../di/container"
-import { AuthMiddleware, AuthenticatedRequest } from "../middleware/auth_middleware"
+import { Controller } from '../../../types'
+import { DIContainer } from '../di/container'
+import { AuthMiddleware, AuthenticatedRequest } from '../middleware/auth_middleware'
 
 export class AuthRouter {
   private _router: Router
@@ -28,11 +28,11 @@ export class AuthRouter {
    */
   private _setupGoogleLogin() {
     // Google認証middlewareを適用
-    this._router.post("/google/login", this._authMiddleware.verifyGoogleAuth(), async (req: AuthenticatedRequest, res) => {
+    this._router.post('/google/login', this._authMiddleware.verifyGoogleAuth(), async (req: AuthenticatedRequest, res) => {
       try {
         // ユーザー情報の存在確認
         if (!req.user) {
-          return res.status(401).json({ error: "User information not found" })
+          return res.status(401).json({ error: 'User information not found' })
         }
 
         const authContainer = this._container.getAuthContainer()
@@ -51,7 +51,7 @@ export class AuthRouter {
         res.status(response.status).send(response)
         return
       } catch {
-        return res.status(500).json({ error: "Internal server error" })
+        return res.status(500).json({ error: 'Internal server error' })
       }
     })
   }

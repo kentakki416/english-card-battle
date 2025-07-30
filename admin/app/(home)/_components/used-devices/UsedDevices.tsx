@@ -1,23 +1,23 @@
-import React from "react"
+import React from 'react'
 
-import PeriodPicker from "../../../../components/util/PeriodPicker"
-import { cn } from "../../../../lib/utils"
-import { getDevicesUsedData } from "../../fetch"
+import PeriodPicker from '../../../../components/util/PeriodPicker'
+import { cn } from '../../../../lib/utils'
+import { getDevicesUsedData } from '../../fetch'
 
-import DonutChart from "./DonutChart"
+import DonutChart from './DonutChart'
 
 type UsedDevicesProps = {
   className?: string
   timeFrame?: string
 }
 
-const UsedDevices = async({ className, timeFrame = "monthly" }: UsedDevicesProps) => {
+const UsedDevices = async({ className, timeFrame = 'monthly' }: UsedDevicesProps) => {
   const data = await getDevicesUsedData(timeFrame)
 
   return (
     <div className={cn(
-      "grid grid-cols-1 grid-rows-[auto_1fr] gap-9 rounded-[10px] \
-        bg-white p-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card",
+      'grid grid-cols-1 grid-rows-[auto_1fr] gap-9 rounded-[10px] \
+        bg-white p-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card',
       className
     )}
     >

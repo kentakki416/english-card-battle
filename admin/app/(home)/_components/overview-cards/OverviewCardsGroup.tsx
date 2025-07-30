@@ -1,13 +1,13 @@
-import React from "react"
+import React from 'react'
 
-import ProductIcon from "../../../../components/icons/ProductIcon"
-import ProfitIcon from "../../../../components/icons/ProfitIcon"
-import UsersIcon from "../../../../components/icons/UsersIcon"
-import ViewsIcon from "../../../../components/icons/ViewsIcon"
-import { compactFormat } from "../../../../lib/format-number"
-import { getOverviewData } from "../../fetch"
+import ProductIcon from '../../../../components/icons/ProductIcon'
+import ProfitIcon from '../../../../components/icons/ProfitIcon'
+import UsersIcon from '../../../../components/icons/UsersIcon'
+import ViewsIcon from '../../../../components/icons/ViewsIcon'
+import { compactFormat } from '../../../../lib/format-number'
+import { getOverviewData } from '../../fetch'
 
-import OverviewCard from "./OverviewCard"
+import OverviewCard from './OverviewCard'
 
 
 const OverviewCardsGroup = async () => {
@@ -27,7 +27,7 @@ const OverviewCardsGroup = async () => {
       <OverviewCard
         data={{
           ...profit,
-          value: "$" + compactFormat(profit.value),
+          value: '$' + compactFormat(profit.value),
         }}
         Icon={ProfitIcon}
         label="Total Profit"

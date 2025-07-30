@@ -1,9 +1,9 @@
-import * as cdk from "aws-cdk-lib"
-import { Peer, Port, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2"
-import { Cluster, ContainerImage, ContainerInsights, FargateService, FargateTaskDefinition, LogDriver, Protocol } from "aws-cdk-lib/aws-ecs"
-import { ApplicationLoadBalancer } from "aws-cdk-lib/aws-elasticloadbalancingv2"
-import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam"
-import { Construct } from "constructs"
+import * as cdk from 'aws-cdk-lib'
+import { Peer, Port, SecurityGroup, Vpc } from 'aws-cdk-lib/aws-ec2'
+import { Cluster, ContainerImage, ContainerInsights, FargateService, FargateTaskDefinition, LogDriver, Protocol } from 'aws-cdk-lib/aws-ecs'
+import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2'
+import { ManagedPolicy, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam'
+import { Construct } from 'constructs'
 
 interface EcsProps extends cdk.StackProps {
   vpc: Vpc,
@@ -22,7 +22,7 @@ export class EcsConstruct extends Construct {
     super(scope, id)
 
     // ALBのセキュリティグループの設定
-    const securityGroupForAlb = new SecurityGroup(this, "SgAlb", {
+    const securityGroupForAlb = new SecurityGroup(this, 'SgAlb', {
       vpc: props.vpc,
       allowAllOutbound: false,
     })
@@ -32,50 +32,50 @@ export class EcsConstruct extends Construct {
     securityGroupForAlb.addEgressRule(Peer.anyIpv4(), Port.allTcp())
 
     // ALBの設定
-    const albForApp = new ApplicationLoadBalancer(this, "Alb", {
+    const albForApp = new ApplicationLoadBalancer(this, 'Alb', {
       vpc: props.vpc,
       internetFacing: true,
       securityGroup: securityGroupForAlb,
       vpcSubnets: props.vpc.selectSubnets({
-        subnetGroupName: "Public",
+        subnetGroupName: 'Public',
       }),
     })
 
     // ECSクラスターの設定
-    const cluster = new Cluster(this, "EcsCluster", {
+    const cluster = new Cluster(this, 'EcsCluster', {
       vpc: props.vpc,
       containerInsightsV2: ContainerInsights.ENABLED,
     })
 
     // タスク実行ロールの設定
-    const executionRole = new Role(this, "EcsTaskExecutionRole", {
-      assumedBy: new ServicePrincipal("ecs-tasks.amazonaws.com"),
+    const executionRole = new Role(this, 'EcsTaskExecutionRole', {
+      assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com'),
       managedPolicies: [
         ManagedPolicy.fromAwsManagedPolicyName(
-          "service-role/AmazonECSTaskExecutionRolePolicy"
+          'service-role/AmazonECSTaskExecutionRolePolicy'
         )
       ]
     })
 
     // タスクロールの設定
-    const taskRole = new Role(this, "EcsServiceTaskRole", {
-      assumedBy: new ServicePrincipal("ecs-tasks.amazonaws.com"),
+    const taskRole = new Role(this, 'EcsServiceTaskRole', {
+      assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com'),
       managedPolicies: [
-        ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMFullAccess")
+        ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMFullAccess')
       ]
     })
 
     // タスク定義の設定
-    const taskDefinition = new FargateTaskDefinition(this, "TaskDefinition", {
+    const taskDefinition = new FargateTaskDefinition(this, 'TaskDefinition', {
       cpu: props.cpu,
       memoryLimitMiB: props.memoryLimitMiB,
       executionRole,
       taskRole,
     })
-    taskDefinition.addContainer("api", {
-      image: ContainerImage.fromRegistry("amazon/amazon-ecs-sample"),
+    taskDefinition.addContainer('api', {
+      image: ContainerImage.fromRegistry('amazon/amazon-ecs-sample'),
       logging: LogDriver.awsLogs({
-        streamPrefix: "englishCardBattle"
+        streamPrefix: 'englishCardBattle'
       })
     }).addPortMappings({
       containerPort: props.containerPort,
@@ -84,7 +84,7 @@ export class EcsConstruct extends Construct {
     })
 
     // Fargateのセキュリティグループの設定
-    const securityGroupForFargate = new SecurityGroup(this, "SgFargate", {
+    const securityGroupForFargate = new SecurityGroup(this, 'SgFargate', {
       vpc: props.vpc,
       allowAllOutbound: false,
     })
@@ -92,9 +92,9 @@ export class EcsConstruct extends Construct {
     securityGroupForFargate.addEgressRule(Peer.anyIpv4(), Port.allTcp())
 
     // Fargateサービスの設定
-    const fargateService = new FargateService(this, "FargateService", {
+    const fargateService = new FargateService(this, 'FargateService', {
       cluster,
-      vpcSubnets: props.vpc.selectSubnets({ subnetGroupName: "Private" }), // プライベートサブネットに配置
+      vpcSubnets: props.vpc.selectSubnets({ subnetGroupName: 'Private' }), // プライベートサブネットに配置
       securityGroups: [securityGroupForFargate],
       taskDefinition,
       desiredCount: props.desiredCount,
@@ -104,14 +104,14 @@ export class EcsConstruct extends Construct {
     })
 
     // ALBのリスナーの設定
-    albForApp.addListener("AlbListener", {
+    albForApp.addListener('AlbListener', {
       port: 80,
-    }).addTargets("FromAppTargetGroup", {
+    }).addTargets('FromAppTargetGroup', {
       port: 80,
       targets: [fargateService],
     })
 
-    new cdk.CfnOutput(this, "LoadBalancerDNS", {
+    new cdk.CfnOutput(this, 'LoadBalancerDNS', {
       value: albForApp.loadBalancerDnsName,
     })
   }

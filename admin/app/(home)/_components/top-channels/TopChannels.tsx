@@ -1,16 +1,16 @@
-import Image from "next/image"
-import React from "react"
+import Image from 'next/image'
+import React from 'react'
 
-import Table from "../../../../components/ui/table/Table"
-import TableBody from "../../../../components/ui/table/TableBody"
-import TableCell from "../../../../components/ui/table/TableCell"
-import TableHead from "../../../../components/ui/table/TableHead"
-import TableHeader from "../../../../components/ui/table/TableHeader"
-import TableRow from "../../../../components/ui/table/TableRow"
-import { compactFormat } from "../../../../lib/format-number"
-import { standardFormat } from "../../../../lib/format-number"
-import { cn } from "../../../../lib/utils"
-import { getTopChannels } from "../../fetch"
+import Table from '../../../../components/ui/table/Table'
+import TableBody from '../../../../components/ui/table/TableBody'
+import TableCell from '../../../../components/ui/table/TableCell'
+import TableHead from '../../../../components/ui/table/TableHead'
+import TableHeader from '../../../../components/ui/table/TableHeader'
+import TableRow from '../../../../components/ui/table/TableRow'
+import { compactFormat } from '../../../../lib/format-number'
+import { standardFormat } from '../../../../lib/format-number'
+import { cn } from '../../../../lib/utils'
+import { getTopChannels } from '../../fetch'
 
 
 type TopChannelsProps = {
@@ -23,7 +23,7 @@ const TopChannels = async ({ className }: TopChannelsProps) => {
   return (
     <div
     className={cn(
-      "grid rounded-[10px] bg-white px-7.5 pb-4 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card",
+      'grid rounded-[10px] bg-white px-7.5 pb-4 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card',
       className,
     )}
   >
@@ -50,7 +50,7 @@ const TopChannels = async ({ className }: TopChannelsProps) => {
           >
             <TableCell className="flex min-w-fit items-center gap-3">
               <Image
-                alt={channel.name + " Logo"}
+                alt={channel.name + ' Logo'}
                 className="size-8 rounded-full object-cover"
                 height={40}
                 role="presentation"
