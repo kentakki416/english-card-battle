@@ -1,9 +1,9 @@
-import { Domain, Result, Success, Failure, UserError } from "../../../types"
-import { ERROR } from "../../../constant"
+import { Domain, Result, Success, Failure, UserError } from '../../../types'
+import { ERROR } from '../../../constant'
 
 export class User {
   /** DB用のユーザーID */
-  private _id = ""
+  private _id = ''
   /** アプリケーション用のユーザーID */
   private readonly _userId: number
   /** プロバイダー情報 */

@@ -1,13 +1,13 @@
-"use client"
+'use client'
 
-import { usePathname, useSearchParams, useRouter } from "next/navigation"
-import React, { useState } from "react"
+import { usePathname, useSearchParams, useRouter } from 'next/navigation'
+import React, { useState } from 'react'
 
-import { cn } from "../../lib/utils"
-import ChevronUpIcon from "../icons/ChevronUpIcon"
-import DropdownContent from "../ui/dropdown/DropdownContent"
-import DropdownProvider from "../ui/dropdown/DropdownProvider"
-import DropdownTrigger from "../ui/dropdown/DropdownTrigger"
+import { cn } from '../../lib/utils'
+import ChevronUpIcon from '../icons/ChevronUpIcon'
+import DropdownContent from '../ui/dropdown/DropdownContent'
+import DropdownProvider from '../ui/dropdown/DropdownProvider'
+import DropdownTrigger from '../ui/dropdown/DropdownTrigger'
 
 type PeriodPickerProps<TItem> = {
   defaultValue: TItem
@@ -16,7 +16,7 @@ type PeriodPickerProps<TItem> = {
   minimal?: boolean
 }
 
-const PARAM_KEY = "selected_time_frame"
+const PARAM_KEY = 'selected_time_frame'
 
 const createQueryString = (props: {
   sectionKey: string;
@@ -30,9 +30,9 @@ const createQueryString = (props: {
   }
 
   const newSearchParams = props.selectedTimeFrame
-    .split(",")
+    .split(',')
     .filter((value) => !value.includes(props.sectionKey))
-    .join(",")
+    .join(',')
 
   if (!newSearchParams) {
     return `?${PARAM_KEY}=${paramsValue}`
@@ -58,15 +58,15 @@ const PeriodPicker = <TItem extends string>({
     <DropdownProvider isOpen={isOpen} setIsOpen={setIsOpen}>
       <DropdownTrigger
         className={cn(
-          "flex h-8 w-full items-center justify-between gap-x-1 rounded-md border border-[#E8E8E8] \
+          'flex h-8 w-full items-center justify-between gap-x-1 rounded-md border border-[#E8E8E8] \
            bg-white px-3 py-2 text-sm font-medium text-dark-5 outline-none ring-offset-white \
            disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-neutral-500 \
             dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:ring-offset-neutral-950 \
              dark:focus:ring-neutral-300 dark:data-[placeholder]:text-neutral-400 [&>span]:line-clamp-1 \
-             [&[data-state='open']>svg]:rotate-0",
-          minimal && "border-none bg-transparent p-0 text-dark dark:bg-transparent dark:text-white",
+             [&[data-state=\'open\']>svg]:rotate-0',
+          minimal && 'border-none bg-transparent p-0 text-dark dark:bg-transparent dark:text-white',
       )}>
-        <span className="capitalize">{defaultValue || "Time Period"}</span>
+        <span className="capitalize">{defaultValue || 'Time Period'}</span>
 
         <ChevronUpIcon className="size-4 rotate-180 transition-transform"/>
       </DropdownTrigger>
@@ -83,7 +83,7 @@ const PeriodPicker = <TItem extends string>({
        `}
     >
       <ul>
-        {(items || ["monthly", "yearly"]).map((item) => (
+        {(items || ['monthly', 'yearly']).map((item) => (
           <li key={crypto.randomUUID()}>
             <button
               className={`

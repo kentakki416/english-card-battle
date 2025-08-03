@@ -1,18 +1,18 @@
-"use client"
+'use client'
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import React, { useEffect, useState, useCallback } from "react"
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import React, { useEffect, useState, useCallback } from 'react'
 
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils'
 
-import { SIDEBAR_DATA } from "../../../constants/sidebar"
-import ArrowLeftIcon from "../../icons/ArrowLeftIcon"
-import ChevronUpIcon from "../../icons/ChevronUpIcon"
-import LogoIcon from "../../icons/LogoIcon"
+import { SIDEBAR_DATA } from '../../../constants/sidebar'
+import ArrowLeftIcon from '../../icons/ArrowLeftIcon'
+import ChevronUpIcon from '../../icons/ChevronUpIcon'
+import LogoIcon from '../../icons/LogoIcon'
 
-import MenuItem from "./MenuItem"
-import { useSidebarContext } from "./SidebarProvider"
+import MenuItem from './MenuItem'
+import { useSidebarContext } from './SidebarProvider'
 
 const Sidebar = () => {
   const pathname = usePathname()
@@ -53,9 +53,9 @@ const Sidebar = () => {
         aria-hidden={!isOpen}
         aria-label="Main navigation"
         className={cn(
-          "max-w-[290px] overflow-hidden border-r border-gray-200 bg-white transition-width duration-200 ease-linear dark:border-gray-800 dark:bg-gray-dark",
-          isMobile ? "fixed inset-y-0 z-50" : "sticky top-0 h-screen",
-          isOpen ? "w-full" : "w-0",
+          'max-w-[290px] overflow-hidden border-r border-gray-200 bg-white transition-width duration-200 ease-linear dark:border-gray-800 dark:bg-gray-dark',
+          isMobile ? 'fixed inset-y-0 z-50' : 'sticky top-0 h-screen',
+          isOpen ? 'w-full' : 'w-0',
         )}
         inert={!isOpen}
       >
@@ -63,7 +63,7 @@ const Sidebar = () => {
           <div className="relative pr-4.5">
             <Link
               className="px-0 py-2.5 min-[850px]:py-0"
-              href={"/"}
+              href={'/'}
               onClick={() => isMobile && toggleSidebar()}
             >
               <LogoIcon />
@@ -111,9 +111,9 @@ const Sidebar = () => {
                               <ChevronUpIcon
                                 aria-hidden="true"
                                 className={cn(
-                                  "ml-auto rotate-180 transition-transform duration-200",
+                                  'ml-auto rotate-180 transition-transform duration-200',
                                   expandedItems.includes(item.title) &&
-                                    "rotate-0",
+                                    'rotate-0',
                                 )}
                               />
                             </MenuItem>
@@ -140,10 +140,10 @@ const Sidebar = () => {
                         ) : (
                           (() => {
                             const href =
-                              "url" in item
-                                ? item.url + ""
-                                : "/" +
-                                  item.title.toLowerCase().split(" ").join("-")
+                              'url' in item
+                                ? item.url + ''
+                                : '/' +
+                                  item.title.toLowerCase().split(' ').join('-')
 
                             return (
                               <MenuItem

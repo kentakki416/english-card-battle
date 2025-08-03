@@ -1,21 +1,21 @@
-import { SubnetType } from "aws-cdk-lib/aws-ec2"
+import { SubnetType } from 'aws-cdk-lib/aws-ec2'
 
-import { EnvironmentParameters } from "./types"
+import { EnvironmentParameters } from './types'
 
 export const devParameters: EnvironmentParameters = {
   vpc: {
-    vpcCidr: "10.100.0.0/16",
+    vpcCidr: '10.100.0.0/16',
     maxAzs: 2,
     natGateways: 1,
     subnetConfiguration: [
       {
         cidrMask: 24,
-        name: "Public",
+        name: 'Public',
         subnetType: SubnetType.PUBLIC,
       },
       {
         cidrMask: 24,
-        name: "Private",
+        name: 'Private',
         subnetType: SubnetType.PRIVATE_WITH_EGRESS,
       },
     ],
@@ -31,6 +31,6 @@ export const devParameters: EnvironmentParameters = {
     enableExecuteCommand: true,
   },
   ecr: {
-    repositoryName: "english-card-battle-api-dev",
+    repositoryName: 'english-card-battle-api-dev',
   },
 }

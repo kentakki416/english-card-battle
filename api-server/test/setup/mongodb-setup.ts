@@ -1,6 +1,6 @@
-import { MongoClient as MongoClientType } from "mongodb"
+import { MongoClient as MongoClientType } from 'mongodb'
 
-import { createMockLogger } from "../utils/test-helper"
+import { createMockLogger } from '../utils/test-helper'
 
 let mongoClient: MongoClientType
 let testDbName: string
@@ -10,8 +10,8 @@ let testDbName: string
  */
 export const setupTestDatabase = async () => {
   const logger = createMockLogger()
-  const mongoUri = process.env.TEST_MONGO_URI || "mongodb://root:password@localhost:27017"
-  testDbName = "test_db"
+  const mongoUri = process.env.TEST_MONGO_URI || 'mongodb://root:password@localhost:27017'
+  testDbName = 'test_db'
   
   mongoClient = new MongoClientType(mongoUri)
   

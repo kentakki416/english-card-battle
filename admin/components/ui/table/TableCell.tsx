@@ -1,4 +1,4 @@
-import { cn } from "../../../lib/utils"
+import { cn } from '../../../lib/utils'
 
 const TableCell = ({
   className,
@@ -7,7 +7,7 @@ const TableCell = ({
   return (
     <td
       className={cn(
-        "p-4 align-middle [&:has([role=checkbox])]:pr-0",
+        'p-4 align-middle [&:has([role=checkbox])]:pr-0',
         className,
       )}
       {...props}

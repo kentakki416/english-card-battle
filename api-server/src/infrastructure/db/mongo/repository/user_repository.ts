@@ -1,17 +1,17 @@
-import { ObjectId, Collection, Db, Filter } from "mongodb"
+import { ObjectId, Collection, Db, Filter } from 'mongodb'
 
-import { ERROR } from "../../../../../constant"
-import { Domain, Result, Success, Failure, UserError, ServerError } from "../../../../../types"
-import { UserCollection } from "../../../../../types/mongo"
-import { ILogger } from "../../../../adapter/interface/ilogger"
-import { IUserRepository } from "../../../../adapter/interface/repository/iuser_repository"
-import { User } from "../../../../domain/entity/user"
+import { ERROR } from '../../../../../constant'
+import { Domain, Result, Success, Failure, UserError, ServerError } from '../../../../../types'
+import { UserCollection } from '../../../../../types/mongo'
+import { ILogger } from '../../../../adapter/interface/ilogger'
+import { IUserRepository } from '../../../../adapter/interface/repository/iuser_repository'
+import { User } from '../../../../domain/entity/user'
 
 export class UserRepository implements IUserRepository {
   private _collection: Collection<UserCollection>
   private _logger: ILogger
   constructor(db: Db, logger: ILogger) {
-    this._collection = db.collection("User")
+    this._collection = db.collection('User')
     this._logger = logger
   }
 

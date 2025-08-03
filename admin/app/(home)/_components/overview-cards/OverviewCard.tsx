@@ -1,8 +1,8 @@
-import React, { SVGProps } from "react"
+import React, { SVGProps } from 'react'
 
-import ArrowDownIcon from "../../../../components/icons/ArrowDownIcon"
-import ArrowUpIcon from "../../../../components/icons/ArrowUpIcon"
-import { cn } from "../../../../lib/utils"
+import ArrowDownIcon from '../../../../components/icons/ArrowDownIcon'
+import ArrowUpIcon from '../../../../components/icons/ArrowUpIcon'
+import { cn } from '../../../../lib/utils'
 
 type OverviewCardProps = {
   label: string
@@ -31,8 +31,8 @@ const OverviewCard = ({ label, data, Icon }: OverviewCardProps) => {
 
         <dl
           className={cn(
-            "text-sm font-medium",
-            isDecreasing ? "text-red" : "text-green",
+            'text-sm font-medium',
+            isDecreasing ? 'text-red' : 'text-green',
           )}
         >
           <dt className="flex items-center gap-1.5">
@@ -45,7 +45,7 @@ const OverviewCard = ({ label, data, Icon }: OverviewCardProps) => {
           </dt>
 
           <dd className="sr-only">
-            {label} {isDecreasing ? "Decreased" : "Increased"} by{" "}
+            {label} {isDecreasing ? 'Decreased' : 'Increased'} by{' '}
             {data.growthRate}%
           </dd>
         </dl>

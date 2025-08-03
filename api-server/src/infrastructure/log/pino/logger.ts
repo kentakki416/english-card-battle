@@ -1,12 +1,12 @@
-import pino from "pino"
+import pino from 'pino'
 
-import { ILogger } from "../../../adapter/interface/ilogger"
+import { ILogger } from '../../../adapter/interface/ilogger'
 
 export class PinoLogger implements ILogger {
   private _logger: pino.Logger
 
   constructor() {
-    const level = process.env.PINO_LOG_LEVEL || "debug"
+    const level = process.env.PINO_LOG_LEVEL || 'debug'
     const targets = this._getTargets()
     const option: pino.LoggerOptions = {
       level,
@@ -25,25 +25,25 @@ export class PinoLogger implements ILogger {
    */
   private _getTargets() {
     const env = process.env.NODE_ENV
-    if (env === "prd") {
+    if (env === 'prd') {
       return [
         {
-          level: "error",
-          target: "pino/file",
+          level: 'error',
+          target: 'pino/file',
           options: { destination: `${__dirname}/error.log`, mkdir: true }
         },
         {
-          target: "pino/file",
+          target: 'pino/file',
           options: { destination: `${__dirname}/combined.log`, mkdir: true }
         }
       ]
     } else {
       return [{
-        target: "pino-pretty",
+        target: 'pino-pretty',
         options: {
           colorize: true,
-          translateTime: "SYS:standard",
-          ignore: "pid,hostname"
+          translateTime: 'SYS:standard',
+          ignore: 'pid,hostname'
         }
       }]
     }

@@ -1,10 +1,10 @@
-"use client"
+'use client'
 
-import type { ApexOptions } from "apexcharts"
-import dynamic from "next/dynamic"
-import React from "react"
+import type { ApexOptions } from 'apexcharts'
+import dynamic from 'next/dynamic'
+import React from 'react'
 
-import { useIsMobile } from "../../../../hooks/use-mobile"
+import { useIsMobile } from '../../../../hooks/use-mobile'
 
 type PaymentOverviewChartProps = {
   data: {
@@ -13,7 +13,7 @@ type PaymentOverviewChartProps = {
   }
 }
 
-const Chart = dynamic(() => import("react-apexcharts"), {
+const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
 })
 
@@ -25,14 +25,14 @@ const PaymentsOverviewChart = ({data}: PaymentOverviewChartProps) => {
     legend: {
       show: false,
     },
-    colors: ["#5750F1", "#0ABEF9"],
+    colors: ['#5750F1', '#0ABEF9'],
     chart: {
       height: 310,
-      type: "area",
+      type: 'area',
       toolbar: {
         show: false,
       },
-      fontFamily: "inherit",
+      fontFamily: 'inherit',
     },
     fill: {
       gradient: {
@@ -59,7 +59,7 @@ const PaymentsOverviewChart = ({data}: PaymentOverviewChartProps) => {
       },
     ],
     stroke: {
-      curve: "smooth",
+      curve: 'smooth',
       width: isMobile ? 2 : 3,
     },
     grid: {
@@ -95,11 +95,11 @@ const PaymentsOverviewChart = ({data}: PaymentOverviewChartProps) => {
         options={options}
         series={[
           {
-            name: "Received",
+            name: 'Received',
             data: data.received,
           },
           {
-            name: "Due",
+            name: 'Due',
             data: data.due,
           }
         ]}

@@ -1,10 +1,10 @@
-import React from "react"
+import React from 'react'
 
-import PeriodPicker from "../../../../components/util/PeriodPicker"
-import { cn } from "../../../../lib/utils"
-import { getWeeksProfitData } from "../../fetch"
+import PeriodPicker from '../../../../components/util/PeriodPicker'
+import { cn } from '../../../../lib/utils'
+import { getWeeksProfitData } from '../../fetch'
 
-import WeeksProfitChart from "./WeeksProfitChart"
+import WeeksProfitChart from './WeeksProfitChart'
 
 type WeeksProfitProps = {
   timeFrame?: string;
@@ -17,18 +17,18 @@ const WeeksProfit = async ({timeFrame, className}: WeeksProfitProps) => {
   return (
     <div
       className={cn(
-        "rounded-[10px] bg-white px-7.5 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card",
+        'rounded-[10px] bg-white px-7.5 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card',
         className,
       )}
     >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h2 className="text-body-2xlg font-bold text-dark dark:text-white">
-          Profit {timeFrame || "this week"}
+          Profit {timeFrame || 'this week'}
         </h2>
 
         <PeriodPicker
-          defaultValue={timeFrame || "this week"}
-          items={["this week", "last week"]}
+          defaultValue={timeFrame || 'this week'}
+          items={['this week', 'last week']}
           sectionKey="weeks_profit"
         />
       </div>

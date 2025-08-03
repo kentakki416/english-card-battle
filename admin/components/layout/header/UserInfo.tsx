@@ -1,27 +1,27 @@
-"use client"
+'use client'
 
-import Image from "next/image"
-import Link from "next/link"
-import { useState } from "react"
+import Image from 'next/image'
+import Link from 'next/link'
+import { useState } from 'react'
 
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils'
 
-import ChevronUpIcon from "../../icons/ChevronUpIcon"
-import LogOutIcon from "../../icons/LogoutIcon"
-import SettingsIcon from "../../icons/SettingsIcon"
-import UserIcon from "../../icons/UserIcon"
-import DropdownContent from "../../ui/dropdown/DropdownContent"
-import DropdownProvider from "../../ui/dropdown/DropdownProvider"
-import DropdownTrigger from "../../ui/dropdown/DropdownTrigger"
+import ChevronUpIcon from '../../icons/ChevronUpIcon'
+import LogOutIcon from '../../icons/LogoutIcon'
+import SettingsIcon from '../../icons/SettingsIcon'
+import UserIcon from '../../icons/UserIcon'
+import DropdownContent from '../../ui/dropdown/DropdownContent'
+import DropdownProvider from '../../ui/dropdown/DropdownProvider'
+import DropdownTrigger from '../../ui/dropdown/DropdownTrigger'
 
 
 const UserInfo = () => {
   const [isOpen, setIsOpen] = useState(false)
 
   const USER = {
-    name: "John Smith",
-    email: "johnson@nextadmin.com",
-    img: "/images/user/user-03.png",
+    name: 'John Smith',
+    email: 'johnson@nextadmin.com',
+    img: '/images/user/user-03.png',
   }
 
   return (
@@ -44,8 +44,8 @@ const UserInfo = () => {
             <ChevronUpIcon
               aria-hidden
               className={cn(
-                "rotate-180 transition-transform",
-                isOpen && "rotate-0",
+                'rotate-180 transition-transform',
+                isOpen && 'rotate-0',
               )}
               strokeWidth={1.5}
             />
@@ -83,7 +83,7 @@ const UserInfo = () => {
         <div className="p-2 text-base text-[#4B5563] dark:text-dark-6 [&>*]:cursor-pointer">
           <Link
             className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-[9px] hover:bg-gray-2 hover:text-dark dark:hover:bg-dark-3 dark:hover:text-white"
-            href={"/profile"}
+            href={'/profile'}
             onClick={() => setIsOpen(false)}
           >
             <UserIcon />
@@ -93,7 +93,7 @@ const UserInfo = () => {
 
           <Link
             className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-[9px] hover:bg-gray-2 hover:text-dark dark:hover:bg-dark-3 dark:hover:text-white"
-            href={"/pages/settings"}
+            href={'/pages/settings'}
             onClick={() => setIsOpen(false)}
           >
             <SettingsIcon />

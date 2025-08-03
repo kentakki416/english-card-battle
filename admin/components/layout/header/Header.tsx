@@ -1,16 +1,16 @@
-"use client"
+'use client'
 
-import Image from "next/image"
-import Link from "next/link"
-import React from "react"
+import Image from 'next/image'
+import Link from 'next/link'
+import React from 'react'
 
-import SearchIcon from "../../icons/SearchIcon"
-import { useSidebarContext } from "../sidebar/SidebarProvider"
+import SearchIcon from '../../icons/SearchIcon'
+import { useSidebarContext } from '../sidebar/SidebarProvider'
 
-import MenuIcon from "./MenuIcon"
-import Notification from "./Notification"
-import ThemeToggleSwitch from "./ThemeToggleSwitch"
-import UserInfo from "./UserInfo"
+import MenuIcon from './MenuIcon'
+import Notification from './Notification'
+import ThemeToggleSwitch from './ThemeToggleSwitch'
+import UserInfo from './UserInfo'
 
 const Header = () => {
   const { toggleSidebar, isMobile } = useSidebarContext()
@@ -26,12 +26,12 @@ const Header = () => {
       </button>
 
       {isMobile && (
-        <Link className="ml-2 max-[430px]:hidden min-[375px]:ml-4" href={"/"}>
+        <Link className="ml-2 max-[430px]:hidden min-[375px]:ml-4" href={'/'}>
           <Image
             alt=""
             height={32}
             role="presentation"
-            src={"/images/logo/logo-icon.svg"}
+            src={'/images/logo/logo-icon.svg'}
             width={32}
           />
         </Link>

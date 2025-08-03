@@ -1,4 +1,4 @@
-import { useDropdownContext } from "./DropdownProvider"
+import { useDropdownContext } from './DropdownProvider'
 
 type DropdownTriggerProps = React.HTMLAttributes<HTMLButtonElement> & {
   children: React.ReactNode;
@@ -12,7 +12,7 @@ const DropdownTrigger = ({ children, className }: DropdownTriggerProps) => {
       aria-expanded={isOpen}
       aria-haspopup="menu"
       className={className}
-      data-state={isOpen ? "open" : "closed"}
+      data-state={isOpen ? 'open' : 'closed'}
       onClick={handleOpen}
     >
       {children}

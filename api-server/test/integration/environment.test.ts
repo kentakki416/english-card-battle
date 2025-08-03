@@ -1,4 +1,4 @@
-describe("Environment-based client selection", () => {
+describe('Environment-based client selection', () => {
   let originalEnv: string | undefined
 
   beforeEach(() => {
@@ -14,32 +14,32 @@ describe("Environment-based client selection", () => {
     }
   })
 
-  describe("【環境変数による分岐】", () => {
-    test("環境変数が未設定の場合、デフォルトでdevが使用される", () => {
+  describe('【環境変数による分岐】', () => {
+    test('環境変数が未設定の場合、デフォルトでdevが使用される', () => {
       // Arrange
       delete process.env.NODE_ENV
 
       // Act
-      const env = process.env.NODE_ENV || "dev"
+      const env = process.env.NODE_ENV || 'dev'
 
       // Assert
-      expect(env).toBe("dev")
+      expect(env).toBe('dev')
     })
 
-    test("NODE_ENV=devが設定されている場合", () => {
+    test('NODE_ENV=devが設定されている場合', () => {
       // Arrange
-      process.env.NODE_ENV = "dev"
+      process.env.NODE_ENV = 'dev'
 
       // Act & Assert
-      expect(process.env.NODE_ENV).toBe("dev")
+      expect(process.env.NODE_ENV).toBe('dev')
     })
 
-    test("NODE_ENV=prdが設定されている場合", () => {
+    test('NODE_ENV=prdが設定されている場合', () => {
       // Arrange
-      process.env.NODE_ENV = "prd"
+      process.env.NODE_ENV = 'prd'
 
       // Act & Assert
-      expect(process.env.NODE_ENV).toBe("prd")
+      expect(process.env.NODE_ENV).toBe('prd')
     })
   })
 }) 

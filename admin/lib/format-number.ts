@@ -16,9 +16,9 @@
  * ```
  */
 export const compactFormat = (value: number) => {
-  const formatter = new Intl.NumberFormat("en", {
-    notation: "compact",
-    compactDisplay: "short",
+  const formatter = new Intl.NumberFormat('en', {
+    notation: 'compact',
+    compactDisplay: 'short',
   })
 
   return formatter.format(value)
@@ -42,7 +42,7 @@ export const compactFormat = (value: number) => {
  * ```
  */
 export const standardFormat = (value: number) => {
-  return value.toLocaleString("en-US", {
+  return value.toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })

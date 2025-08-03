@@ -1,43 +1,43 @@
-"use client"
+'use client'
 
-import Image from "next/image"
-import Link from "next/link"
-import { useState } from "react"
+import Image from 'next/image'
+import Link from 'next/link'
+import { useState } from 'react'
 
-import { useIsMobile } from "@/hooks/use-mobile"
-import { cn } from "@/lib/utils"
+import { useIsMobile } from '@/hooks/use-mobile'
+import { cn } from '@/lib/utils'
 
-import DropdownContent from "../../ui/dropdown/DropdownContent"
-import DropdownProvider from "../../ui/dropdown/DropdownProvider"
-import DropdownTrigger from "../../ui/dropdown/DropdownTrigger"
+import DropdownContent from '../../ui/dropdown/DropdownContent'
+import DropdownProvider from '../../ui/dropdown/DropdownProvider'
+import DropdownTrigger from '../../ui/dropdown/DropdownTrigger'
 
-import BellIcon from "./BellIcon"
+import BellIcon from './BellIcon'
 
 const notificationList = [
   {
-    image: "/images/user/user-15.png",
-    title: "Piter Joined the Team!",
-    subTitle: "Congratulate him",
+    image: '/images/user/user-15.png',
+    title: 'Piter Joined the Team!',
+    subTitle: 'Congratulate him',
   },
   {
-    image: "/images/user/user-03.png",
-    title: "New message",
-    subTitle: "Devid sent a new message",
+    image: '/images/user/user-03.png',
+    title: 'New message',
+    subTitle: 'Devid sent a new message',
   },
   {
-    image: "/images/user/user-26.png",
-    title: "New Payment received",
-    subTitle: "Check your earnings",
+    image: '/images/user/user-26.png',
+    title: 'New Payment received',
+    subTitle: 'Check your earnings',
   },
   {
-    image: "/images/user/user-28.png",
-    title: "Jolly completed tasks",
-    subTitle: "Assign new task",
+    image: '/images/user/user-28.png',
+    title: 'Jolly completed tasks',
+    subTitle: 'Assign new task',
   },
   {
-    image: "/images/user/user-27.png",
-    title: "Roman Joined the Team!",
-    subTitle: "Congratulate him",
+    image: '/images/user/user-27.png',
+    title: 'Roman Joined the Team!',
+    subTitle: 'Congratulate him',
   },
 ]
 
@@ -65,7 +65,7 @@ const Notification = () => {
           {isDotVisible && (
             <span
               className={cn(
-                "absolute right-0 top-0 z-1 size-2 rounded-full bg-red-light ring-2 ring-gray-2 dark:ring-dark-3",
+                'absolute right-0 top-0 z-1 size-2 rounded-full bg-red-light ring-2 ring-gray-2 dark:ring-dark-3',
               )}
             >
               <span className="absolute inset-0 -z-1 animate-ping rounded-full bg-red-light opacity-75" />
@@ -75,7 +75,7 @@ const Notification = () => {
       </DropdownTrigger>
 
       <DropdownContent
-        align={isMobile ? "end" : "center"}
+        align={isMobile ? 'end' : 'center'}
         className="border border-stroke bg-white px-3.5 py-3 shadow-md dark:border-dark-3 dark:bg-gray-dark min-[350px]:min-w-80"
       >
         <div className="mb-1 flex items-center justify-between px-2 py-1.5">

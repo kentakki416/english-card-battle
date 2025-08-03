@@ -1,4 +1,4 @@
-export * from "./user_collection"
+export * from './user_collection'
 
 
 export type Collection = {

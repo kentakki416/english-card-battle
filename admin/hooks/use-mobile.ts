@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from 'react'
 
 const MOBILE_BREAKPOINT = 850
 
@@ -18,10 +18,10 @@ export const useIsMobile = () => {
     setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
 
     // ウィンドウサイズ変更時のイベントリスナーを設定して、ウィンドウがリサイズされるたびにモバイル判定を更新する
-    mql.addEventListener("change", () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT))
+    mql.addEventListener('change', () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT))
 
     // メモリリークを防ぐために、コンポーネントがアンマウントされる際にイベントリスナーを削除
-    return () => mql.removeEventListener("change", () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT))
+    return () => mql.removeEventListener('change', () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT))
   }, [])
 
   return isMobile

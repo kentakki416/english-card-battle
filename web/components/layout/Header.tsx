@@ -1,10 +1,10 @@
-"use client"
+'use client'
 
-import Image from "next/image"
+import Image from 'next/image'
 
-import { Button } from "../ui"
+import { Button } from '../ui'
 
-import { useAuth } from "@/hooks/use-auth"
+import { useAuth } from '@/hooks/use-auth'
 
 type HeaderProps = {
   onLoginClick?: () => void
@@ -15,15 +15,15 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
 
     return (
         <header className="h-20 w-full border-b-2 border-slate-200 px-4">
-            <div className="lg:max-w-screen-lg mx-auto flex items-center justify-between h-full">
-                <div className="pt-8 pl-4 pb-7 flex items-center gap-x-3">
+            <div className="mx-auto flex h-full items-center justify-between lg:max-w-screen-lg">
+                <div className="flex items-center gap-x-3 pb-7 pl-4 pt-8">
                     <Image
                         alt="Parrot Logo"
                         height={40}
                         src="/assets/PNG/Square/snake.png"
                         width={40}
                     />
-                    <h1 className="text-2xl font-extrabold text-green-600 tracking-wide">
+                    <h1 className="text-2xl font-extrabold tracking-wide text-green-600">
             English Card Battle
                     </h1>
                 </div>

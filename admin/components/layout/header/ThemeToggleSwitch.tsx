@@ -1,18 +1,18 @@
-import { useTheme } from "next-themes"
-import { useEffect, useState } from "react"
+import { useTheme } from 'next-themes'
+import { useEffect, useState } from 'react'
 
-import { cn } from "../../../lib/utils"
-import MoonIcon from "../../icons/header/MoonIcon"
-import SunIcon from "../../icons/header/SunIcon"
+import { cn } from '../../../lib/utils'
+import MoonIcon from '../../icons/header/MoonIcon'
+import SunIcon from '../../icons/header/SunIcon'
 
 
 const THEMES = [
   {
-    name: "light",
+    name: 'light',
     Icon: SunIcon,
   },
   {
-    name: "dark",
+    name: 'dark',
     Icon: MoonIcon
   }
 ]
@@ -32,10 +32,10 @@ const ThemeToggleSwitch = () => {
   return (
     <button
       className="group rounded-full bg-gray-3 p-[5px] text-[#111928] outline-1 outline-primary focus-visible:outline dark:bg-[#020D1A] dark:text-current"
-      onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+      onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
     >
       <span className="sr-only">
-        Switch to {theme === "light" ? "dark" : "light"} mode
+        Switch to {theme === 'light' ? 'dark' : 'light'} mode
       </span>
 
       <span aria-hidden className="relative flex gap-2.5">
@@ -45,8 +45,8 @@ const ThemeToggleSwitch = () => {
         {THEMES.map(({ name, Icon }) => (
           <span
             className={cn(
-              "relative grid size-[38px] place-items-center rounded-full",
-              name === "dark" && "dark:text-white"
+              'relative grid size-[38px] place-items-center rounded-full',
+              name === 'dark' && 'dark:text-white'
             )}
             key={name}
            >

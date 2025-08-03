@@ -1,7 +1,7 @@
-import Image from "next/image"
+import Image from 'next/image'
 
-import darkLogo from "../../public/logos/dark.svg"
-import logo from "../../public/logos/main.svg"
+import darkLogo from '../../public/logos/dark.svg'
+import logo from '../../public/logos/main.svg'
 
 const LogoIcon = () => {
   return (

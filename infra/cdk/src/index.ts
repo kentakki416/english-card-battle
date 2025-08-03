@@ -1,4 +1,4 @@
-import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb"
+import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb'
 
 const dynamoDbClient = new DynamoDBClient({})
 const tableName = process.env.TABLE_NAME
@@ -19,7 +19,7 @@ export const handler = async () => {
   return {
     statusCode: 200,
     body: JSON.stringify({
-      message: "書き込み成功"
+      message: '書き込み成功'
     })
   }
 }

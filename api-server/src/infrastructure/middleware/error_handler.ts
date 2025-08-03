@@ -1,5 +1,5 @@
-import express from "express"
-import { ILogger } from "../../adapter/interface/ilogger"
+import express from 'express'
+import { ILogger } from '../../adapter/interface/ilogger'
 
 /**
  * エラーハンドリングミドルウェア
@@ -26,8 +26,8 @@ export class ErrorHandlerMiddleware {
       // クライアントには汎用的なエラーメッセージを返す
       res.status(500).json({
         success: false,
-        error: "Internal server error",
-        message: "An unexpected error occurred"
+        error: 'Internal server error',
+        message: 'An unexpected error occurred'
       })
     }
   }
@@ -40,7 +40,7 @@ export class ErrorHandlerMiddleware {
       this._logger.error(new Error(`Not found API: ${req.method} ${req.path}`))
       res.status(404).json({
         success: false,
-        error: "Not found API",
+        error: 'Not found API',
         message: `Route ${req.method} ${req.path} not found`
       })
     }

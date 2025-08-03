@@ -1,4 +1,4 @@
-import { SVGProps } from "react"
+import { SVGProps } from 'react'
 
 const BellIcon = (props: SVGProps<SVGSVGElement>) => {
   return (

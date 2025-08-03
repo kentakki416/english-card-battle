@@ -7,7 +7,7 @@ export type Result<T, E = Error> = Success<T> | Failure<E>
  * 成功時のResult
  */
 export class Success<T> {
-  readonly _tag = "Success" as const
+  readonly _tag = 'Success' as const
 
   constructor(readonly value: T) {}
 
@@ -24,7 +24,7 @@ export class Success<T> {
  * 失敗時のResult
  */
 export class Failure<E> {
-  readonly _tag = "Failure" as const
+  readonly _tag = 'Failure' as const
 
   constructor(readonly error: E) {}
 
