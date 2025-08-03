@@ -6,7 +6,6 @@ import { Environment } from '../../parameter'
 
 interface Route53StackProps extends cdk.StackProps {
   environment: Environment
-  domainName?: string // ドメイン名をパラメータとして受け取る
 }
 
 export class Route53Stack extends cdk.Stack {
@@ -16,7 +15,7 @@ export class Route53Stack extends cdk.Stack {
     super(scope, id, props)
 
     // ドメイン名の設定（テスト用の一時的なドメイン名）
-    const domainName = props.domainName || 'english-card-battle-test.com' // テスト用ドメイン名
+    const domainName = 'english-card-battle-test.com' // テスト用ドメイン名
 
     // Hosted Zone
     this.hostedZone = new route53.HostedZone(this, 'HostedZone', {

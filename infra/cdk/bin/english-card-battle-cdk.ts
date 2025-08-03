@@ -32,9 +32,8 @@ const vpcStack = new VpcStack(app, 'Vpc', {
 /**
  * Route53 Stack
  */
-new Route53Stack(app, 'Route53', {
+const route53Stack = new Route53Stack(app, 'Route53', {
   environment: process.env.ENVIRONMENT as Environment,
-  domainName: process.env.DOMAIN_NAME || 'english-card-battle-test.com', // テスト用ドメイン名
 })
 
 /**
@@ -43,6 +42,7 @@ new Route53Stack(app, 'Route53', {
 new ApiServerStack(app, 'ApiServer', {
   environment: process.env.ENVIRONMENT as Environment,
   vpcStack: vpcStack,
+  route53Stack: route53Stack.hostedZone,
 })
 
 new SimpleApiServerStack(app, 'SimpleApiServer', {})

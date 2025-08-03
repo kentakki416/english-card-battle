@@ -12,7 +12,7 @@ import { VpcStack } from './common/vpc-stack'
 interface ApiServerStackProps extends cdk.StackProps {
   environment: Environment
   vpcStack: VpcStack // VPC Stackへの参照
-  route53Stack?: route53.HostedZone // Route53 Stackへの参照（オプション）
+  route53Stack: route53.HostedZone // Route53 Stackへの参照
 }
 
 export class ApiServerStack extends cdk.Stack {
@@ -57,25 +57,22 @@ export class ApiServerStack extends cdk.Stack {
       },
     })
 
-    // Route53 Aレコードの設定（Route53 Stackが提供された場合）
-    if (props.route53Stack) {
-      // サブドメインのAレコード: api.english-card-battle-test.com
-      new route53.ARecord(this, 'ApiARecord', {
-        zone: props.route53Stack,
-        recordName: 'api', // サブドメイン名
-        target: route53.RecordTarget.fromAlias(
-          new cdk.aws_route53_targets.LoadBalancerTarget(ecsConstruct.alb)
-        )
-      })
+    // サブドメインのAレコード: api.english-card-battle-test.com
+    new route53.ARecord(this, 'ApiARecord', {
+      zone: props.route53Stack,
+      recordName: 'api', // サブドメイン名
+      target: route53.RecordTarget.fromAlias(
+        new cdk.aws_route53_targets.LoadBalancerTarget(ecsConstruct.alb)
+      )
+    })
 
-      // ルートドメインのAレコード: english-card-battle-test.com
-      new route53.ARecord(this, 'RootARecord', {
-        zone: props.route53Stack,
-        recordName: '', // 空文字 = ルートドメイン
-        target: route53.RecordTarget.fromAlias(
-          new cdk.aws_route53_targets.LoadBalancerTarget(ecsConstruct.alb)
-        )
-      })
-    }
+    // ルートドメインのAレコード: english-card-battle-test.com
+    new route53.ARecord(this, 'RootARecord', {
+      zone: props.route53Stack,
+      recordName: '', // 空文字 = ルートドメイン
+      target: route53.RecordTarget.fromAlias(
+        new cdk.aws_route53_targets.LoadBalancerTarget(ecsConstruct.alb)
+      )
+    })
   }
 }
