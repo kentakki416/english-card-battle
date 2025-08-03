@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib'
 import { Template } from 'aws-cdk-lib/assertions'
 
-import { ServerLessAppStack } from '../lib/serverless-app-stack'
+import { ServerLessAppStack } from '../lib/stack/serverless-app-stack'
 
 describe(__filename, () => {
 

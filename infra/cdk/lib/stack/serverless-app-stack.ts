@@ -1,9 +1,9 @@
 import * as cdk from 'aws-cdk-lib'
 import { Construct } from 'constructs'
 
-import { Api } from './constructs/api'
-import { Auth } from './constructs/auth'
-import { DataStore } from './constructs/datastore'
+import { Api } from '../constructs/api'
+import { Auth } from '../constructs/auth'
+import { DataStore } from '../constructs/datastore'
 
 export class ServerLessAppStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
