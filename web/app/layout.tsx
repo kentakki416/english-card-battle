@@ -1,10 +1,10 @@
+import { ClerkProvider } from '@clerk/nextjs'
 import { Nunito } from 'next/font/google'
 
 import './globals.css'
-import NextAuthProvider from './providers'
 
 import type { Metadata } from 'next'
-import { ClerkProvider } from "@clerk/nextjs"
+
 
 const font = Nunito({
     subsets: ['latin'],
@@ -23,14 +23,12 @@ const RootLayout = ({
     children: React.ReactNode;
 }>) => {
     return (
-    
-        <NextAuthProvider>
+        <ClerkProvider>
             <html lang='ja'>
                 <body className={`${font.variable} antialiased`}>
                     {children}
                 </body>
             </html>
-        </NextAuthProvider>
         </ClerkProvider>
     )
 }
