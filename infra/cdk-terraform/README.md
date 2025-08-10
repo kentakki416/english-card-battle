@@ -52,9 +52,7 @@ npm install
 
 ## 🛠️ CDK-Terraformコマンド詳細解説
 
-### 基本コマンド
-
-#### `cdktf init` - プロジェクト初期化
+### 1️⃣ `cdktf init` - プロジェクト初期化
 **内部挙動:**
 1. テンプレートのダウンロードと展開
 2. 設定ファイルの生成（`cdktf.json`、`package.json`など）
@@ -68,7 +66,12 @@ npm install
 - `--local`: ローカルバックエンドを使用
 - `--from-terraform-project`: 既存のTerraformプロジェクトから変換
 
-#### `cdktf get` - プロバイダーコード生成
+### 2️⃣ `cdktf get` - プロバイダーコード生成
+**使用用途**
+
+✅ プロバイダーやモジュールを追加した時に実行するコマンド
+
+
 **内部挙動:**
 1. `cdktf.json`からプロバイダーとモジュールを読み取り
 2. Terraform Registryからプロバイダースキーマをダウンロード
@@ -81,43 +84,52 @@ npm install
 - `.gen/constraints.json`: バージョン制約
 - `.gen/versions.json`: 使用バージョン情報
 
-#### `cdktf synth` - Terraformコード合成
+### 3️⃣ `cdktf synth` - Terraformコード合成
+**使用用途**
+
+✅ TypescriptからTerraformへ変換するためのコマンド
+
 **内部挙動:**
 1. TypeScriptコードをコンパイル
 2. CDKTFアプリケーションを実行
 3. Terraformリソース定義を生成
 4. `cdktf.out/`ディレクトリに出力
 
-**出力構造:**
-```
-cdktf.out/
-├── manifest.json          # スタック情報
-└── stacks/
-    └── [stack-name]/
-        ├── cdk.tf.json    # Terraform設定
-        └── metadata.json  # スタックメタデータ
-```
+### 4️⃣ `cdktf diff` - 差分確認
+**使用用途**
 
-#### `cdktf deploy` - デプロイ実行
+✅ 実際のリソースとソースコード(cdktf.out/)を比較する
+
+**内部挙動:**
+1. `cdktf synth`を実行
+2. 現在の状態と比較
+3. 変更予定のリソースを表示
+
+### 5️⃣ `cdktf deploy` - デプロイ実行
+
+**使用用途**
+
+✅ 実際にリソースを作成し、.tfstateを作成
+
 **内部挙動:**
 1. `cdktf synth`を実行
 2. Terraformの初期化（`terraform init`）
 3. プランの実行（`terraform plan`）
 4. 適用の実行（`terraform apply`）
+5. .tfstateファイルを更新
 
 **オプション:**
 - `--auto-approve`: 承認なしでデプロイ
 - `--parallelism`: 並列実行数
 - `--refresh-only`: 状態の更新のみ
 
-#### `cdktf diff` - 差分確認
-**内部挙動:**
-1. `cdktf synth`を実行
-2. 現在の状態と比較
-3. 変更予定のリソースを表示
 
-#### `cdktf destroy` - リソース削除
+### 6️⃣ `cdktf destroy` - リソース削除
 **内部挙動:**
 1. `cdktf synth`を実行
 2. 削除プランの確認
 3. リソースの削除実行
+
+### 7️⃣ `terraform import` - リソースのimport
+**用途**
+- cdktfにimportコマンドはない
