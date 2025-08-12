@@ -30,8 +30,8 @@ export class ApiServerStack extends cdk.Stack {
       repositoryName: parameters.ecr.repositoryName,
     })
 
-    // API Server ECS Constructの作成（BaseEcsConstructを直接使用）
-    const ecsConstruct = new BaseEcsConstruct(this, 'ApiServerEcsConstruct', {
+    // API Server ECS Constructの作成
+    new BaseEcsConstruct(this, 'ApiServerEcsConstruct', {
       vpc: vpc,
       cpu: parameters.ecs.cpu,
       memoryLimitMiB: parameters.ecs.memoryLimitMiB,
@@ -56,26 +56,5 @@ export class ApiServerStack extends cdk.Stack {
         LOG_LEVEL: 'info',
       },
     })
-
-    // Route53 Aレコードの設定（Route53 Stackが提供された場合）
-    if (props.route53Stack) {
-      // サブドメインのAレコード: api.english-card-battle-test.com
-      new route53.ARecord(this, 'ApiARecord', {
-        zone: props.route53Stack,
-        recordName: 'api', // サブドメイン名
-        target: route53.RecordTarget.fromAlias(
-          new cdk.aws_route53_targets.LoadBalancerTarget(ecsConstruct.alb)
-        )
-      })
-
-      // ルートドメインのAレコード: english-card-battle-test.com
-      new route53.ARecord(this, 'RootARecord', {
-        zone: props.route53Stack,
-        recordName: '', // 空文字 = ルートドメイン
-        target: route53.RecordTarget.fromAlias(
-          new cdk.aws_route53_targets.LoadBalancerTarget(ecsConstruct.alb)
-        )
-      })
-    }
   }
 }
