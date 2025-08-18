@@ -29,7 +29,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: 📥 リポジトリをチェックアウト
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: ⚙️ Terraformのセットアップ
         uses: hashicorp/setup-terraform@v3
