@@ -23,7 +23,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: 📥 リポジトリをチェックアウト
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🟢 Node.jsのセットアップ
         uses: actions/setup-node@v4
