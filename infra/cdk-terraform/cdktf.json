@@ -1,8 +1,8 @@
 {
   "language": "typescript",
   "app": "npx ts-node main.ts",
-  "projectId": "e6d6ca61-bb8a-4f10-9bad-46f89178b917",
-  "sendCrashReports": "true",
+  "projectId": "a81e8693-57b2-415d-b65d-dab239a8fb81",
+  "sendCrashReports": "false",
   "terraformProviders": [
     "hashicorp/aws@~>4.0"
   ],
