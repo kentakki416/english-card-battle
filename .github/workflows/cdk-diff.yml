@@ -55,7 +55,7 @@ jobs:
         run: npm run build
 
       - name: 🔐 AWS認証情報を設定
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
