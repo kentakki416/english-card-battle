@@ -9,7 +9,7 @@ const Footer = () => {
     <footer className="hidden h-20 w-full border-t-2 border-slate-200 p-2 lg:block">
       <div className="mx-auto flex h-full max-w-screen-lg items-center justify-evenly">
         <Button size="lg" variant="ghost" className="w-full">
-          <Image src="" alt="Croation" height={32} width={40}/>
+          <Image src="/assets/hr.svg" alt="Croatian" height={32} width={40}/>
         </Button>
       </div>
     </footer>
