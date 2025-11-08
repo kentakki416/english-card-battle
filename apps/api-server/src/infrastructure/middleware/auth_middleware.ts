@@ -24,7 +24,6 @@ export class AuthMiddleware {
   public verifyGoogleAuth() {
     return async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
       try {
-        console.log(this.jwtService)
         // NextAuth.jsのセッショントークンの存在確認
         const sessionToken = req.headers.authorization?.replace('Bearer ', '')
         

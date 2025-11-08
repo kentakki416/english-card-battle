@@ -1,9 +1,9 @@
 import { ERROR } from '../../../constant'
 import { Result, Success, Failure, Controller, Domain, ServerError, UserError, GoogleAuthError } from '../../../types'
+import { User } from '../../domain/entity/user'
+import { IUserRepository } from '../../infrastructure/db/repository/user_repository'
 import { ILogger } from '../../infrastructure/log/logger'
 import { IToken } from '../../infrastructure/util/jwt'
-import { IUserRepository } from '../../infrastructure/db/repository/user_repository'
-import { User } from '../../domain/entity/user'
 
 export type GoogleLoginError = GoogleAuthError | UserError | ServerError
 
