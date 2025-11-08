@@ -37,8 +37,6 @@ jobs:
 
       - name: 📦 pnpmをセットアップ
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: 🟢 Node.jsのセットアップ
         uses: actions/setup-node@v4
