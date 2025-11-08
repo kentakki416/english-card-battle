@@ -59,20 +59,20 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
 
       - name: 🔧 Terraform init
-        working-directory: infra/terraform/aws/env/${{ github.event.inputs.environment }}
+        working-directory: infrastructure/terraform/aws/env/${{ github.event.inputs.environment }}
         run: terraform init
 
       - name: 📋 Terraform plan
-        working-directory: infra/terraform/aws/env/${{ github.event.inputs.environment }}
+        working-directory: infrastructure/terraform/aws/env/${{ github.event.inputs.environment }}
         run: terraform plan -detailed-exitcode -out=apply.tfplan
 
       - name: 🔍 Show Plan
-        working-directory: infra/terraform/aws/env/${{ github.event.inputs.environment }}
+        working-directory: infrastructure/terraform/aws/env/${{ github.event.inputs.environment }}
         run: terraform show apply.tfplan
 
       - name: 🚀 Execute Apply
         if: github.event.inputs.dry_run != 'true'
-        working-directory: infra/terraform/aws/env/${{ github.event.inputs.environment }}
+        working-directory: infrastructure/terraform/aws/env/${{ github.event.inputs.environment }}
         run: |
           echo "🚀 Applying infrastructure for ${{ github.event.inputs.environment }}..."
           terraform apply apply.tfplan

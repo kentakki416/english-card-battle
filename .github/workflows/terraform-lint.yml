@@ -2,7 +2,7 @@ name: 🧹 Terraform Lint
 on:
   push:
     paths:
-      - 'infra/terraform/**'
+      - 'infrastructure/terraform/**'
       - '.github/workflows/terraform-lint.yml'
   workflow_dispatch:
 permissions:
@@ -37,15 +37,15 @@ jobs:
           terraform_version: '1.7.0'
 
       - name: 🔧 Terraformの初期化
-        working-directory: infra/terraform/aws/env/dev
+        working-directory: infrastructure/terraform/aws/env/dev
         run: terraform init -backend=false
 
       - name: 📝 フォーマットチェック
-        working-directory: infra/terraform/aws/env/dev
+        working-directory: infrastructure/terraform/aws/env/dev
         run: terraform fmt -check -recursive -diff
 
       - name: 📝 バリデーションチェック
-        working-directory: infra/terraform/aws/env/dev
+        working-directory: infrastructure/terraform/aws/env/dev
         run: terraform validate
 
       - name: 🎯 Tflintのセットアップ
@@ -54,7 +54,7 @@ jobs:
           tflint_version: latest
 
       - name: 🔧 TFLintの初期化
-        working-directory: infra/terraform
+        working-directory: infrastructure/terraform
         run: tflint --init --config .tflint.hcl
         env:
           # https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/plugins.md#avoiding-rate-limiting
@@ -67,7 +67,7 @@ jobs:
       #     aws-region: ${{ env.AWS_REGION }}
 
       - name: 📝 TFLintの実行
-        working-directory: infra/terraform
+        working-directory: infrastructure/terraform
         run: tflint --recursive -c $(realpath ./.tflint.hcl)
 
 
