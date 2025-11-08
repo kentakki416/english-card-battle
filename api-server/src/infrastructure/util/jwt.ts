@@ -1,6 +1,9 @@
 import jwt, { JwtPayload } from 'jsonwebtoken'
 
-import { IToken } from '../../adapter/interface/itoken'
+export interface IToken {
+  generateToken(payload: string): string
+  verifyToken(token: string): string | JwtPayload
+}
 
 export class Jwt implements IToken {
   /**

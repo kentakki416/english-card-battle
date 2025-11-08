@@ -2,7 +2,7 @@ import express from 'express'
 import { pinoHttp } from 'pino-http'
 
 import { DIContainer } from '../di/container'
-import { PinoLogger } from '../log/pino/logger'
+import { PinoLogger } from '../log/logger'
 import { CorsMiddleware } from '../middleware/cors'
 import { ErrorHandlerMiddleware } from '../middleware/error_handler'
 import { ExpressRouter } from '../router/router'

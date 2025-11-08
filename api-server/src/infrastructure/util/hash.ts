@@ -1,5 +1,11 @@
 import bcrypt from 'bcrypt'
-export class Hash {
+
+export interface IHash {
+  passwordToHash(password: string): Promise<string>
+  confirmPassword(password: string, hashedPassword: string): Promise<boolean>
+}
+
+export class Hash implements IHash {
   /**
    * パスワードをハッシュ化する
    */

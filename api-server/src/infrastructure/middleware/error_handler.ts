@@ -1,5 +1,5 @@
 import express from 'express'
-import { ILogger } from '../../adapter/interface/ilogger'
+import { ILogger } from '../log/logger'
 
 /**
  * エラーハンドリングミドルウェア

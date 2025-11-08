@@ -1,7 +1,7 @@
 import { Db } from 'mongodb'
 
-import { IDbClient } from '../../adapter/interface/idb_client'
-import { ILogger } from '../../adapter/interface/ilogger'
+import { IDbClient } from '../db/client'
+import { ILogger } from '../log/logger'
 import { ApiTokenGenerator } from '../middleware/api_token'
 
 import { AuthContainer } from './auth_container'

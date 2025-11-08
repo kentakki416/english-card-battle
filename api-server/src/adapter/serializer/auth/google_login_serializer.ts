@@ -65,7 +65,7 @@ export class GoogleLoginSerializer {
     }
     
     return {
-      status: CONSTANT.STATUS_CODE.SUCCESS,
+      status: CONSTANT.SUCCESS,
       data: responseData,
       responsedAt: new Date()
     }
@@ -74,7 +74,7 @@ export class GoogleLoginSerializer {
   /**
    * アプリケーションエラーのレスポンス
    */
-  applicationError(error: UserError | GoogleAuthError): Controller.Response<Controller.GoogleLoginErrorResponse> {
+  applicationError(error: UserError | GoogleAuthError | ServerError): Controller.Response<Controller.GoogleLoginErrorResponse> {
     return {
       status: error.statusCode,
       errorCode: error.errorCode,

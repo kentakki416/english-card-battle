@@ -1,6 +1,6 @@
-import { MongoClient } from './infrastructure/db/mongo/client'
+import { MongoClient } from './infrastructure/db/client'
 import { DIContainer } from './infrastructure/di/container'
-import { PinoLogger } from './infrastructure/log/pino/logger'
+import { PinoLogger } from './infrastructure/log/logger'
 import { ExpressServer } from './infrastructure/server/server'
 
 (async() => {
