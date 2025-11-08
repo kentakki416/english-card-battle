@@ -55,7 +55,8 @@ export async function POST() {
     
     // レスポンスデータからトークンを取得してクッキーに保存
     if (responseData.data?.token) {
-      cookies().set('jwt', responseData.data.token, {
+      const cookieStore = await cookies()
+      cookieStore.set('jwt', responseData.data.token, {
         httpOnly: true,                    // JavaScriptからアクセス不可（XSS攻撃対策）
         secure: process.env.NODE_ENV === 'production', // HTTPS環境でのみ送信（本番環境では必須）
         sameSite: 'lax',                   // クロスサイトリクエストでの送信制限（CSRF攻撃対策）
