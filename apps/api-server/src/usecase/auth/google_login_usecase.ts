@@ -36,7 +36,7 @@ export class GoogleLoginUsecase {
         return userResult
       }
 
-      let user: User | null = userResult.value ?? null
+      let user: User
 
       // ユーザーが見つからない場合、新規作成
       if (userResult.value === null) {
