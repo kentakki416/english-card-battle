@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express'
-import { Jwt } from '../util/jwt'
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -11,10 +10,8 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export class AuthMiddleware {
-  private jwtService: Jwt
-
   constructor() {
-    this.jwtService = new Jwt()
+    // 将来的なJWT検証用に拡張可能
   }
 
   /**

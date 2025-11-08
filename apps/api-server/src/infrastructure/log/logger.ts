@@ -66,22 +66,39 @@ export class PinoLogger implements ILogger {
   }
 
   public debug(message: string, ...args: unknown[]): void {
-    this._logger.debug(message, ...args)
+    if (args.length > 0) {
+      this._logger.debug({ args }, message)
+    } else {
+      this._logger.debug(message)
+    }
   }
 
   public info(message: string, ...args: unknown[]): void {
-    this._logger.info(message, ...args)
+    if (args.length > 0) {
+      this._logger.info({ args }, message)
+    } else {
+      this._logger.info(message)
+    }
   }
 
   public warn(message: string, ...args: unknown[]): void {
-    this._logger.warn(message, ...args)
+    if (args.length > 0) {
+      this._logger.warn({ args }, message)
+    } else {
+      this._logger.warn(message)
+    }
   }
 
   public error(err: Error, message?: string, ...args: unknown[]): void {
+    const errorObj = {
+      error: err.message,
+      stack: err.stack,
+      ...(args.length > 0 && { args })
+    }
     if (message) {
-      this._logger.error(`${message}\n${err.stack}`, ...args)
+      this._logger.error(errorObj, `${message}\n${err.stack}`)
     } else {
-      this._logger.error(`${err.message}\n${err.stack}`, ...args)
+      this._logger.error(errorObj, `${err.message}\n${err.stack}`)
     }
   }
 }

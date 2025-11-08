@@ -33,5 +33,5 @@ Thumbs.db
 coverage
 
 # Database
-db/
-configdb/
+/db/
+/configdb/
