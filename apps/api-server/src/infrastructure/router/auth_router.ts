@@ -1,7 +1,7 @@
 import { Router } from 'express'
 
 import { Controller } from '../../../types'
-import { DIContainer } from '../di/container'
+import { DIContainer } from '../di/di_container'
 import { AuthMiddleware, AuthenticatedRequest } from '../middleware/auth_middleware'
 
 export class AuthRouter {
@@ -35,8 +35,8 @@ export class AuthRouter {
           return res.status(401).json({ error: 'User information not found' })
         }
 
-        const authContainer = this._container.getAuthContainer()
-        const controller = authContainer.getGoogleLoginController()
+        // 新しいフラット構造のDIContainerから直接取得
+        const controller = this._container.getGoogleLoginController()
         
         // 検証済みユーザー情報を使用
         const loginRequest: Controller.LoginRequest = {

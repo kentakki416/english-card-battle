@@ -1,8 +1,8 @@
 import { Router } from 'express'
 
-import { DIContainer } from '../di/container'
-
 import { AuthRouter } from './auth_router'
+import { DIContainer } from '../di/di_container'
+
 
 export class ExpressRouter {
   private _router: Router

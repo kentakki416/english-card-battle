@@ -1,5 +1,5 @@
 import { MongoClient } from './infrastructure/db/client'
-import { DIContainer } from './infrastructure/di/container'
+import { DIContainer } from './infrastructure/di/di_container'
 import { PinoLogger } from './infrastructure/log/logger'
 import { ExpressServer } from './infrastructure/server/server'
 

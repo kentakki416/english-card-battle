@@ -1,5 +1,5 @@
-import { Domain, Result, Success, Failure, UserError } from '../../../types'
 import { ERROR } from '../../../constant'
+import { Domain, Result, Success, Failure, UserError } from '../../../types'
 
 export class User {
   /** DB用のユーザーID */
