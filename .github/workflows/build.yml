@@ -1,0 +1,54 @@
+name: 🏗️ Build
+
+on:
+  push:
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - '.github/workflows/build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # 環境変数（必要に応じて追加）
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+  CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+
+jobs:
+  build:
+    name: 🏗️ Build All Apps
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: 📥 リポジトリをチェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Turborepoの差分検出のため
+
+      - name: 📦 pnpmをセットアップ
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: 🟢 Node.jsのセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: 📦 依存関係をインストール
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏗️ ビルドを実行
+        run: pnpm build
+

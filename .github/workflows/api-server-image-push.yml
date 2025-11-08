@@ -3,7 +3,8 @@ on:
   push:
     branches: [ main, develop ]
     paths:
-      - 'api-server/**'
+      - 'apps/api-server/**'
+      - 'packages/shared-types/**'
       - '.github/workflows/api-server-image-push.yml'
   workflow_dispatch:
     inputs:
@@ -74,7 +75,7 @@ jobs:
           echo "ecr_repository=${ECR_REPO_NAME}" >> $GITHUB_OUTPUT
 
       - name: 🐳 Dockerイメージをビルド・プッシュ
-        working-directory: api-server
+        working-directory: apps/api-server
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ steps.image-tag.outputs.ecr_repository }}
