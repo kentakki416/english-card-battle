@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
+
 import { Jwt } from '../util/jwt'
 
 export interface AuthenticatedRequest extends Request {
