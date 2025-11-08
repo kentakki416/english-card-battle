@@ -108,6 +108,16 @@ git checkout -b docs/api-documentation
 
 ## 技術スタック
 
+### プロジェクト管理
+
+<div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0;">
+  <img src="https://img.shields.io/badge/Turborepo-EF4444?style=for-the-badge&logo=turborepo&logoColor=white" alt="Turborepo" />
+  <img src="https://img.shields.io/badge/pnpm-F69220?style=for-the-badge&logo=pnpm&logoColor=white" alt="pnpm" />
+</div>
+
+- **Turborepo**: 高速なビルドとキャッシュを提供するmonorepoツール
+- **pnpm**: 効率的なディスク使用とインストール速度を実現するパッケージマネージャー
+
 ### フロントエンド
 
 <div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0;">
@@ -159,23 +169,29 @@ git checkout -b docs/api-documentation
 
 ## プロジェクト構成
 
+このプロジェクトは **Turborepo + pnpm** を使用したmonorepo構成です。
+
 ```
 english-card-battle/
-├── web/                 # フロントエンド (Next.js)
-│   ├── app/               # App Router
-│   ├── components/        # UIコンポーネント
-│   ├── lib/              # ユーティリティ
-│   └── public/           # 静的ファイル
-├── server/               # バックエンド (Node.js)
-│   ├── src/
-│   │   ├── adapter/      # アダプター層
-│   │   ├── domain/       # ドメイン層
-│   │   ├── usecase/      # ユースケース層
-│   │   └── infrastructure/ # インフラ層
-│   └── test/             # テストファイル
-└── infra/               # インフラストラクチャ
-    ├── aws/             # AWS Terraform設定
-    └── cdk/             # AWS CDK設定
+├── apps/                    # アプリケーション
+│   ├── admin/              # 管理画面 (Next.js 15)
+│   ├── web/                # メインアプリ (Next.js 14)
+│   └── api-server/         # バックエンドAPI (Node.js + Express)
+│       ├── src/
+│       │   ├── adapter/      # アダプター層
+│       │   ├── domain/       # ドメイン層
+│       │   ├── usecase/      # ユースケース層
+│       │   └── infrastructure/ # インフラ層
+│       └── test/             # テストファイル
+├── packages/               # 共有パッケージ
+│   └── shared-types/       # 共有型定義
+├── infrastructure/         # インフラストラクチャ
+│   └── cdk-terraform/      # AWS CDK for Terraform
+├── eslint.config.base.mjs # 共通ESLint設定（Flat Config）
+├── tsconfig.base.json     # 共通TypeScript設定
+├── pnpm-workspace.yaml    # pnpmワークスペース設定
+├── turbo.json             # Turborepo設定
+└── package.json           # ルートpackage.json
 ```
 
 ### アーキテクチャ詳細
@@ -202,7 +218,7 @@ english-card-battle/
 ### 前提条件
 
 - Node.js 18以上
-- npm または yarn
+- pnpm 8以上
 - Docker
 - MongoDB（ローカル開発用）
 
@@ -214,24 +230,17 @@ english-card-battle/
    cd english-card-battle
    ```
 
-2. フロントエンドのセットアップ
+2. 依存関係のインストール（ルートで一括インストール）
    ```bash
-   cd web
-   npm install
+   pnpm install
    ```
 
-3. バックエンドのセットアップ
+3. 環境変数の設定
    ```bash
-   cd ../api-server
-   npm install
-   ```
-
-4. 環境変数の設定
-   ```bash
-   # web/.env.local
+   # apps/web/.env.local
    NEXT_PUBLIC_API_URL=http://localhost:3001
    
-   # api-server/.env
+   # apps/api-server/.env
    MONGODB_URI=mongodb://localhost:27017/english-card-battle
    JWT_SECRET=your-secret-key
    PORT=3001
@@ -240,33 +249,37 @@ english-card-battle/
 ### 開発サーバーの起動
 
 ```bash
-# フロントエンド（ポート3000）
-cd web
-npm run dev
+# すべてのアプリケーションを起動
+pnpm dev
 
-# バックエンド（ポート3001）
-cd server
-npm run dev
+# 特定のアプリケーションのみ起動
+pnpm --filter admin dev      # 管理画面
+pnpm --filter client dev     # メインアプリ
+pnpm --filter api-server dev # バックエンドAPI
 ```
 
 ## 環境変数の設定
 
-### Next.js（web）側
+### Next.js（web/admin）側
 
-1. `web/env.example`を`web/.env.local`にコピー
+1. 各アプリの`.env.example`を`.env.local`にコピー
 2. 必要な値を設定
 
 ```bash
-cp web/env.example web/.env.local
+# Webアプリ
+cp apps/web/.env.example apps/web/.env.local
+
+# 管理画面
+cp apps/admin/.env.example apps/admin/.env.local
 ```
 
-### Express.js（server）側
+### Express.js（api-server）側
 
-1. `server/env.example`を`server/.env.local`にコピー
+1. `apps/api-server/.env.example`を`apps/api-server/.env.local`にコピー
 2. 必要な値を設定
 
 ```bash
-cp server/env.example server/.env.local
+cp apps/api-server/.env.example apps/api-server/.env.local
 ```
 
 ### 必要な環境変数
@@ -284,33 +297,39 @@ cp server/env.example server/.env.local
 
 ## 開発
 
-### テスト実行
+### Monorepoコマンド
 
 ```bash
-# フロントエンドテスト
-cd web
-npm test
+# すべてのパッケージをビルド
+pnpm build
 
-# バックエンドテスト
-cd server
-npm test
+# すべてのパッケージでlintを実行
+pnpm lint
+
+# すべてのパッケージでlintを修正
+pnpm lint:fix
+
+# すべてのパッケージでテストを実行
+pnpm test
 ```
 
-### コード品質
+### 個別パッケージのコマンド
 
 ```bash
-# ESLint
-npm run lint
+# 特定のパッケージでコマンドを実行
+pnpm --filter <package-name> <command>
 
-# TypeScript型チェック
-npm run type-check
+# 例：
+pnpm --filter admin build      # adminアプリをビルド
+pnpm --filter client test      # webアプリのテストを実行
+pnpm --filter api-server lint  # api-serverでlintを実行
 ```
 
 ### デプロイ
 
 ```bash
 # インフラのデプロイ
-cd infra/terraform/aws
+cd infrastructure/cdk-terraform
 terraform init
 terraform plan
 terraform apply

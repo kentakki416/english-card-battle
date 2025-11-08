@@ -25,7 +25,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.33.1
         with:
           scan-type: 'config'
-          scan-ref: 'infra/terraform/'
+          scan-ref: 'infrastructure/terraform/'
           severity: 'CRITICAL,HIGH,MEDIUM'
           exit-code: '1'
           ignore-unfixed: true
@@ -41,7 +41,7 @@ jobs:
       - name: 🔍 Run Checkov Security Scan
         uses: bridgecrewio/checkov-action@v12
         with:
-          directory: 'infra/terraform/'
+          directory: 'infrastructure/terraform/'
           framework: 'terraform,terraform_plan'
           soft_fail: false
           download_external_modules: true
