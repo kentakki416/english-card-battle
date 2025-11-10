@@ -155,8 +155,8 @@ importers:
         specifier: ^2.32.0
         version: 2.32.0(@typescript-eslint/parser@8.46.3(eslint@9.39.1(jiti@1.21.7))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.1(jiti@1.21.7))
       globals:
-        specifier: ^15.10.0
-        version: 15.15.0
+        specifier: ^16.5.0
+        version: 16.5.0
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@22.19.0)(ts-node@10.9.2(@types/node@22.19.0)(typescript@5.9.3))
@@ -238,7 +238,7 @@ importers:
         version: 19.2.2(@types/react@19.2.2)
       '@vitest/eslint-plugin':
         specifier: ^1.1.17
-        version: 1.4.1(eslint@9.39.1(jiti@1.21.7))(typescript@5.9.3)
+        version: 1.4.2(eslint@9.39.1(jiti@1.21.7))(typescript@5.9.3)
       eslint:
         specifier: ^9.17.0
         version: 9.39.1(jiti@1.21.7)
@@ -276,8 +276,8 @@ importers:
         specifier: ^4.1.4
         version: 4.3.0(@typescript-eslint/eslint-plugin@8.46.3(@typescript-eslint/parser@8.46.3(eslint@9.39.1(jiti@1.21.7))(typescript@5.9.3))(eslint@9.39.1(jiti@1.21.7))(typescript@5.9.3))(eslint@9.39.1(jiti@1.21.7))
       globals:
-        specifier: ^15.13.0
-        version: 15.15.0
+        specifier: ^16.5.0
+        version: 16.5.0
       postcss:
         specifier: ^8
         version: 8.5.6
@@ -1425,8 +1425,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@vitest/eslint-plugin@1.4.1':
-    resolution: {integrity: sha512-eBMCLeUhKvQxH7nPihmLUJUWXxqKovVFEmxbGKqkY/aN6hTAXGiRid8traRUOvgr82NJFJL3KPpE19fElOR7bg==}
+  '@vitest/eslint-plugin@1.4.2':
+    resolution: {integrity: sha512-7rENIOOk6eqgtf2FsQWilgfQheeuGRiU3lB2H+pmtbcA4jOdtBfQHVqS7f/KCOJ2JKjrIJgow8yUeANi34rj9w==}
     engines: {node: '>=18'}
     peerDependencies:
       eslint: '>=8.57.0'
@@ -2443,8 +2443,8 @@ packages:
     resolution: {integrity: sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==}
     engines: {node: '>=18'}
 
-  globals@15.15.0:
-    resolution: {integrity: sha512-7ACyT3wmyp3I61S4fG682L0VA2RGD9otkqGJIwNUMF1SWUombIIk+af1unuDYgMm082aHYwD+mzJvv9Iu8dsgg==}
+  globals@16.5.0:
+    resolution: {integrity: sha512-c/c15i26VrJ4IRt5Z89DnIzCGDn9EcebibhAOjw5ibqEHsE1wLUgkPn9RDmNcUKyU87GeaL633nyJ+pplFR2ZQ==}
     engines: {node: '>=18'}
 
   globalthis@1.0.4:
@@ -5534,7 +5534,7 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.11.1':
     optional: true
 
-  '@vitest/eslint-plugin@1.4.1(eslint@9.39.1(jiti@1.21.7))(typescript@5.9.3)':
+  '@vitest/eslint-plugin@1.4.2(eslint@9.39.1(jiti@1.21.7))(typescript@5.9.3)':
     dependencies:
       '@typescript-eslint/scope-manager': 8.46.3
       '@typescript-eslint/utils': 8.46.3(eslint@9.39.1(jiti@1.21.7))(typescript@5.9.3)
@@ -6761,7 +6761,7 @@ snapshots:
 
   globals@14.0.0: {}
 
-  globals@15.15.0: {}
+  globals@16.5.0: {}
 
   globalthis@1.0.4:
     dependencies:
