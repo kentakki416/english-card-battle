@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`/Users/s16865/workspace/local/product/english-card-battle/infra/cdk/test/serverless-app-stack.test.ts スナップショットテスト スナップショットが一致する 1`] = `
 {

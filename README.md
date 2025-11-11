@@ -36,8 +36,19 @@
       </ul>
     </li>
     <li><a href="#project-structure">プロジェクト構成</a></li>
-    <li><a href="#getting-started">セットアップ</a></li>
-    <li><a href="#development">開発</a></li>
+    <li>
+      <a href="#getting-started">セットアップ</a>
+      <ul>
+        <li><a href="#pnpm-install">pnpmのインストール</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#development">開発</a>
+      <ul>
+        <li><a href="#pnpm-workspace">pnpm Workspaceコマンド</a></li>
+        <li><a href="#troubleshooting">トラブルシューティング</a></li>
+      </ul>
+    </li>
     <li><a href="#license">ライセンス</a></li>
   </ol>
 </details>
@@ -222,6 +233,30 @@ english-card-battle/
 - Docker
 - MongoDB（ローカル開発用）
 
+### pnpmのインストール
+
+このプロジェクトでは**pnpm**をパッケージマネージャーとして使用しています。npmの代わりに必ずpnpmを使用してください。
+
+#### pnpmをインストールする
+
+```bash
+# npmを使用してグローバルインストール
+npm install -g pnpm
+
+# または、スタンドアロンスクリプト（推奨）
+curl -fsSL https://get.pnpm.io/install.sh | sh -
+
+# Macの場合（Homebrew）
+brew install pnpm
+```
+
+#### バージョン確認
+
+```bash
+pnpm --version
+# 8.0.0以上であることを確認
+```
+
 ### インストール手順
 
 1. リポジトリのクローン
@@ -297,9 +332,32 @@ cp apps/api-server/.env.example apps/api-server/.env.local
 
 ## 開発
 
-### Monorepoコマンド
+### pnpm Workspaceコマンド
+
+このプロジェクトはpnpm Workspaceを使用したmonorepo構成です。以下のコマンドを理解することで効率的に開発できます。
+
+#### ⚠️ 重要な注意点
+
+**❌ 絶対にやってはいけないこと**
+```bash
+# npm や yarn を使用しない
+npm install package-name     # ❌ 依存関係の競合が発生します
+yarn add package-name        # ❌ ロックファイルが壊れます
+```
+
+**✅ 正しい方法**
+```bash
+# pnpmを使用する
+pnpm add package-name        # ✅ 正しい
+pnpm install                 # ✅ 正しい
+```
+
+#### 全体のコマンド
 
 ```bash
+# すべてのワークスペースの依存関係をインストール
+pnpm install
+
 # すべてのパッケージをビルド
 pnpm build
 
@@ -313,16 +371,163 @@ pnpm lint:fix
 pnpm test
 ```
 
-### 個別パッケージのコマンド
+#### 特定のワークスペースでコマンドを実行
 
 ```bash
-# 特定のパッケージでコマンドを実行
-pnpm --filter <package-name> <command>
+# 基本形式
+pnpm --filter <workspace-name> <command>
+
+# 例：開発サーバーの起動
+pnpm --filter admin dev           # 管理画面を起動
+pnpm --filter web dev             # Webアプリを起動
+pnpm --filter api-server dev      # APIサーバーを起動
+
+# 例：ビルド
+pnpm --filter admin build         # adminアプリをビルド
+pnpm --filter @english-card-battle/cdk build  # CDKをビルド
+
+# 例：テスト
+pnpm --filter api-server test     # api-serverのテストを実行
+```
+
+#### ワークスペースにパッケージを追加
+
+```bash
+# ルートから特定のワークスペースにパッケージを追加
+pnpm --filter <workspace-name> add <package-name>
+
+# 開発依存として追加
+pnpm --filter <workspace-name> add -D <package-name>
 
 # 例：
-pnpm --filter admin build      # adminアプリをビルド
-pnpm --filter client test      # webアプリのテストを実行
-pnpm --filter api-server lint  # api-serverでlintを実行
+pnpm --filter admin add axios                      # adminにaxiosを追加
+pnpm --filter @english-card-battle/cdk add -D cdk-nag  # CDKにcdk-nagを開発依存として追加
+pnpm --filter api-server add express              # api-serverにexpressを追加
+
+# または、該当ディレクトリに移動してから追加
+cd apps/admin
+pnpm add axios
+```
+
+#### パッケージの削除
+
+```bash
+# 特定のワークスペースからパッケージを削除
+pnpm --filter <workspace-name> remove <package-name>
+
+# 例：
+pnpm --filter admin remove axios
+```
+
+#### ワークスペース間の依存関係
+
+```bash
+# ワークスペース内の別パッケージを参照する場合
+pnpm --filter web add @english-card-battle/shared-types@workspace:*
+```
+
+#### よくあるコマンド
+
+```bash
+# pnpmのストア（キャッシュ）をクリーン
+pnpm store prune
+
+# 使用していない依存関係を削除
+pnpm prune
+
+# package.jsonの内容でnode_modulesを再生成
+pnpm install --force
+
+# 依存関係の更新
+pnpm update
+
+# 特定のワークスペースだけ更新
+pnpm --filter admin update
+```
+
+### トラブルシューティング
+
+#### エラー: `ERESOLVE could not resolve`
+
+```bash
+npm error ERESOLVE could not resolve
+npm error Found: @typescript-eslint/eslint-plugin@8.37.0
+```
+
+**原因**: `npm`コマンドを使用してしまった場合に発生します。
+
+**解決策**: 必ず`pnpm`を使用してください。
+
+```bash
+# ❌ 間違い
+npm install --save-dev package-name
+
+# ✅ 正しい
+pnpm --filter <workspace-name> add -D package-name
+```
+
+#### エラー: `Cannot find module 'next/dist/bin/next'`
+
+```bash
+Error: Cannot find module '/path/to/apps/web/node_modules/next/dist/bin/next'
+```
+
+**原因**: 依存関係が正しくインストールされていない、またはpnpmのストアの場所が変わった。
+
+**解決策**: 依存関係を再インストールします。
+
+```bash
+# 方法1: 強制的に再インストール
+pnpm install --force
+
+# 方法2: node_modulesを削除してから再インストール（推奨度低）
+rm -rf node_modules apps/*/node_modules packages/*/node_modules
+pnpm install
+```
+
+#### エラー: `Unexpected store location`
+
+```bash
+ERR_PNPM_UNEXPECTED_STORE  Unexpected store location
+```
+
+**原因**: pnpmのストアの場所が変更された。
+
+**解決策**:
+
+```bash
+# 依存関係を再インストール
+pnpm install --force
+
+# または、ストアの場所を固定（グローバル設定）
+pnpm config set store-dir ~/.pnpm-store --global
+pnpm install
+```
+
+#### 一般的なトラブルシューティング手順
+
+1. **キャッシュをクリア**
+   ```bash
+   pnpm store prune
+   ```
+
+2. **依存関係を再インストール**
+   ```bash
+   pnpm install --force
+   ```
+
+3. **ビルドキャッシュをクリア（Turbo）**
+   ```bash
+   rm -rf .turbo
+   pnpm build
+   ```
+
+4. **それでもダメな場合**
+   ```bash
+   # 完全クリーンアップ
+   rm -rf node_modules .turbo apps/*/node_modules packages/*/node_modules
+   pnpm store prune
+   pnpm install
 ```
 
 ### デプロイ

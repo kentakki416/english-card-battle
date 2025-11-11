@@ -1,4 +1,6 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+  - 'infrastructure/cdk'
+  - 'infrastructure/cdk-terraform'
 

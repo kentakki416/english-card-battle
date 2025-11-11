@@ -1,11 +1,12 @@
 import js from '@eslint/js'
-import { defineConfig } from 'eslint/config'
 import importPlugin from 'eslint-plugin-import'
 import globals from 'globals'
-import * as tseslint from 'typescript-eslint'
+import tseslint from 'typescript-eslint'
 
-export default defineConfig([
-  // 除外設定を最初に追加
+import baseConfig from '../../eslint.config.base.mjs'
+
+export default tseslint.config(
+  // 除外設定
   {
     ignores: [
       'cdk.out/**',
@@ -14,63 +15,53 @@ export default defineConfig([
       '*.js',
       '*.d.ts',
       'coverage/**',
-      '*.min.js',
-      'build/**',
-      'temp/**',
-      '.git/**'
+      'jest.config.js'
     ]
   },
-  { files: ['**/*.{js,mjs,cjs,ts,mts,cts}'], plugins: { js }, extends: ['js/recommended'] },
-  { files: ['**/*.{js,mjs,cjs,ts,mts,cts}'], languageOptions: { globals: globals.node } },
-  tseslint.configs.recommended,
+  // ESLintの推奨設定
+  js.configs.recommended,
+  // TypeScript ESLintの推奨設定
+  ...tseslint.configs.recommended,
+  // グローバル変数設定
   {
-    files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
+    files: ['**/*.ts'],
+    languageOptions: {
+      globals: {
+        ...globals.node
+      },
+      parserOptions: {
+        project: './tsconfig.json',
+        tsconfigRootDir: import.meta.dirname
+      }
+    }
+  },
+  // importプラグイン設定
+  {
     plugins: {
-      import: importPlugin,
+      import: importPlugin
     },
     settings: {
       'import/resolver': {
         typescript: {
           alwaysTryTypes: true,
-          project: './tsconfig.json',
+          project: './tsconfig.json'
         },
         node: {
-          extensions: ['.js', '.jsx', '.ts', '.tsx'],
-        },
-      },
-    },
+          extensions: ['.js', '.jsx', '.ts', '.tsx']
+        }
+      }
+    }
+  },
+  // ベース設定をインポート
+  baseConfig,
+  // CDK固有のルール
+  {
     rules: {
-      'quotes': ['error', 'single'],
-      'semi': ['error', 'never'],
-      'object-curly-spacing': ['error', 'always'],
-      'array-bracket-spacing': ['error', 'never'],
-      'computed-property-spacing': ['error', 'never'],
-      'arrow-parens': ['error', 'always'],
-      'arrow-spacing': ['error', { 'before': true, 'after': true }],
-      'no-multi-spaces': ['error'],
-      'no-trailing-spaces': ['error'],
-      'import/order': [
-        'error',
-        {
-          groups: [
-            'builtin',
-            'external',
-            'internal',
-            'parent',
-            'sibling',
-            'index',
-          ],
-          'newlines-between': 'always',
-          alphabetize: {
-            order: 'asc',
-            caseInsensitive: true,
-          },
-        },
-      ],
-      // 追加のimport関連ルール
-      'import/no-unresolved': 'error',
-      'import/no-unused-modules': 'error',
-      'import/no-duplicates': 'error',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      'no-console': 'off' // CDKではconsole.logを許可
     }
   }
-])
+)
+

@@ -4,7 +4,7 @@ import * as cdk from 'aws-cdk-lib'
 import { CognitoUserPoolsAuthorizer, Cors, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway'
 import { UserPool } from 'aws-cdk-lib/aws-cognito'
 import { TableV2 } from 'aws-cdk-lib/aws-dynamodb'
-import { Function, Runtime } from 'aws-cdk-lib/aws-lambda'
+import { Function as LambdaFunction, Runtime } from 'aws-cdk-lib/aws-lambda'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import { Construct } from 'constructs'
 
@@ -14,7 +14,7 @@ interface ApiProps extends cdk.StackProps {
 }
 
 export class Api extends Construct {
-  readonly testLambda: Function
+  readonly testLambda: LambdaFunction
   constructor(scope: Construct, id: string, props: ApiProps) {
     super(scope, id)
 

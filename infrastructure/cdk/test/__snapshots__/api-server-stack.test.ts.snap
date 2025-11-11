@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`/Users/s16865/workspace/local/product/english-card-battle/infra/cdk/test/api-server-stack.test.ts 環境別スナップショットテスト dev環境のスナップショットが一致する 1`] = `
 {
@@ -2621,6 +2621,1699 @@ exports[`/Users/s16865/workspace/local/product/english-card-battle/infra/cdk/tes
         },
       },
       "Type": "AWS::EC2::VPCGatewayAttachment",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`/Users/s16865/workspace/local/product/english-card-battle/infrastructure/cdk/test/api-server-stack.test.ts 環境別スナップショットテスト dev環境のスナップショットが一致する 1`] = `
+{
+  "Outputs": {
+    "ApiServerEcsConstructLoadBalancerDNS4F808EED": {
+      "Export": {
+        "Name": "api-server-alb-dns",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "ApiServerEcsConstructAlb7EA0F270",
+          "DNSName",
+        ],
+      },
+    },
+    "ApiServerEcsConstructServiceName35EB22EF": {
+      "Export": {
+        "Name": "api-server-service-name",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "ApiServerEcsConstructFargateService3F8A48DD",
+          "Name",
+        ],
+      },
+    },
+    "EcrConstructEcrRepositoryUri1765FAFF": {
+      "Description": "ECR Repository URI",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            {
+              "Fn::Select": [
+                4,
+                {
+                  "Fn::Split": [
+                    ":",
+                    {
+                      "Fn::GetAtt": [
+                        "EcrConstructRepository7CDA447F",
+                        "Arn",
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            ".dkr.ecr.",
+            {
+              "Fn::Select": [
+                3,
+                {
+                  "Fn::Split": [
+                    ":",
+                    {
+                      "Fn::GetAtt": [
+                        "EcrConstructRepository7CDA447F",
+                        "Arn",
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "EcrConstructRepository7CDA447F",
+            },
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "ApiServerEcsConstructAlb7EA0F270": {
+      "Properties": {
+        "LoadBalancerAttributes": [
+          {
+            "Key": "deletion_protection.enabled",
+            "Value": "false",
+          },
+        ],
+        "Scheme": "internet-facing",
+        "SecurityGroups": [
+          {
+            "Fn::GetAtt": [
+              "ApiServerEcsConstructSgAlb2ABCAD17",
+              "GroupId",
+            ],
+          },
+        ],
+        "Subnets": [
+          {
+            "Fn::ImportValue": "devVpcStack:ExportsOutputRefVpcPublicSubnet1Subnet5C2D37C4FFA2B456",
+          },
+          {
+            "Fn::ImportValue": "devVpcStack:ExportsOutputRefVpcPublicSubnet2Subnet691E08A351552740",
+          },
+        ],
+        "Type": "application",
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+    },
+    "ApiServerEcsConstructAlbAlbListener0C6F4C73": {
+      "Properties": {
+        "DefaultActions": [
+          {
+            "TargetGroupArn": {
+              "Ref": "ApiServerEcsConstructAlbAlbListenerFromAppTargetGroupGroup01FBF52F",
+            },
+            "Type": "forward",
+          },
+        ],
+        "LoadBalancerArn": {
+          "Ref": "ApiServerEcsConstructAlb7EA0F270",
+        },
+        "Port": 80,
+        "Protocol": "HTTP",
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+    },
+    "ApiServerEcsConstructAlbAlbListenerFromAppTargetGroupGroup01FBF52F": {
+      "Properties": {
+        "Port": 80,
+        "Protocol": "HTTP",
+        "TargetGroupAttributes": [
+          {
+            "Key": "stickiness.enabled",
+            "Value": "false",
+          },
+        ],
+        "TargetType": "ip",
+        "VpcId": {
+          "Fn::ImportValue": "devVpcStack:ExportsOutputRefVpc8378EB38272D6E3A",
+        },
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+    },
+    "ApiServerEcsConstructEcsCluster3DE8E6FB": {
+      "Properties": {
+        "ClusterSettings": [
+          {
+            "Name": "containerInsights",
+            "Value": "enabled",
+          },
+        ],
+      },
+      "Type": "AWS::ECS::Cluster",
+    },
+    "ApiServerEcsConstructEcsServiceTaskRoleDefaultPolicy933CDB0D": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "ssmmessages:CreateControlChannel",
+                "ssmmessages:CreateDataChannel",
+                "ssmmessages:OpenControlChannel",
+                "ssmmessages:OpenDataChannel",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "logs:DescribeLogGroups",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:DescribeLogStreams",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ApiServerEcsConstructEcsServiceTaskRoleDefaultPolicy933CDB0D",
+        "Roles": [
+          {
+            "Ref": "ApiServerEcsConstructEcsServiceTaskRoleE190C900",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ApiServerEcsConstructEcsServiceTaskRoleE190C900": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonSSMFullAccess",
+              ],
+            ],
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonDynamoDBFullAccess",
+              ],
+            ],
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonS3ReadOnlyAccess",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "ApiServerEcsConstructEcsTaskExecutionRoleAC31F27F": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "ApiServerEcsConstructEcsTaskExecutionRoleDefaultPolicyBF4EF80C": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "ApiServerEcsConstructTaskDefinitionapiserverLogGroup397F063A",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ApiServerEcsConstructEcsTaskExecutionRoleDefaultPolicyBF4EF80C",
+        "Roles": [
+          {
+            "Ref": "ApiServerEcsConstructEcsTaskExecutionRoleAC31F27F",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ApiServerEcsConstructFargateService3F8A48DD": {
+      "DependsOn": [
+        "ApiServerEcsConstructAlbAlbListenerFromAppTargetGroupGroup01FBF52F",
+        "ApiServerEcsConstructAlbAlbListener0C6F4C73",
+        "ApiServerEcsConstructEcsServiceTaskRoleDefaultPolicy933CDB0D",
+        "ApiServerEcsConstructEcsServiceTaskRoleE190C900",
+      ],
+      "Properties": {
+        "Cluster": {
+          "Ref": "ApiServerEcsConstructEcsCluster3DE8E6FB",
+        },
+        "DeploymentConfiguration": {
+          "Alarms": {
+            "AlarmNames": [],
+            "Enable": false,
+            "Rollback": false,
+          },
+          "MaximumPercent": 200,
+          "MinimumHealthyPercent": 50,
+        },
+        "DesiredCount": 1,
+        "EnableECSManagedTags": false,
+        "EnableExecuteCommand": true,
+        "HealthCheckGracePeriodSeconds": 60,
+        "LaunchType": "FARGATE",
+        "LoadBalancers": [
+          {
+            "ContainerName": "api-server",
+            "ContainerPort": 80,
+            "TargetGroupArn": {
+              "Ref": "ApiServerEcsConstructAlbAlbListenerFromAppTargetGroupGroup01FBF52F",
+            },
+          },
+        ],
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "DISABLED",
+            "SecurityGroups": [
+              {
+                "Fn::GetAtt": [
+                  "ApiServerEcsConstructSgFargateBE54B614",
+                  "GroupId",
+                ],
+              },
+            ],
+            "Subnets": [
+              {
+                "Fn::ImportValue": "devVpcStack:ExportsOutputRefVpcPrivateSubnet1Subnet536B997AFD4CC940",
+              },
+              {
+                "Fn::ImportValue": "devVpcStack:ExportsOutputRefVpcPrivateSubnet2Subnet3788AAA1380949A3",
+              },
+            ],
+          },
+        },
+        "ServiceName": "api-server",
+        "TaskDefinition": {
+          "Ref": "ApiServerEcsConstructTaskDefinitionC255919F",
+        },
+      },
+      "Type": "AWS::ECS::Service",
+    },
+    "ApiServerEcsConstructSgAlb2ABCAD17": {
+      "Properties": {
+        "GroupDescription": "devTestStack/ApiServerEcsConstruct/SgAlb",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "from 0.0.0.0/0:ALL PORTS",
+            "FromPort": 0,
+            "IpProtocol": "tcp",
+            "ToPort": 65535,
+          },
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "from 0.0.0.0/0:80",
+            "FromPort": 80,
+            "IpProtocol": "tcp",
+            "ToPort": 80,
+          },
+        ],
+        "VpcId": {
+          "Fn::ImportValue": "devVpcStack:ExportsOutputRefVpc8378EB38272D6E3A",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "ApiServerEcsConstructSgAlbtodevTestStackApiServerEcsConstructSgFargate8B272A48801AA80F43": {
+      "Properties": {
+        "Description": "Load balancer to target",
+        "DestinationSecurityGroupId": {
+          "Fn::GetAtt": [
+            "ApiServerEcsConstructSgFargateBE54B614",
+            "GroupId",
+          ],
+        },
+        "FromPort": 80,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "ApiServerEcsConstructSgAlb2ABCAD17",
+            "GroupId",
+          ],
+        },
+        "IpProtocol": "tcp",
+        "ToPort": 80,
+      },
+      "Type": "AWS::EC2::SecurityGroupEgress",
+    },
+    "ApiServerEcsConstructSgFargateBE54B614": {
+      "Properties": {
+        "GroupDescription": "devTestStack/ApiServerEcsConstruct/SgFargate",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "from 0.0.0.0/0:ALL PORTS",
+            "FromPort": 0,
+            "IpProtocol": "tcp",
+            "ToPort": 65535,
+          },
+        ],
+        "VpcId": {
+          "Fn::ImportValue": "devVpcStack:ExportsOutputRefVpc8378EB38272D6E3A",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "ApiServerEcsConstructSgFargatefromdevTestStackApiServerEcsConstructSgAlb07A0512680B49C0FDD": {
+      "Properties": {
+        "Description": "from devTestStackApiServerEcsConstructSgAlb07A05126:80",
+        "FromPort": 80,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "ApiServerEcsConstructSgFargateBE54B614",
+            "GroupId",
+          ],
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "ApiServerEcsConstructSgAlb2ABCAD17",
+            "GroupId",
+          ],
+        },
+        "ToPort": 80,
+      },
+      "Type": "AWS::EC2::SecurityGroupIngress",
+    },
+    "ApiServerEcsConstructTaskDefinitionC255919F": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Environment": [
+              {
+                "Name": "NODE_ENV",
+                "Value": "dev",
+              },
+              {
+                "Name": "API_VERSION",
+                "Value": "v1",
+              },
+              {
+                "Name": "LOG_LEVEL",
+                "Value": "info",
+              },
+            ],
+            "Essential": true,
+            "Image": "amazon/amazon-ecs-sample",
+            "LogConfiguration": {
+              "LogDriver": "awslogs",
+              "Options": {
+                "awslogs-group": {
+                  "Ref": "ApiServerEcsConstructTaskDefinitionapiserverLogGroup397F063A",
+                },
+                "awslogs-region": {
+                  "Ref": "AWS::Region",
+                },
+                "awslogs-stream-prefix": "api-server",
+              },
+            },
+            "Name": "api-server",
+            "PortMappings": [
+              {
+                "ContainerPort": 80,
+                "HostPort": 80,
+                "Protocol": "tcp",
+              },
+            ],
+          },
+        ],
+        "Cpu": "256",
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "ApiServerEcsConstructEcsTaskExecutionRoleAC31F27F",
+            "Arn",
+          ],
+        },
+        "Family": "devTestStackApiServerEcsConstructTaskDefinition9ADACC75",
+        "Memory": "512",
+        "NetworkMode": "awsvpc",
+        "RequiresCompatibilities": [
+          "FARGATE",
+        ],
+        "TaskRoleArn": {
+          "Fn::GetAtt": [
+            "ApiServerEcsConstructEcsServiceTaskRoleE190C900",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ECS::TaskDefinition",
+    },
+    "ApiServerEcsConstructTaskDefinitionapiserverLogGroup397F063A": {
+      "DeletionPolicy": "Retain",
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "EcrConstructRepository7CDA447F": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "ImageScanningConfiguration": {
+          "ScanOnPush": true,
+        },
+        "LifecyclePolicy": {
+          "LifecyclePolicyText": "{"rules":[{"rulePriority":1,"selection":{"tagStatus":"untagged","countType":"sinceImagePushed","countNumber":1,"countUnit":"days"},"action":{"type":"expire"}},{"rulePriority":2,"selection":{"tagStatus":"any","countType":"imageCountMoreThan","countNumber":5},"action":{"type":"expire"}}]}",
+        },
+        "RepositoryName": "english-card-battle-api-dev",
+      },
+      "Type": "AWS::ECR::Repository",
+      "UpdateReplacePolicy": "Delete",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`/Users/s16865/workspace/local/product/english-card-battle/infrastructure/cdk/test/api-server-stack.test.ts 環境別スナップショットテスト prd環境のスナップショットが一致する 1`] = `
+{
+  "Outputs": {
+    "ApiServerEcsConstructLoadBalancerDNS4F808EED": {
+      "Export": {
+        "Name": "api-server-alb-dns",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "ApiServerEcsConstructAlb7EA0F270",
+          "DNSName",
+        ],
+      },
+    },
+    "ApiServerEcsConstructServiceName35EB22EF": {
+      "Export": {
+        "Name": "api-server-service-name",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "ApiServerEcsConstructFargateService3F8A48DD",
+          "Name",
+        ],
+      },
+    },
+    "EcrConstructEcrRepositoryUri1765FAFF": {
+      "Description": "ECR Repository URI",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            {
+              "Fn::Select": [
+                4,
+                {
+                  "Fn::Split": [
+                    ":",
+                    {
+                      "Fn::GetAtt": [
+                        "EcrConstructRepository7CDA447F",
+                        "Arn",
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            ".dkr.ecr.",
+            {
+              "Fn::Select": [
+                3,
+                {
+                  "Fn::Split": [
+                    ":",
+                    {
+                      "Fn::GetAtt": [
+                        "EcrConstructRepository7CDA447F",
+                        "Arn",
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "EcrConstructRepository7CDA447F",
+            },
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "ApiServerEcsConstructAlb7EA0F270": {
+      "Properties": {
+        "LoadBalancerAttributes": [
+          {
+            "Key": "deletion_protection.enabled",
+            "Value": "false",
+          },
+        ],
+        "Scheme": "internet-facing",
+        "SecurityGroups": [
+          {
+            "Fn::GetAtt": [
+              "ApiServerEcsConstructSgAlb2ABCAD17",
+              "GroupId",
+            ],
+          },
+        ],
+        "Subnets": [
+          {
+            "Fn::ImportValue": "prdVpcStack:ExportsOutputRefVpcPublicSubnet1Subnet5C2D37C4FFA2B456",
+          },
+          {
+            "Fn::ImportValue": "prdVpcStack:ExportsOutputRefVpcPublicSubnet2Subnet691E08A351552740",
+          },
+        ],
+        "Type": "application",
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+    },
+    "ApiServerEcsConstructAlbAlbListener0C6F4C73": {
+      "Properties": {
+        "DefaultActions": [
+          {
+            "TargetGroupArn": {
+              "Ref": "ApiServerEcsConstructAlbAlbListenerFromAppTargetGroupGroup01FBF52F",
+            },
+            "Type": "forward",
+          },
+        ],
+        "LoadBalancerArn": {
+          "Ref": "ApiServerEcsConstructAlb7EA0F270",
+        },
+        "Port": 80,
+        "Protocol": "HTTP",
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+    },
+    "ApiServerEcsConstructAlbAlbListenerFromAppTargetGroupGroup01FBF52F": {
+      "Properties": {
+        "Port": 80,
+        "Protocol": "HTTP",
+        "TargetGroupAttributes": [
+          {
+            "Key": "stickiness.enabled",
+            "Value": "false",
+          },
+        ],
+        "TargetType": "ip",
+        "VpcId": {
+          "Fn::ImportValue": "prdVpcStack:ExportsOutputRefVpc8378EB38272D6E3A",
+        },
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+    },
+    "ApiServerEcsConstructEcsCluster3DE8E6FB": {
+      "Properties": {
+        "ClusterSettings": [
+          {
+            "Name": "containerInsights",
+            "Value": "enabled",
+          },
+        ],
+      },
+      "Type": "AWS::ECS::Cluster",
+    },
+    "ApiServerEcsConstructEcsServiceTaskRoleE190C900": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonSSMFullAccess",
+              ],
+            ],
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonDynamoDBFullAccess",
+              ],
+            ],
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonS3ReadOnlyAccess",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "ApiServerEcsConstructEcsTaskExecutionRoleAC31F27F": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "ApiServerEcsConstructEcsTaskExecutionRoleDefaultPolicyBF4EF80C": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "ApiServerEcsConstructTaskDefinitionapiserverLogGroup397F063A",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ApiServerEcsConstructEcsTaskExecutionRoleDefaultPolicyBF4EF80C",
+        "Roles": [
+          {
+            "Ref": "ApiServerEcsConstructEcsTaskExecutionRoleAC31F27F",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ApiServerEcsConstructFargateService3F8A48DD": {
+      "DependsOn": [
+        "ApiServerEcsConstructAlbAlbListenerFromAppTargetGroupGroup01FBF52F",
+        "ApiServerEcsConstructAlbAlbListener0C6F4C73",
+        "ApiServerEcsConstructEcsServiceTaskRoleE190C900",
+      ],
+      "Properties": {
+        "Cluster": {
+          "Ref": "ApiServerEcsConstructEcsCluster3DE8E6FB",
+        },
+        "DeploymentConfiguration": {
+          "Alarms": {
+            "AlarmNames": [],
+            "Enable": false,
+            "Rollback": false,
+          },
+          "MaximumPercent": 200,
+          "MinimumHealthyPercent": 50,
+        },
+        "DesiredCount": 3,
+        "EnableECSManagedTags": false,
+        "EnableExecuteCommand": false,
+        "HealthCheckGracePeriodSeconds": 60,
+        "LaunchType": "FARGATE",
+        "LoadBalancers": [
+          {
+            "ContainerName": "api-server",
+            "ContainerPort": 80,
+            "TargetGroupArn": {
+              "Ref": "ApiServerEcsConstructAlbAlbListenerFromAppTargetGroupGroup01FBF52F",
+            },
+          },
+        ],
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "DISABLED",
+            "SecurityGroups": [
+              {
+                "Fn::GetAtt": [
+                  "ApiServerEcsConstructSgFargateBE54B614",
+                  "GroupId",
+                ],
+              },
+            ],
+            "Subnets": [
+              {
+                "Fn::ImportValue": "prdVpcStack:ExportsOutputRefVpcPrivateSubnet1Subnet536B997AFD4CC940",
+              },
+              {
+                "Fn::ImportValue": "prdVpcStack:ExportsOutputRefVpcPrivateSubnet2Subnet3788AAA1380949A3",
+              },
+            ],
+          },
+        },
+        "ServiceName": "api-server",
+        "TaskDefinition": {
+          "Ref": "ApiServerEcsConstructTaskDefinitionC255919F",
+        },
+      },
+      "Type": "AWS::ECS::Service",
+    },
+    "ApiServerEcsConstructSgAlb2ABCAD17": {
+      "Properties": {
+        "GroupDescription": "prdTestStack/ApiServerEcsConstruct/SgAlb",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "from 0.0.0.0/0:ALL PORTS",
+            "FromPort": 0,
+            "IpProtocol": "tcp",
+            "ToPort": 65535,
+          },
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "from 0.0.0.0/0:80",
+            "FromPort": 80,
+            "IpProtocol": "tcp",
+            "ToPort": 80,
+          },
+        ],
+        "VpcId": {
+          "Fn::ImportValue": "prdVpcStack:ExportsOutputRefVpc8378EB38272D6E3A",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "ApiServerEcsConstructSgAlbtoprdTestStackApiServerEcsConstructSgFargateCD628CB880FC31B3CF": {
+      "Properties": {
+        "Description": "Load balancer to target",
+        "DestinationSecurityGroupId": {
+          "Fn::GetAtt": [
+            "ApiServerEcsConstructSgFargateBE54B614",
+            "GroupId",
+          ],
+        },
+        "FromPort": 80,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "ApiServerEcsConstructSgAlb2ABCAD17",
+            "GroupId",
+          ],
+        },
+        "IpProtocol": "tcp",
+        "ToPort": 80,
+      },
+      "Type": "AWS::EC2::SecurityGroupEgress",
+    },
+    "ApiServerEcsConstructSgFargateBE54B614": {
+      "Properties": {
+        "GroupDescription": "prdTestStack/ApiServerEcsConstruct/SgFargate",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "from 0.0.0.0/0:ALL PORTS",
+            "FromPort": 0,
+            "IpProtocol": "tcp",
+            "ToPort": 65535,
+          },
+        ],
+        "VpcId": {
+          "Fn::ImportValue": "prdVpcStack:ExportsOutputRefVpc8378EB38272D6E3A",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "ApiServerEcsConstructSgFargatefromprdTestStackApiServerEcsConstructSgAlb4AB77AF5804BF89ADE": {
+      "Properties": {
+        "Description": "from prdTestStackApiServerEcsConstructSgAlb4AB77AF5:80",
+        "FromPort": 80,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "ApiServerEcsConstructSgFargateBE54B614",
+            "GroupId",
+          ],
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "ApiServerEcsConstructSgAlb2ABCAD17",
+            "GroupId",
+          ],
+        },
+        "ToPort": 80,
+      },
+      "Type": "AWS::EC2::SecurityGroupIngress",
+    },
+    "ApiServerEcsConstructTaskDefinitionC255919F": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Environment": [
+              {
+                "Name": "NODE_ENV",
+                "Value": "prd",
+              },
+              {
+                "Name": "API_VERSION",
+                "Value": "v1",
+              },
+              {
+                "Name": "LOG_LEVEL",
+                "Value": "info",
+              },
+            ],
+            "Essential": true,
+            "Image": "amazon/amazon-ecs-sample",
+            "LogConfiguration": {
+              "LogDriver": "awslogs",
+              "Options": {
+                "awslogs-group": {
+                  "Ref": "ApiServerEcsConstructTaskDefinitionapiserverLogGroup397F063A",
+                },
+                "awslogs-region": {
+                  "Ref": "AWS::Region",
+                },
+                "awslogs-stream-prefix": "api-server",
+              },
+            },
+            "Name": "api-server",
+            "PortMappings": [
+              {
+                "ContainerPort": 80,
+                "HostPort": 80,
+                "Protocol": "tcp",
+              },
+            ],
+          },
+        ],
+        "Cpu": "1024",
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "ApiServerEcsConstructEcsTaskExecutionRoleAC31F27F",
+            "Arn",
+          ],
+        },
+        "Family": "prdTestStackApiServerEcsConstructTaskDefinition94043772",
+        "Memory": "2048",
+        "NetworkMode": "awsvpc",
+        "RequiresCompatibilities": [
+          "FARGATE",
+        ],
+        "TaskRoleArn": {
+          "Fn::GetAtt": [
+            "ApiServerEcsConstructEcsServiceTaskRoleE190C900",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ECS::TaskDefinition",
+    },
+    "ApiServerEcsConstructTaskDefinitionapiserverLogGroup397F063A": {
+      "DeletionPolicy": "Retain",
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "EcrConstructRepository7CDA447F": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "ImageScanningConfiguration": {
+          "ScanOnPush": true,
+        },
+        "LifecyclePolicy": {
+          "LifecyclePolicyText": "{"rules":[{"rulePriority":1,"selection":{"tagStatus":"untagged","countType":"sinceImagePushed","countNumber":1,"countUnit":"days"},"action":{"type":"expire"}},{"rulePriority":2,"selection":{"tagStatus":"any","countType":"imageCountMoreThan","countNumber":5},"action":{"type":"expire"}}]}",
+        },
+        "RepositoryName": "english-card-battle-api-prd",
+      },
+      "Type": "AWS::ECR::Repository",
+      "UpdateReplacePolicy": "Delete",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`/Users/s16865/workspace/local/product/english-card-battle/infrastructure/cdk/test/api-server-stack.test.ts 環境別スナップショットテスト stg環境のスナップショットが一致する 1`] = `
+{
+  "Outputs": {
+    "ApiServerEcsConstructLoadBalancerDNS4F808EED": {
+      "Export": {
+        "Name": "api-server-alb-dns",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "ApiServerEcsConstructAlb7EA0F270",
+          "DNSName",
+        ],
+      },
+    },
+    "ApiServerEcsConstructServiceName35EB22EF": {
+      "Export": {
+        "Name": "api-server-service-name",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "ApiServerEcsConstructFargateService3F8A48DD",
+          "Name",
+        ],
+      },
+    },
+    "EcrConstructEcrRepositoryUri1765FAFF": {
+      "Description": "ECR Repository URI",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            {
+              "Fn::Select": [
+                4,
+                {
+                  "Fn::Split": [
+                    ":",
+                    {
+                      "Fn::GetAtt": [
+                        "EcrConstructRepository7CDA447F",
+                        "Arn",
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            ".dkr.ecr.",
+            {
+              "Fn::Select": [
+                3,
+                {
+                  "Fn::Split": [
+                    ":",
+                    {
+                      "Fn::GetAtt": [
+                        "EcrConstructRepository7CDA447F",
+                        "Arn",
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "EcrConstructRepository7CDA447F",
+            },
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "ApiServerEcsConstructAlb7EA0F270": {
+      "Properties": {
+        "LoadBalancerAttributes": [
+          {
+            "Key": "deletion_protection.enabled",
+            "Value": "false",
+          },
+        ],
+        "Scheme": "internet-facing",
+        "SecurityGroups": [
+          {
+            "Fn::GetAtt": [
+              "ApiServerEcsConstructSgAlb2ABCAD17",
+              "GroupId",
+            ],
+          },
+        ],
+        "Subnets": [
+          {
+            "Fn::ImportValue": "stgVpcStack:ExportsOutputRefVpcPublicSubnet1Subnet5C2D37C4FFA2B456",
+          },
+          {
+            "Fn::ImportValue": "stgVpcStack:ExportsOutputRefVpcPublicSubnet2Subnet691E08A351552740",
+          },
+        ],
+        "Type": "application",
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+    },
+    "ApiServerEcsConstructAlbAlbListener0C6F4C73": {
+      "Properties": {
+        "DefaultActions": [
+          {
+            "TargetGroupArn": {
+              "Ref": "ApiServerEcsConstructAlbAlbListenerFromAppTargetGroupGroup01FBF52F",
+            },
+            "Type": "forward",
+          },
+        ],
+        "LoadBalancerArn": {
+          "Ref": "ApiServerEcsConstructAlb7EA0F270",
+        },
+        "Port": 80,
+        "Protocol": "HTTP",
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+    },
+    "ApiServerEcsConstructAlbAlbListenerFromAppTargetGroupGroup01FBF52F": {
+      "Properties": {
+        "Port": 80,
+        "Protocol": "HTTP",
+        "TargetGroupAttributes": [
+          {
+            "Key": "stickiness.enabled",
+            "Value": "false",
+          },
+        ],
+        "TargetType": "ip",
+        "VpcId": {
+          "Fn::ImportValue": "stgVpcStack:ExportsOutputRefVpc8378EB38272D6E3A",
+        },
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+    },
+    "ApiServerEcsConstructEcsCluster3DE8E6FB": {
+      "Properties": {
+        "ClusterSettings": [
+          {
+            "Name": "containerInsights",
+            "Value": "enabled",
+          },
+        ],
+      },
+      "Type": "AWS::ECS::Cluster",
+    },
+    "ApiServerEcsConstructEcsServiceTaskRoleDefaultPolicy933CDB0D": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "ssmmessages:CreateControlChannel",
+                "ssmmessages:CreateDataChannel",
+                "ssmmessages:OpenControlChannel",
+                "ssmmessages:OpenDataChannel",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "logs:DescribeLogGroups",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:DescribeLogStreams",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ApiServerEcsConstructEcsServiceTaskRoleDefaultPolicy933CDB0D",
+        "Roles": [
+          {
+            "Ref": "ApiServerEcsConstructEcsServiceTaskRoleE190C900",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ApiServerEcsConstructEcsServiceTaskRoleE190C900": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonSSMFullAccess",
+              ],
+            ],
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonDynamoDBFullAccess",
+              ],
+            ],
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/AmazonS3ReadOnlyAccess",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "ApiServerEcsConstructEcsTaskExecutionRoleAC31F27F": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "ApiServerEcsConstructEcsTaskExecutionRoleDefaultPolicyBF4EF80C": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "ApiServerEcsConstructTaskDefinitionapiserverLogGroup397F063A",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ApiServerEcsConstructEcsTaskExecutionRoleDefaultPolicyBF4EF80C",
+        "Roles": [
+          {
+            "Ref": "ApiServerEcsConstructEcsTaskExecutionRoleAC31F27F",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ApiServerEcsConstructFargateService3F8A48DD": {
+      "DependsOn": [
+        "ApiServerEcsConstructAlbAlbListenerFromAppTargetGroupGroup01FBF52F",
+        "ApiServerEcsConstructAlbAlbListener0C6F4C73",
+        "ApiServerEcsConstructEcsServiceTaskRoleDefaultPolicy933CDB0D",
+        "ApiServerEcsConstructEcsServiceTaskRoleE190C900",
+      ],
+      "Properties": {
+        "Cluster": {
+          "Ref": "ApiServerEcsConstructEcsCluster3DE8E6FB",
+        },
+        "DeploymentConfiguration": {
+          "Alarms": {
+            "AlarmNames": [],
+            "Enable": false,
+            "Rollback": false,
+          },
+          "MaximumPercent": 200,
+          "MinimumHealthyPercent": 50,
+        },
+        "DesiredCount": 2,
+        "EnableECSManagedTags": false,
+        "EnableExecuteCommand": true,
+        "HealthCheckGracePeriodSeconds": 60,
+        "LaunchType": "FARGATE",
+        "LoadBalancers": [
+          {
+            "ContainerName": "api-server",
+            "ContainerPort": 80,
+            "TargetGroupArn": {
+              "Ref": "ApiServerEcsConstructAlbAlbListenerFromAppTargetGroupGroup01FBF52F",
+            },
+          },
+        ],
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "DISABLED",
+            "SecurityGroups": [
+              {
+                "Fn::GetAtt": [
+                  "ApiServerEcsConstructSgFargateBE54B614",
+                  "GroupId",
+                ],
+              },
+            ],
+            "Subnets": [
+              {
+                "Fn::ImportValue": "stgVpcStack:ExportsOutputRefVpcPrivateSubnet1Subnet536B997AFD4CC940",
+              },
+              {
+                "Fn::ImportValue": "stgVpcStack:ExportsOutputRefVpcPrivateSubnet2Subnet3788AAA1380949A3",
+              },
+            ],
+          },
+        },
+        "ServiceName": "api-server",
+        "TaskDefinition": {
+          "Ref": "ApiServerEcsConstructTaskDefinitionC255919F",
+        },
+      },
+      "Type": "AWS::ECS::Service",
+    },
+    "ApiServerEcsConstructSgAlb2ABCAD17": {
+      "Properties": {
+        "GroupDescription": "stgTestStack/ApiServerEcsConstruct/SgAlb",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "from 0.0.0.0/0:ALL PORTS",
+            "FromPort": 0,
+            "IpProtocol": "tcp",
+            "ToPort": 65535,
+          },
+        ],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "from 0.0.0.0/0:80",
+            "FromPort": 80,
+            "IpProtocol": "tcp",
+            "ToPort": 80,
+          },
+        ],
+        "VpcId": {
+          "Fn::ImportValue": "stgVpcStack:ExportsOutputRefVpc8378EB38272D6E3A",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "ApiServerEcsConstructSgAlbtostgTestStackApiServerEcsConstructSgFargate76F4FF3980BFFE1358": {
+      "Properties": {
+        "Description": "Load balancer to target",
+        "DestinationSecurityGroupId": {
+          "Fn::GetAtt": [
+            "ApiServerEcsConstructSgFargateBE54B614",
+            "GroupId",
+          ],
+        },
+        "FromPort": 80,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "ApiServerEcsConstructSgAlb2ABCAD17",
+            "GroupId",
+          ],
+        },
+        "IpProtocol": "tcp",
+        "ToPort": 80,
+      },
+      "Type": "AWS::EC2::SecurityGroupEgress",
+    },
+    "ApiServerEcsConstructSgFargateBE54B614": {
+      "Properties": {
+        "GroupDescription": "stgTestStack/ApiServerEcsConstruct/SgFargate",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "from 0.0.0.0/0:ALL PORTS",
+            "FromPort": 0,
+            "IpProtocol": "tcp",
+            "ToPort": 65535,
+          },
+        ],
+        "VpcId": {
+          "Fn::ImportValue": "stgVpcStack:ExportsOutputRefVpc8378EB38272D6E3A",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "ApiServerEcsConstructSgFargatefromstgTestStackApiServerEcsConstructSgAlbF37071758046792AB2": {
+      "Properties": {
+        "Description": "from stgTestStackApiServerEcsConstructSgAlbF3707175:80",
+        "FromPort": 80,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "ApiServerEcsConstructSgFargateBE54B614",
+            "GroupId",
+          ],
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "ApiServerEcsConstructSgAlb2ABCAD17",
+            "GroupId",
+          ],
+        },
+        "ToPort": 80,
+      },
+      "Type": "AWS::EC2::SecurityGroupIngress",
+    },
+    "ApiServerEcsConstructTaskDefinitionC255919F": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Environment": [
+              {
+                "Name": "NODE_ENV",
+                "Value": "stg",
+              },
+              {
+                "Name": "API_VERSION",
+                "Value": "v1",
+              },
+              {
+                "Name": "LOG_LEVEL",
+                "Value": "info",
+              },
+            ],
+            "Essential": true,
+            "Image": "amazon/amazon-ecs-sample",
+            "LogConfiguration": {
+              "LogDriver": "awslogs",
+              "Options": {
+                "awslogs-group": {
+                  "Ref": "ApiServerEcsConstructTaskDefinitionapiserverLogGroup397F063A",
+                },
+                "awslogs-region": {
+                  "Ref": "AWS::Region",
+                },
+                "awslogs-stream-prefix": "api-server",
+              },
+            },
+            "Name": "api-server",
+            "PortMappings": [
+              {
+                "ContainerPort": 80,
+                "HostPort": 80,
+                "Protocol": "tcp",
+              },
+            ],
+          },
+        ],
+        "Cpu": "512",
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "ApiServerEcsConstructEcsTaskExecutionRoleAC31F27F",
+            "Arn",
+          ],
+        },
+        "Family": "stgTestStackApiServerEcsConstructTaskDefinition6E3A8BA6",
+        "Memory": "1024",
+        "NetworkMode": "awsvpc",
+        "RequiresCompatibilities": [
+          "FARGATE",
+        ],
+        "TaskRoleArn": {
+          "Fn::GetAtt": [
+            "ApiServerEcsConstructEcsServiceTaskRoleE190C900",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ECS::TaskDefinition",
+    },
+    "ApiServerEcsConstructTaskDefinitionapiserverLogGroup397F063A": {
+      "DeletionPolicy": "Retain",
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "EcrConstructRepository7CDA447F": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "ImageScanningConfiguration": {
+          "ScanOnPush": true,
+        },
+        "LifecyclePolicy": {
+          "LifecyclePolicyText": "{"rules":[{"rulePriority":1,"selection":{"tagStatus":"untagged","countType":"sinceImagePushed","countNumber":1,"countUnit":"days"},"action":{"type":"expire"}},{"rulePriority":2,"selection":{"tagStatus":"any","countType":"imageCountMoreThan","countNumber":5},"action":{"type":"expire"}}]}",
+        },
+        "RepositoryName": "english-card-battle-api-stg",
+      },
+      "Type": "AWS::ECR::Repository",
+      "UpdateReplacePolicy": "Delete",
     },
   },
   "Rules": {
