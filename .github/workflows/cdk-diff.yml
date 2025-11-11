@@ -2,8 +2,8 @@ name: 🔍 CDK Diff
 on:
   push:
     paths:
-      - "infrastructure/cdk/**"
-      - ".github/workflows/cdk-diff.yml"
+      - 'infrastructure/cdk/**'
+      - '.github/workflows/cdk-diff.yml'
   workflow_dispatch:
     inputs:
       environment:
