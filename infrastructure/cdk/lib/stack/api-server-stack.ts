@@ -6,7 +6,6 @@ import { Construct } from 'constructs'
 import { BaseEcsConstruct } from '../constructs/base-ecs'
 import { EcrConstruct } from '../constructs/ecr'
 import { Environment, getEnvironmentParameters } from '../parameter'
-
 import { VpcStack } from './common/vpc-stack'
 
 interface ApiServerStackProps extends cdk.StackProps {
