@@ -24,6 +24,11 @@ export class Api extends Construct {
       runtime: Runtime.NODEJS_LATEST,
       environment: {
         TABLE_NAME: props.sampleTable.tableName
+      },
+      bundling: {
+        externalModules: [
+          '@aws-sdk/*', // AWS SDK v3はLambdaランタイムに含まれているため除外
+        ]
       }
     })
 
