@@ -1,6 +1,7 @@
 import { Router } from 'express'
 
 import { AuthRouter } from './auth_router'
+import { StudyRouter } from './study_router'
 import { DIContainer } from '../di/di_container'
 
 
@@ -26,6 +27,10 @@ export class ExpressRouter {
     // Auth API
     const authRouter = new AuthRouter(this._router, this._container)
     this._router.use('/auth', authRouter.getRouter())
+    
+    // Study API
+    const studyRouter = new StudyRouter(this._router, this._container)
+    this._router.use('/study', studyRouter.getRouter())
   }
 
   /**
