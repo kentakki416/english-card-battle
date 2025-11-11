@@ -93,7 +93,7 @@ export const getChatsData = async () => {
 }
 
 export const getPaymentsOverviewData = async (
-  timeFrame?: 'monthly' | 'yearly' | (string & {}),
+  timeFrame?: 'monthly' | 'yearly' | string,
 ) => {
   // Fake delay
   await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -200,7 +200,7 @@ export const getWeeksProfitData = async (timeFrame?: string) => {
 
 
 export async function getDevicesUsedData(
-  timeFrame?: 'monthly' | 'yearly' | (string & {}),
+  timeFrame?: 'monthly' | 'yearly' | string,
 ) {
   // Fake delay
   await new Promise((resolve) => setTimeout(resolve, 1000))
