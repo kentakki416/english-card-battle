@@ -13,7 +13,7 @@ const LearnLayout: React.FC<LearnLayoutProps> = ({ children }) => {
     <MobileHeader />
     <Sidebar className="hidden lg:flex" />
     <main className="min-h-screen pt-[50px] lg:pl-[256px] lg:pt-0">
-      <div className="min-h-screen bg-red-500">
+      <div className="min-h-screen">
         {children}
       </div>
     </main>
