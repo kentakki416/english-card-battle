@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: 📥 リポジトリをチェックアウト
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: 📦 pnpmをセットアップ
         uses: pnpm/action-setup@v4
