@@ -114,7 +114,7 @@ jobs:
     
     steps:
       - name: 📥 リポジトリをチェックアウト
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: 🔑 AWS認証を設定
         uses: aws-actions/configure-aws-credentials@v4
