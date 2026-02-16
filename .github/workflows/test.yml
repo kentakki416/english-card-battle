@@ -32,7 +32,7 @@ jobs:
 
       - name: 🔍 api-server変更をチェック
         id: changes
-        uses: dorny/paths-filter@v2
+        uses: dorny/paths-filter@v3
         with:
           filters: |
             api-server:
