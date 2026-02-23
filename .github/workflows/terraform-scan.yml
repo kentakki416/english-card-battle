@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: 📥 Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: 🔍 Run Trivy Security Scan
         uses: aquasecurity/trivy-action@0.34.1
@@ -36,7 +36,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: 📥 Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: 🔍 Run Checkov Security Scan
         uses: bridgecrewio/checkov-action@v12
