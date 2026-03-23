@@ -50,7 +50,7 @@ jobs:
           docker compose ps
 
       - name: 📦 pnpmをセットアップ
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
 
       - name: 🟢 Node.jsのセットアップ
         uses: actions/setup-node@v4
