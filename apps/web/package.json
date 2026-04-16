@@ -11,7 +11,7 @@
         "format": "prettier --write \"**/*.+(js|json|yml|ts|tsx)\""
     },
     "dependencies": {
-        "@clerk/nextjs": "^6.23.3",
+        "@clerk/nextjs": "^6.39.2",
         "@radix-ui/react-dialog": "^1.1.14",
         "@radix-ui/react-slot": "^1.2.3",
         "class-variance-authority": "^0.7.1",
