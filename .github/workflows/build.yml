@@ -36,7 +36,7 @@ jobs:
           fetch-depth: 2  # Turborepoの差分検出のため
 
       - name: 📦 pnpmをセットアップ
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
       - name: 🟢 Node.jsのセットアップ
         uses: actions/setup-node@v4
